@@ -4,7 +4,6 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.js",
     "client": "cd client && cd my-app && npm start",
     "jsonserver": "cd client && cd my-app && npm run server",
@@ -26,11 +25,7 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
     "io-session-handler": "^1.0.74",
-    "moment": "^2.29.1",
     "mongoose": "^6.2.6",
-    "node-sass-middleware": "^1.0.1",
     "socket.io": "^4.4.1",
-    "twilio": "^3.75.1",
-    "ws": "^8.5.0"
   }
 }
