@@ -1,0 +1,4 @@
+my-app/src/tasktracker
+my-app/node_modules/
+my-app/package-lock.json
+my-app/dist/
