@@ -10,7 +10,7 @@ require('dotenv').config()
 
 let app = express()
 
-const uri = process.env.LOCALURI
+const uri = process.env.URI
 
 const dbUrl = uri
 let db = mongoose.connection
