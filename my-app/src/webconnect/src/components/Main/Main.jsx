@@ -23,7 +23,8 @@ const Main = () => {
 	const status = useSelector(state => state.globalProps.user.status)
 	const OTM = useSelector(state => state.globalProps.oneTimeMessage)
 	const components = useSelector(state => state.globalProps.components)
-	const reciepient = useSelector(state => state.globalProps.currentSelectedUser)
+	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
+	const recentChats = useSelector(state => state.globalProps.recentChats)
 
 	const notify = useSelector(state => state.globalProps.user.settings.notifications)
 
@@ -40,13 +41,13 @@ const Main = () => {
 		Notification.requestPermission()
 	}
 	React.useEffect(() => {
-		if (Object.keys(reciepient).length > 0) {
+		if (Object.keys(selectedUser).length > 0) {
 			const ele = document.querySelectorAll('.Wzm2GKa4C2sh_8jVswOw')
 			if (ele.length > 0) {
 				setTimeout(() => ele[0].scrollTop = ele[0].scrollHeight, 1000)
 			}
 		}
-	}, [reciepient])
+	}, [selectedUser])
 
 	React.useEffect(() => {
 		if (contacts.username !== '') {
@@ -66,7 +67,7 @@ const Main = () => {
 	})
 
 	React.useEffect(() => {
-	 	reciepient.token !== undefined && socket.emit('typing', contacts.id, reciepient.id, {typing: contacts.typing})
+	 	selectedUser.token !== undefined && socket.emit('typing', contacts.id, selectedUser.id, {typing: contacts.typing})
 	 }, [contacts.typing])
 
 	socket.off('user disconnect').on('user disconnect', (username, socketId) => {
@@ -87,12 +88,21 @@ const Main = () => {
 		let me = false;
 		username === contacts.username ? me = true : me = false
 		dispatch(storePrivateChats({username: username, message: message, me: me}))
-
+		if (Object.keys(selectedUser).length === 0) {
+			const find = recentChats.find(user => user.username === username)
+			if (find !== undefined) {
+				fetch(`/saveUnread/${contacts.id}/${contacts.username}/${find.username}/${find.unread}`)
+			}
+		} else {
+			if (selectedUser.username !== username) {
+				fetch(`/saveUnread/${contacts.id}/${contacts.username}/${find.username}/${find.unread}`)
+			}
+		}
 	})
 
 	React.useEffect( () => {
 		if(OTM !== '') {
-			socket.emit('sendMessage', reciepient.username, contacts.id, 
+			socket.emit('sendMessage', selectedUser.username, contacts.id, 
 				contacts.username, OTM, 
 				new Date().toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'}))
 		}

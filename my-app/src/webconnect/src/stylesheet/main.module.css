@@ -386,7 +386,8 @@ h1, h2, h3, h4, h5, h6 {
 	background: #fff;
   font-family: "Open Sans", sans-serif !important;
   max-width: 70%;
-  min-width: 30%;
+  min-width: 25%;
+  width: 30%;
   resize: horizontal;
   overflow: hidden;
 }

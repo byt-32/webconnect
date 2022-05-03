@@ -126,6 +126,8 @@ const globalPropsSlice = createSlice({
 					state.activeUsers[userInActiveUsers] = {...selected, ...user}
 					const spliced = state.activeUsers.splice(userInActiveUsers,1)[0]
 					state.activeUsers.unshift(spliced)
+				} else {
+					state.activeUsers.unshift(user)
 				}
 				if (user.username === state.currentSelectedUser.username) {
 					let selected = state.currentSelectedUser
@@ -414,6 +416,7 @@ const globalPropsSlice = createSlice({
 		})
 		.addCase(fetchInitialData.fulfilled, (state, action) => {
 			const { users, settings, props, recentChats, unread} = action.payload
+			state.preload.recentChats = false
 			state.activeUsers = SORT(users)
 			state.preload.activeUsers = false
 			if (settings) state.user.settings = settings
@@ -449,8 +452,7 @@ const globalPropsSlice = createSlice({
 					}
 				})
 				state.recentChats = sorted
-				state.preload.recentChats = false
-			}
+			} else {state.preload.recentChats = false}
 		})
 	}
 })

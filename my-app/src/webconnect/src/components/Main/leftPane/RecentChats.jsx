@@ -56,11 +56,6 @@ const User = ({user, color}) => {
 	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
 	const userInChats = useSelector(state => state.globalProps.privateChats.findIndex(chat => chat.username === user.username))
 	
-	// window.addEventListener('unload', () => {
-	// 	if (navigator.sendBeacon) {
-	// 		navigator.sendBeacon(`/saveUnread/${JSON.stringify(us)}`)
-	// 	}
-	// })
 	const setSelected = args => {
 		if (selectedUser.username !== args.username) {
 			if (user.unread !== 0) {
@@ -113,13 +108,6 @@ const RecentChats = () => {
 	const USER = useSelector(state => state.globalProps.user.contacts)
 	const preload = useSelector(state => state.globalProps.preload.recentChats)
 
-	React.useEffect(() => {
-		const findUnread = recentChats.find(chat => chat.unread !== 0)
-		if (findUnread !== undefined && selectedUser !== findUnread.username) {
-			fetch(`/saveUnread/${USER.id}/${USER.username}/${findUnread.username}/${findUnread.unread}`)
-		}
-	}, [recentChats])
-	
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
 	}
