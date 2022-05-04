@@ -676,9 +676,11 @@ h1, h2, h3, h4, h5, h6 {
 .messageChats {
 	height: 100%;
 	overflow-y: scroll;
-	/*scroll-behavior: smooth;*/
+	scroll-behavior: smooth;
 	padding: 5px 8px;
 	position: relative;
+	display: flex;
+	flex-direction: column-reverse;
 }
 .profilePage {
 	width: 40%;
