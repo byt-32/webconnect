@@ -27,25 +27,6 @@ function chats() {
 	return chats
 }
 
-// function populateRecentChats() {
-// 	let recentChats = []
-// 	chats() !== null && chats().map( chat => {
-// 		recentChats.unshift({ unread: 0, username: chat.username, status: 'offline', color: chat.color})
-// 	})
-	
-// 	return recentChats
-// }
-function SORT(arr) {
-	let result = []
-	let sortedNames = [...arr.map(user => user.username)].sort()
-	sortedNames.forEach((name, i) => {
-		const find = arr.find(user => user.username === name)
-		if (find !== undefined) {
-			result.push(find)
-		}
-	})
-	return result
-}
 let temp = []
 const initialState = {
 	oneTimeMessage: '',
@@ -205,28 +186,22 @@ const globalPropsSlice = createSlice({
 			const senderInUsers = state.activeUsers.find(user => user.username === username)
 			
 			if (senderInRecentChats !== -1) {
-				state.recentChats[senderInRecentChats] = {
-					...state.recentChats[senderInRecentChats], 
-				}
-				if (!me) {
-					if (Object.keys(state.currentSelectedUser).length === 0) {
-						state.recentChats[senderInRecentChats].unread += 1
-					} else {
-						if (state.currentSelectedUser.username !== username) {
-							state.recentChats[senderInRecentChats].unread += 1
-						}
-					}
-				}
-
 				const spliced = state.recentChats.splice(senderInRecentChats, 1)[0]
 				state.recentChats.unshift(spliced)
 			} else {
 				state.recentChats.unshift({
 					...senderInUsers,
-					unread: 1
 				})
 			}
-
+			if (!me) {
+				if (Object.keys(state.currentSelectedUser).length === 0) {
+					state.recentChats.find(user => user.username === username).unread += 1
+				} else {
+					if (state.currentSelectedUser.username !== username) {
+						state.recentChats.find(user => user.username === username).unread += 1
+					}
+				}
+			}
 			//handle storage of message in privateChats object
 			function pushToLS() {
 				let ls = JSON.parse(localStorage.getItem('messages')) || []
@@ -273,7 +248,6 @@ const globalPropsSlice = createSlice({
 			}
 			pushToLS()
 			pushToStore()
-
 		},
 		storeProfileInfos: (state, action) => {
 			const data = action.payload
@@ -417,7 +391,10 @@ const globalPropsSlice = createSlice({
 		.addCase(fetchInitialData.fulfilled, (state, action) => {
 			const { users, settings, props, recentChats, unread} = action.payload
 			state.preload.recentChats = false
-			state.activeUsers = SORT(users)
+			state.activeUsers = users.sort((a, b) => {
+				if (a.username < b.username) return -1
+					if (a.username > b.username) return 1
+			})
 			state.preload.activeUsers = false
 			if (settings) state.user.settings = settings
 			if (props.bio) state.user.bio = props.bio
@@ -425,33 +402,27 @@ const globalPropsSlice = createSlice({
 
 			if (recentChats.chats) {
 				let _recentChats = [...recentChats.chats]
-				let sorted = []
 
-				let lastSents = [..._recentChats.map((user, i) => {
-					return user.lastSent || []
-				})].sort((a,b) => b - a)
-
-				lastSents.forEach((a, i) => {
-					if (a !== undefined) {
-						const find = _recentChats.find(user => user.lastSent === a) 
-						find !== undefined && sorted.push(find)
-					}
+				_recentChats.sort((a, b) => {
+					if (a.lastSent > b.lastSent) return -1
+					if (a.lastSent < b.lastSent) return 1
 				})
-				sorted.forEach((user, i) => {
+				
+				_recentChats.forEach((user, i) => {
 
 					let userInUnread = unread.find(unread => unread.username === user.username)
 
 					const userInActiveUsers = 
 						state.activeUsers.find(_user => _user.username === user.username)
 					if (userInActiveUsers !== undefined) {
-						sorted[i] = {
+						_recentChats[i] = {
 							...user, 
 							...userInActiveUsers, 
 							unread: userInUnread !== undefined ? userInUnread.count : 0
 						}
 					}
 				})
-				state.recentChats = sorted
+				state.recentChats = _recentChats
 			} else {state.preload.recentChats = false}
 		})
 	}
