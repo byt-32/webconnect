@@ -10,7 +10,7 @@ require('dotenv').config()
 
 let app = express()
 
-const uri = process.env.URI
+const uri = process.env.LOCALURI
 
 const dbUrl = uri
 let db = mongoose.connection
@@ -204,10 +204,6 @@ app.use(express.json())
 app.use(express.static('webconnect_build/dist/'))
 app.use(cors())
 
-// app.post('/feedback/:token', (request, response) => {
-// 	const id = request.params.token
-// 	console.log(id, request.body)
-// })
 app.get('/fetchInitialData/:requesterId', async (request, response) => {
 	const { requesterId } = request.params
 	if (requesterId !== '' || requesterId) {
