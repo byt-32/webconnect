@@ -111,9 +111,7 @@ const RecentChats = () => {
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
 	}
-	React.useEffect(() => {
-		// dispatch(handleSearch({input: '', component: 'recentChats'}))
-	}, [])
+	
 	const performSearch = (searchVal) => {
 		dispatch(handleSearch({input: searchVal, component: 'recentChats'}))
 	}
@@ -123,7 +121,7 @@ const RecentChats = () => {
   	setHeight(`${window.innerHeight - 30}px`)
   }
 	return (
-		<section className={[styles.component, styles.recentChats, styles.animate__animated].join(' ')} >
+		<section className={[styles.component, styles.recentChats, styles.animate__animated, styles.animate__fadeIn].join(' ')} >
 			
 			<div position="static" className={styles.app} >
 			  <div className={styles.toolbar} >

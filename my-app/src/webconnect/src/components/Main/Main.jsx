@@ -40,14 +40,6 @@ const Main = () => {
 	if (Notification.permission !== 'granted') {
 		Notification.requestPermission()
 	}
-	React.useEffect(() => {
-		if (Object.keys(selectedUser).length > 0) {
-			const ele = document.querySelectorAll('.Wzm2GKa4C2sh_8jVswOw')
-			if (ele.length > 0) {
-				setTimeout(() => ele[0].scrollTop = ele[0].scrollHeight, 1000)
-			}
-		}
-	}, [selectedUser])
 
 	React.useEffect(() => {
 		if (contacts.username !== '') {
@@ -88,6 +80,7 @@ const Main = () => {
 		let me = false;
 		username === contacts.username ? me = true : me = false
 		dispatch(storePrivateChats({username: username, message: message, me: me}))
+		
 		if (Object.keys(selectedUser).length === 0) {
 			const find = recentChats.find(user => user.username === username)
 			if (find !== undefined) {
