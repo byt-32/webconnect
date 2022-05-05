@@ -733,6 +733,10 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: column;
   align-items: flex-end;
 }
+.chats .message > div {
+
+}
+
 .chats .chatsRight {
 	color: #fff;
   align-self: flex-end;
@@ -750,6 +754,8 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.3;
   letter-spacing: 0;
   border-radius: 5px;
+  display: flex;
+  align-items: center;
 }
 .chats .message .chat_ svg {
 	margin-left: 4px;
@@ -758,7 +764,9 @@ h1, h2, h3, h4, h5, h6 {
 	margin: 0 0 0 5px;
   background: cornflowerblue;
 }
-
+.chats .message .chat_ * {
+	pointer-events: none;
+}
 
 .chats .datetime {
 	font-size: 11px;

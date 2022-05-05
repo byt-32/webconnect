@@ -10,7 +10,7 @@ require('dotenv').config()
 
 let app = express()
 
-const uri = process.env.LOCALURI
+const uri = process.env.URI
 
 const dbUrl = uri
 let db = mongoose.connection
@@ -156,6 +156,12 @@ io.on('connection', socket => {
 		pushUsers()
 		socket.broadcast.emit('user disconnect', socket.username, socket.id)
 	})
+	socket.on('updateChatStatus', (socketId, username, callerUsername, unreadLen) => {
+		console.log(unreadLen)
+		if (socketId !== null) {
+			io.to(socketId).emit('chatIsSeen', callerUsername, unreadLen)
+		}
+	})
 	socket.on('sendMessage', async (reciepientName, sendersToken, sendersName, message, time) => {
 		const reciepient = connected.find(user => user.username === reciepientName);
 		if (reciepient !== undefined) {//receiver is online
@@ -253,17 +259,14 @@ app.get('/resetUnread/:requesterId/:friendsName', async (request, response) => {
 		if (find !== -1) {
 			unread.users.splice(find, 1)
 			await UnreadCount.findByIdAndUpdate(requesterId, {users: unread.users})
+			response.send({status: true})
 		}
 	}
 })
-
 app.get('/saveUnread/:requesterId/:requesterName/:friendsName/:unread', async (request, response) => {
 	const { friendsName, requesterName, requesterId, unread } = request.params
 	const friend = await User.findOne({username: friendsName}, {_id: 1})
-	saveUnread(requesterId, friend.id, requesterName, friendsName, )
-	// let unread = await UnreadCount.findOne({_id: requesterId}, {_id: 0, users: 1})
-
-	
+	saveUnread(requesterId, friend.id, requesterName, friendsName)
 })
 
 app.get('/chats/:friendsName/:requesterId', async (request, response) => {
