@@ -45,15 +45,17 @@ const initialState = {
 		activeUsers: ''
 	},
 	currentSelectedUser: {},
-	recentChats: [],
 	showCount: true,
 	docTitle: 'webconnect',
 	loader: false,
+	chatUpdate: {},
 	preload: {
 		recentChats: true, 
 		activeUsers: true
 	},
+	recentChats: [],
 	activeUsers: [],
+	onlineUsers: [],
 	components: {
 		rightPane: false,
 		leftPane: true,
@@ -90,11 +92,29 @@ const globalPropsSlice = createSlice({
 			state.user.socketId = action.payload
 			state.user.status = 'online'
 		},
-		addNewUser: (state, action ) => {
+		updateUnreadReset: (state, action) => {
+			state.chatUpdate = action.payload
+		},
+		updateChatStatus: (state, action) => {
+			// let {count, username} = action.payload
+			// const find = state.privateChats.find(chat => chat.username === username).messages
+			// for (let i = find.length; i > count; i-=1) {
+			// 	console.log(find[i])
+			// }
 			
+		},
+		addNewUser: (state, action ) => {
 			action.payload.forEach(user => {
 				const userInRecentChats = state.recentChats.findIndex(chat => chat.username === user.username)
 				const userInActiveUsers = state.activeUsers.findIndex(chat => chat.username === user.username)
+				const online = state.onlineUsers.findIndex(i => i.username === user.username)
+
+				if (online !== -1) {
+					state.onlineUsers.splice(online, 1)
+					state.onlineUsers = [...state.onlineUsers, user]
+				} else {
+					state.onlineUsers = [...state.onlineUsers, user]
+				}
 
 				if (userInRecentChats !== -1) {
 					let selected = state.recentChats[userInRecentChats]
@@ -119,6 +139,11 @@ const globalPropsSlice = createSlice({
 		userDisconnect: (state, action) => {
 			const {username, socketId} = action.payload
 			const offlineInRecentChats = state.recentChats.findIndex(chat => chat.username === username)
+			const userInOnline = state.onlineUsers.findIndex(i => i.username === username)
+
+			if (userInOnline !== -1) {
+				state.onlineUsers.splice(userInOnline, 1)
+			}
 
 			offlineInRecentChats !== -1 &&
 			(state.recentChats[offlineInRecentChats].status = 'offline')
@@ -130,6 +155,10 @@ const globalPropsSlice = createSlice({
 				if (state.currentSelectedUser.socketId === socketId || state.currentSelectedUser.username === username) {
 					state.currentSelectedUser.status = 'offline'
 				}
+			})
+			state.activeUsers = state.activeUsers.sort((a, b) => {
+				if (a.username.toLowerCase() < b.username.toLowerCase()) return -1
+				if (a.username.toLowerCase() > b.username.toLowerCase()) return 1
 			})
 		},
 		setLoginAlert: (state, action) => {
@@ -191,6 +220,7 @@ const globalPropsSlice = createSlice({
 			} else {
 				state.recentChats.unshift({
 					...senderInUsers,
+					unread: 0
 				})
 			}
 			if (!me) {
@@ -391,10 +421,23 @@ const globalPropsSlice = createSlice({
 		.addCase(fetchInitialData.fulfilled, (state, action) => {
 			const { users, settings, props, recentChats, unread} = action.payload
 			state.preload.recentChats = false
+			
+
 			state.activeUsers = users.sort((a, b) => {
-				if (a.username < b.username) return -1
-					if (a.username > b.username) return 1
-			})
+				if (a.username.toLowerCase() < b.username.toLowerCase()) return -1
+				if (a.username.toLowerCase() > b.username.toLowerCase()) return 1
+			});
+
+			state.activeUsers.forEach((user, i) => {
+				const findOnline = state.onlineUsers.find(i => i.username === user.username);
+
+				if (findOnline !== undefined) {
+					state.activeUsers[i] = {...user, ...findOnline}
+					let spliced = state.activeUsers.splice(i, 1)[0]
+					state.activeUsers.unshift(spliced)
+				}
+			});
+
 			state.preload.activeUsers = false
 			if (settings) state.user.settings = settings
 			if (props.bio) state.user.bio = props.bio
@@ -406,7 +449,7 @@ const globalPropsSlice = createSlice({
 				_recentChats.sort((a, b) => {
 					if (a.lastSent > b.lastSent) return -1
 					if (a.lastSent < b.lastSent) return 1
-				})
+				});
 				
 				_recentChats.forEach((user, i) => {
 
@@ -414,21 +457,25 @@ const globalPropsSlice = createSlice({
 
 					const userInActiveUsers = 
 						state.activeUsers.find(_user => _user.username === user.username)
+					const userInOnline = state.onlineUsers.find(i => i.username === user.username) || {}
 					if (userInActiveUsers !== undefined) {
 						_recentChats[i] = {
 							...user, 
+							...userInOnline,
 							...userInActiveUsers, 
 							unread: userInUnread !== undefined ? userInUnread.count : 0
 						}
 					}
-				})
+				});
+
 				state.recentChats = _recentChats
 			} else {state.preload.recentChats = false}
 		})
 	}
 })
 
-export const { setLoginAlert, setComponents, handleSearch, storeProfileInfos,
+export const { setLoginAlert, setComponents, handleSearch,
+ storeProfileInfos, updateUnreadReset, updateChatStatus,
 	afterLogin, addNewUser,	setSelectedUser, afterRegistration, setStatus, hideCount,
 	storePrivateChats, retrieveOTM, userDisconnect, storeSocketId, setBio, changeSettings
 } = globalPropsSlice.actions
