@@ -6,9 +6,10 @@ import RightPane from './rightPane/RightPane'
 import Profile from './rightPane/Profile'
 import styles from '../../stylesheet/main.module.css'
 import { storeSocketId, setStatus,
-	addNewUser, storePrivateChats, 
+	addNewUser, storePrivateChats, updateChatStatus,
 	userDisconnect, fetchInitialData } from '../../Redux/globalPropsSlice'
 import { io } from 'socket.io-client'
+import addNotification from 'react-push-notification';
 import { Route, Routes } from 'react-router-dom'
 const socket = io('/', {autoConnect: false})
 let audio;
@@ -24,10 +25,10 @@ const Main = () => {
 	const OTM = useSelector(state => state.globalProps.oneTimeMessage)
 	const components = useSelector(state => state.globalProps.components)
 	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
+	const chatUpdate = useSelector(state => state.globalProps.chatUpdate)
 	const recentChats = useSelector(state => state.globalProps.recentChats)
 
 	const notify = useSelector(state => state.globalProps.user.settings.notifications)
-
 	React.useEffect(() => {
 		if (sessionStorage.getItem('refresh') == 'false') {
 			document.location.pathname = ''
@@ -62,8 +63,18 @@ const Main = () => {
 	 	selectedUser.token !== undefined && socket.emit('typing', contacts.id, selectedUser.id, {typing: contacts.typing})
 	 }, [contacts.typing])
 
+	React.useEffect(() => {
+		if (Object.keys(chatUpdate).length > 0) {
+			socket.emit('updateChatStatus', chatUpdate.socketId, chatUpdate.username, contacts.username, chatUpdate.unread)
+		}
+	}, [chatUpdate])
+
 	socket.off('user disconnect').on('user disconnect', (username, socketId) => {
 		dispatch(userDisconnect({username: username, socketId: socketId}))
+	})
+
+	socket.off('chatIsSeen').on('chatIsSeen', (friendName, unreadLen) => {
+		dispatch(updateChatStatus({username: friendName, count: unreadLen}))
 	})
 
 	socket.off('users').on('users', users => {
@@ -73,13 +84,15 @@ const Main = () => {
 	socket.off('sentFromSocket').on('sentFromSocket', (username, message) => {
 		if (!components.rightPane) {
 			if(notify) {
-				const alert = new Notification('1 new message')
+				addNotification({
+          title: '1 new message',
+          theme: 'darkblue',
+          native: true // when using native, your OS will handle theming.
+        });
 			}
 			audio.play()
 		}
-		let me = false;
-		username === contacts.username ? me = true : me = false
-		dispatch(storePrivateChats({username: username, message: message, me: me}))
+		dispatch(storePrivateChats({username: username, message: message, me: false}))
 		
 		if (Object.keys(selectedUser).length === 0) {
 			const find = recentChats.find(user => user.username === username)

@@ -3,6 +3,8 @@ import styles from '../../../stylesheet/main.module.css'
 import { useSelector } from 'react-redux'
 import retrieveDate from '../../../retrieveDate'
 import Loader from './Loader'
+import DoneAllIcon from '@material-ui/icons/DoneAll'
+import DoneIcon from '@material-ui/icons/Done'
 
 const ChatMessages = () => {
 	const [chats, setChats] = React.useState([])
@@ -69,12 +71,13 @@ const ChatMessages = () => {
 							</span> : <></>
 						}
 						<div className={[styles.message,  message.me ? styles.chatsRight : styles.chatsLeft].join(' ')} >
-							<span onClick={e => {
-								setEle(e)
-							}}
-
-								 className={styles.chat_} dangerouslySetInnerHTML={replace(message.message)} > 
-							</span>
+							<div className={styles.chat_} onClick={e => {setEle(e)}} >
+								<span dangerouslySetInnerHTML={replace(message.message)}>
+								</span>{/*
+								{me && message.read && 
+									<DoneAllIcon style={{fontSize: '17px'}} />
+								}*/}
+							</div>
 							<span className={styles.datetime} style={{display: 'none'}} > {message.timestamp.time} </span>
 						</div>
 					</div>

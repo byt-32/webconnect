@@ -2,7 +2,8 @@ import React from 'react'
 import styles from '../../../stylesheet/main.module.css'
 import IconButton from '@material-ui/core/IconButton'
 import { useSelector, useDispatch } from 'react-redux'
-import { setSelectedUser, fetchMessages,setComponents, handleSearch } from '../../../Redux/globalPropsSlice'
+import { setSelectedUser, fetchMessages, updateUnreadReset,
+	setComponents, handleSearch } from '../../../Redux/globalPropsSlice'
 
 import Typography from '@material-ui/core/Typography';
 import Menu from '@material-ui/core/Menu'
@@ -60,6 +61,10 @@ const User = ({user, color}) => {
 		if (selectedUser.username !== args.username) {
 			if (user.unread !== 0) {
 				fetch(`/resetUnread/${token}/${user.username}`)
+				.then(res => res.json())
+				.then(res => {
+					dispatch(updateUnreadReset(args))
+				})
 			}
 			dispatch(setSelectedUser(args))
 			dispatch(setComponents({component: 'rightPane', value: true}))
