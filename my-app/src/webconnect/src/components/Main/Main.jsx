@@ -5,19 +5,25 @@ import ResetPassword from './leftPane/settings/ResetPassword'
 import RightPane from './rightPane/RightPane'
 import Profile from './rightPane/Profile'
 import styles from '../../stylesheet/main.module.css'
-import { storeSocketId, setStatus,
+import { storeSocketId, setStatus, handleReply,
 	addNewUser, storePrivateChats, updateChatStatus,
 	userDisconnect, fetchInitialData } from '../../Redux/globalPropsSlice'
 import { io } from 'socket.io-client'
 import addNotification from 'react-push-notification';
 import { Route, Routes } from 'react-router-dom'
 const socket = io('/', {autoConnect: false})
+
 let audio;
 if (!document.querySelector('audio')) {
 	audio = document.createElement('audio')
 	audio.src = '/audio/pop.mp3'
 	document.querySelector('body').appendChild(audio)
 }
+
+if (Notification.permission !== 'granted') {
+	Notification.requestPermission()
+}
+
 const Main = () => {
 	const dispatch = useDispatch()
 	const contacts = useSelector(state => state.globalProps.user.contacts)
@@ -27,20 +33,18 @@ const Main = () => {
 	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
 	const chatUpdate = useSelector(state => state.globalProps.chatUpdate)
 	const recentChats = useSelector(state => state.globalProps.recentChats)
+	const reply = useSelector(state => state.globalProps.reply)
 
 	const notify = useSelector(state => state.globalProps.user.settings.notifications)
+
 	React.useEffect(() => {
 		if (sessionStorage.getItem('refresh') == 'false') {
 			document.location.pathname = ''
 		}
 		sessionStorage.setItem('refresh', 'true')
-
 		dispatch(fetchInitialData(contacts.id))
 	}, [])
 
-	if (Notification.permission !== 'granted') {
-		Notification.requestPermission()
-	}
 
 	React.useEffect(() => {
 		if (contacts.username !== '') {
@@ -53,35 +57,65 @@ const Main = () => {
 		})
 	}, [contacts])
 
+	React.useEffect( () => {
+		if(OTM.input !== '') {
+			socket.emit('sendMessage', 
+				selectedUser.username, 
+				contacts.id, 
+				contacts.username, 
+				OTM.input,
+				OTM.chatId,
+				reply,
+				new Date().toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'},
+			))
+			dispatch(handleReply({open: false, to: '', person: '', chatId: ''}))
+		}
+	}, [OTM])
+
+	React.useEffect(() => {
+		if (Object.keys(chatUpdate).length > 0) {
+			socket.emit('updateChatStatus', 
+				chatUpdate.socketId, 
+				chatUpdate.username, 
+				contacts.username, 
+				chatUpdate.unread
+			)
+		}
+	}, [chatUpdate])
+
+	React.useEffect(() => {
+	 	selectedUser.token !== undefined && socket.emit('typing', 
+	 		contacts.id, 
+	 		selectedUser.id, 
+	 		{typing: contacts.typing})
+
+	 }, [contacts.typing])
+
 	socket.off('connect_error').on('connect_error', (err) => status !== 'offline' && dispatch(setStatus('offline')))
 
 	socket.off('disconnect').on('disconnect', () => {
 		dispatch(setStatus('offline'))
 	})
 
-	React.useEffect(() => {
-	 	selectedUser.token !== undefined && socket.emit('typing', contacts.id, selectedUser.id, {typing: contacts.typing})
-	 }, [contacts.typing])
-
-	React.useEffect(() => {
-		if (Object.keys(chatUpdate).length > 0) {
-			socket.emit('updateChatStatus', chatUpdate.socketId, chatUpdate.username, contacts.username, chatUpdate.unread)
-		}
-	}, [chatUpdate])
-
 	socket.off('user disconnect').on('user disconnect', (username, socketId) => {
-		dispatch(userDisconnect({username: username, socketId: socketId}))
+		dispatch(userDisconnect({
+			username: username, 
+			socketId: socketId
+		}))
 	})
 
 	socket.off('chatIsSeen').on('chatIsSeen', (friendName, unreadLen) => {
-		dispatch(updateChatStatus({username: friendName, count: unreadLen}))
+		dispatch(updateChatStatus({
+			username: friendName, 
+			count: unreadLen
+		}))
 	})
 
 	socket.off('users').on('users', users => {
 		dispatch(addNewUser(users))
 	})
 
-	socket.off('sentFromSocket').on('sentFromSocket', (username, message) => {
+	socket.off('sentFromSocket').on('sentFromSocket', (username, message, chatId, reply) => {
 		if (!components.rightPane) {
 			if(notify) {
 				addNotification({
@@ -92,7 +126,9 @@ const Main = () => {
 			}
 			audio.play()
 		}
-		dispatch(storePrivateChats({username: username, message: message, me: false}))
+		dispatch(storePrivateChats({
+			username: username, message: message, me: false, chatId: chatId, reply: reply
+		}))
 		
 		if (Object.keys(selectedUser).length === 0) {
 			const find = recentChats.find(user => user.username === username)
@@ -106,14 +142,6 @@ const Main = () => {
 		}
 	})
 
-	React.useEffect( () => {
-		if(OTM !== '') {
-			socket.emit('sendMessage', selectedUser.username, contacts.id, 
-				contacts.username, OTM, 
-				new Date().toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'}))
-		}
-	}, [OTM])
-	
 	const [height, setHeight] = React.useState(`${window.innerHeight}px`)
   window.onresize = () => {
   	setHeight(`${window.innerHeight}px`)

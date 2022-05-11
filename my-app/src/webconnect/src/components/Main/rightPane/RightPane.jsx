@@ -20,7 +20,8 @@ const useStyles = makeStyles({
 	}
 })
 
-const RightPane = () => {
+
+const RightPaneChild = () => {
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
@@ -86,6 +87,12 @@ const RightPane = () => {
 			
 			<MessagesPane />
 		</section>
+	)
+}
+
+const RightPane = () => {
+	return (
+		<RightPaneChild />
 	)
 }
 

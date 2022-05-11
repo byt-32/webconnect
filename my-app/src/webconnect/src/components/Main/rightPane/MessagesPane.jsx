@@ -12,11 +12,13 @@ import MenuItem from '@material-ui/core/MenuItem'
 import Typography from '@material-ui/core/Typography';
 import VideoCallIcon from '@material-ui/icons/VideoCall';
 import AddIcCall from '@material-ui/icons/AddIcCall';
+import CloseIcon from '@material-ui/icons/Close';
 import InputBase from "@material-ui/core/InputBase";
 import { useDispatch,useSelector } from 'react-redux'
-import { retrieveOTM, storePrivateChats } from '../../../Redux/globalPropsSlice'
+import { retrieveOTM, storePrivateChats, handleReply } from '../../../Redux/globalPropsSlice'
 import ChatMessages from './ChatMessages'
 import { makeStyles } from '@material-ui/core/styles';
+import Fade from '@material-ui/core/Fade';
 
 const useStyles = makeStyles({
 	emoji: {
@@ -38,7 +40,8 @@ const MessagesPane = () => {
 	const emojiClass = useStyles()
 
 	const dispatch = useDispatch()
-	const recepient  = useSelector(state => state.globalProps.currentSelectedUser)
+	const selectedUser  = useSelector(state => state.globalProps.currentSelectedUser)
+	const reply  = useSelector(state => state.globalProps.reply)
 	const user = useSelector(state => state.globalProps.user)
 	const status = useSelector(state => state.globalProps.user.status)
 	const loader = useSelector(state => state.globalProps.loader)
@@ -82,14 +85,22 @@ const MessagesPane = () => {
 	}
 
 	const sendMessage = async () => {
+		const dateNow = () => Date.now()
+		let chatId = dateNow()
 		if (input !== '') {
 			if (status === 'offline') {
 				setFetchErr(true)
 			} else if (status === 'online') {
 				setFetchErr(false)
-				dispatch(storePrivateChats({username: recepient.username, message: input, me: true}))
+				dispatch(storePrivateChats({
+					username: selectedUser.username, 
+					message: input, 
+					me: true, 
+					chatId: chatId,
+					reply: reply,
+				}))
 				setInput('')
-				dispatch(retrieveOTM(input))
+				dispatch(retrieveOTM({input: input, chatId: chatId}))
 			}
 		}
 	}
@@ -97,16 +108,32 @@ const MessagesPane = () => {
   window.onresize = () => {
   	setHeight(`${window.innerHeight - 30}px`)
   }
-	
+  const closeReply = () => {
+  	dispatch(handleReply({open: false}))
+  }
+	React.useEffect(() => {
+		dispatch(handleReply({open: false, to: '', person: '', chatId: ''}))
+		setInput('')
+	}, [selectedUser])
 	return (
 		<section className={styles.messagesMain} style={{
 			height: height
 		}} >
 			<div className={[styles.messageChats, classes.messagesChats].join(' ')}>
-				<span className={styles.dateFixed}> Today </span>
 				{fetchErr && <Alert className={classes.error} severity="warning"> You are currently offline </Alert>}
 				<ChatMessages />
 			</div>
+			{reply.open ? (
+				<Fade in={reply.open}>
+					<div className={styles.reply}>
+						<span className={styles.person}> {reply.person === user.contacts.username ? 'You' : reply.person} </span>
+						<span className={styles.replyTo} 
+							dangerouslySetInnerHTML={{__html: reply.to.replaceAll('\n', '<br/>')}} />
+						<span className={styles.closeReply} onClick={closeReply} > <CloseIcon style={{fontSize: '20px'}} /> </span>
+					</div>
+				</Fade> )
+				: null 
+			}
 			<div className={styles.messageInput} >
 				<div style={{width: '10%'}}>
 					<IconButton onClick={openFilePicker} >
@@ -127,8 +154,8 @@ const MessagesPane = () => {
 				</div>
 				<div className={styles.chatOtions}>
 					<IconButton onClick={toggleMenu}> 
-							<MoreVertIcon color='disabled' />
-						</IconButton>
+						<MoreVertIcon color='disabled' />
+					</IconButton>
 
 						<Menu open={false} variant='menu' anchorEl={anchorEl} onClose={handleClose} getContentAnchorEl={null} anchorOrigin={{
 					      vertical: 'top',

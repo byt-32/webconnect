@@ -6,7 +6,9 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
+import InputLabel from '@material-ui/core/InputLabel';
 import Tooltip from '@material-ui/core/Tooltip';
+import Input from '@material-ui/core/Input';
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import EditIcon from '@material-ui/icons/Edit';
 import { makeStyles } from '@material-ui/core/styles';
@@ -279,7 +281,6 @@ const Settings = () => {
 	const setFeedback = (e) => {
 		assignFeedbackInput(e.target.value)
 	}
-
   const performLogout = () => {
   	fetch(`http://localhost:3000/feedback/${user.id}`, {
   		method: 'post',
@@ -303,22 +304,63 @@ const Settings = () => {
   })
 	const open = {
 		dialog: Boolean(anchorEl.dialog), 
-		menu: Boolean(anchorEl.menu)
+		menu: Boolean(anchorEl.menu),
 	}
-
 	const toggleMenu = (ele, event) => {
-		if (ele === 'menu')	setAnchorEl({...anchorEl, menu: event.target})
-		if (ele === 'dialog') setAnchorEl({...anchorEl, dialog: event.target})
+		setAnchorEl({...anchorEl, [`${ele}`]: event.target })
 	}
-
 	const handleClose =(ele) => {
-		if (ele === 'menu') setAnchorEl({...anchorEl, menu: null})
-		if (ele === 'dialog') setAnchorEl({...anchorEl, dialog: null})
+		setAnchorEl({...anchorEl, [`${ele}`]: null})
 	}
 	
+	const [openImageDialog, setOpen] = React.useState(false)
+	const [profileImgUrl, setProfileImgUrl] = React.useState('')
+	const closeImageDialog = () => {
+		setOpen(false)
+	}
+	const fileInput = React.useRef(null)
+	const [avatar, setAvatar] = React.useState({})
+
+	const uploadToServer = () => {
+		const formData = new FormData()
+		formData.append('avatar', avatar)
+		// fetch(`/uploadProfilePhoto/${user.token}`, {
+		// 	method: 'PUT',
+		// 	body: formData
+		// })
+	}
+	React.useEffect(() => {
+		if (profileImgUrl !== '') {
+			setOpen(true)
+		}
+	}, [profileImgUrl])
+	const handleProfileUpload = (e) => {
+		fileInput.current.addEventListener('change', (e) => {
+			const _file = e.target.files[0]
+			setAvatar(_file)
+			setProfileImgUrl(URL.createObjectURL(_file))
+		})
+	}
+
 	const classes = useStyles()
 	return (
 		<section className={[styles.component, styles.settings, styles.animate__animated, styles.animate__fadeInLeft].join(' ')} >
+			<Dialog open={openImageDialog} onClose={closeImageDialog} aria-labelledby="form-dialog-title">
+				<DialogContent >
+					<img src={profileImgUrl} height={`${window.innerHeight - 200}px`} width='100%' />
+				</DialogContent>
+				<DialogActions>
+					 <Button onClick={closeImageDialog} color="primary">
+            Cancel
+          </Button>
+          <Button color="primary" onClick={() => {
+          	closeImageDialog()
+          	uploadToServer()
+          }} >
+            Save
+          </Button>
+				</DialogActions>
+			</Dialog>
 			<AppBar position="static" className={classes.app} >
 			  <Toolbar className={classes.toolbar} >
 			  	<div className={classes.headerItem} >
@@ -332,10 +374,10 @@ const Settings = () => {
 				    </Typography>
 			    </div>
 			    <div className={classes.headerItem}>
-			    	<IconButton onClick={(e) => toggleMenu('menu', e)}> 
-							<MoreVertIcon color='disabled' />
+			    	<IconButton onClick={(e) => toggleMenu('menu', e)} disabled> 
+							<MoreVertIcon />
 						</IconButton>
-			    	<Menu open={false} variant='menu' anchorEl={anchorEl.menu}
+			    	<Menu open={false} variant='menu' anchorEl={anchorEl.menu} style={{padding: 0}}
 			    	 onClose={() => handleClose('menu')} getContentAnchorEl={null} anchorOrigin={{
 					      vertical: 'top',
 					      horizontal: 'center',
@@ -344,9 +386,19 @@ const Settings = () => {
 				      vertical: 'top',
 				      horizontal: 'right',
 				    }}>
-							<MenuItem onClick={(e) => handleClose('menu')}>
-								<AddAPhotoIcon style={{fontSize: '21px'}} />
-								<Typography component='span' style={{marginLeft: '5px', fontSize: '14.5px'}}> Upload a photo </Typography>
+							<MenuItem disableGutters={true} onClick={(e) => handleClose('menu')} style={{position: 'relative', padding: 0}} >
+								<form action='/uploadProfilePhoto' encType='multipart/form-data' method='POST'>
+									<InputLabel onClick={handleProfileUpload}
+									htmlFor="upload" style={{padding: '10px', fontSize: '14.5px', color: '#000'}}>Upload a photo</InputLabel>
+									<input type='file'
+										ref={fileInput}
+										name='profilePhoto' 
+										id='upload' 
+										style={{visibility: 'hidden', position: 'absolute'}} 
+										accept="image/png, image/jpeg"
+									/>
+									
+								</form>
 							</MenuItem>
 						</Menu>
 			    </div>

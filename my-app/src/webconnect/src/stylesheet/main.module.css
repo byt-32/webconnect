@@ -88,6 +88,78 @@ body {
         opacity: 1
     }
 }
+@-webkit-keyframes headShake {
+    0% {
+        -webkit-transform: translateX(0);
+        transform: translateX(0)
+    }
+
+    6.5% {
+        -webkit-transform: translateX(-6px) rotateY(-9deg);
+        transform: translateX(-6px) rotateY(-9deg)
+    }
+
+    18.5% {
+        -webkit-transform: translateX(5px) rotateY(7deg);
+        transform: translateX(5px) rotateY(7deg)
+    }
+
+    31.5% {
+        -webkit-transform: translateX(-3px) rotateY(-5deg);
+        transform: translateX(-3px) rotateY(-5deg)
+    }
+
+    43.5% {
+        -webkit-transform: translateX(2px) rotateY(3deg);
+        transform: translateX(2px) rotateY(3deg)
+    }
+
+    50% {
+        -webkit-transform: translateX(0);
+        transform: translateX(0)
+    }
+}
+
+@keyframes headShake {
+    0% {
+        -webkit-transform: translateX(0);
+        transform: translateX(0)
+    }
+
+    6.5% {
+        -webkit-transform: translateX(-6px) rotateY(-9deg);
+        transform: translateX(-6px) rotateY(-9deg)
+    }
+
+    18.5% {
+        -webkit-transform: translateX(5px) rotateY(7deg);
+        transform: translateX(5px) rotateY(7deg)
+    }
+
+    31.5% {
+        -webkit-transform: translateX(-3px) rotateY(-5deg);
+        transform: translateX(-3px) rotateY(-5deg)
+    }
+
+    43.5% {
+        -webkit-transform: translateX(2px) rotateY(3deg);
+        transform: translateX(2px) rotateY(3deg)
+    }
+
+    50% {
+        -webkit-transform: translateX(0);
+        transform: translateX(0)
+    }
+}
+
+.animate__headShake {
+    -webkit-animation-name: headShake;
+    animation-name: headShake;
+    -webkit-animation-timing-function: ease-in-out;
+    animation-timing-function: ease-in-out;
+    -webkit-animation-duration: 1s !important;
+    animation-duration: 1s !important;
+}
 
 .animate__animated {
   -webkit-animation-duration: .5s;
@@ -179,7 +251,7 @@ h1, h2, h3, h4, h5, h6 {
 :root {
  --animate-duration: .5s;
   --animate-delay: 1s;
-  --animate-repeat: 1
+  --animate-repeat: 1;
 	--mainpane_width: 100%;
 	--basic_color: cornflowerblue;
 	--default_fontsize: 99.5% !important;
@@ -197,9 +269,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .spx1 {
+	width: 400px;
+  display: flex;
+  justify-content: center;
   padding: 32px 0;
+  margin: 30px 0;
 	background: #fff;
-	height: 100%;
+	box-shadow: -1px 4px 20px 20px #91b8eb26, -2px 8px 20px 20px #ffa3a324;
 }
 .SMRContainer {
 	padding: 0 6%;
@@ -226,9 +302,9 @@ h1, h2, h3, h4, h5, h6 {
 }*/
 
 .signupMainRight {
-	float: right;
-	display: flex;
-	justify-content: center;
+	/*display: flex;
+	justify-content: center;*/
+	width: 100%;
 }
 
 
@@ -699,79 +775,147 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
 }
 
-.dateFixed {
-	display: none;
-  position: fixed;
-  width: max-content;
-  margin: 0 auto;
-  top: 56;
-}
-
-.chat {
-	display: flex;
-	flex-direction: column;
-	margin: 8px 0;
-}
-.dateNotice {
-	text-align: center;
-  background: #fff;
-  display: block;
-  margin: 5px auto;
-  width: max-content;
-  padding: 2px 10px;
-  font-size: 13px;
-  box-shadow: 0px 0px 1px 0px #545454;
-}
 .chats {
 	padding: 0 10%;
 }
-
-.chats .message {
-	margin-top: 5px;
-  max-width: max-content;
+.dateNotice {
+	position: sticky;
+	top: 0;
+	z-index: 20;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  justify-content: center;
+  margin: 5px auto;
+  width: 100%;
 }
-.chats .message > div {
+.dateNotice > div {
+	width: max-content;
+  box-shadow: 0px 0px 1px 0px #545454;
+  padding: 2px 10px;
+  font-size: 13.7px;
+	text-align: center;
+  background: #fff;
+}
+.chatCollection {
+}
+.chatHeader {
 
 }
-
-.chats .chatsRight {
-	color: #fff;
-  align-self: flex-end;
+.indexedChats {
+	display: flex;
+	flex-direction: column;
 }
-.chats .chatsLeft {
+
+.chatSingle.leftChat {
 	align-self: flex-start;
 	align-items: flex-start;
 }
-.chats .message .chat_ {
-  background: #fff;
-  padding: 5px 10px;
-  width: inherit;
-  margin: 0 5px 0 0;
-  font-size: 13.9px;
-  line-height: 1.3;
-  letter-spacing: 0;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
+.chatSingle.rightChat {
+	align-self: flex-end;
+	align-items: flex-end;
 }
-.chats .message .chat_ svg {
-	margin-left: 4px;
+.chatSingle {
+	max-width: 90%;
+	border-radius: 10px;
+	margin: 8.5px 0;
+	position: relative;
+	display: flex;
+	flex-direction: column;
 }
-.chats .chatsRight .chat_ {
-	margin: 0 0 0 5px;
-  background: cornflowerblue;
+.highlight {
+	width: 100%;
+	background: #5885bd40;
 }
-.chats .message .chat_ * {
-	pointer-events: none;
+.chatReply .replySingle {
+	cursor: pointer;
+	background: #fff;
+	padding: 7px 13px 5px 7px;
+	border-radius: 5px 5px 0 0;
+	border-left: 3px solid #5885bd;
+	font-size: 90%;
+}
+.replySingle .person {
+	color: coral;
+	font-weight: bold;
+	font-size: 90%;
+}
+.replySingle .to {
+	margin: 1px 0 0 0;
+}
+.chatReply .message {
+	/*border-top: 1px solid #afafaf;*/
+	border-radius: 0 0 5px 5px !important;
 }
 
-.chats .datetime {
-	font-size: 11px;
-	color: #7e7e7e !important;
-	margin-top: 2px;
+.chatSingle.leftChat .chatAction {
+	/*right: -35px;*/
+}
+.chatSingle.rightChat .chatAction {
+	/*left: -35px;*/
+}
+
+.chatAction {
+	position: absolute;
+	display: flex;
+	background: #fff;
+	border-radius: 5px;
+	z-index: 10;
+	top: -40px;
+}
+.chatAction button.MuiIconButton-root {
+	display: flex;
+	align-items: center;
+	padding: 10px;
+	cursor: pointer;
+}
+.chatAction .MuiIconButton-root:hover {
+
+}
+.chatAction .MuiIconButton-root svg {
+	font-size: 20px;
+}
+.chatSingle .message {
+	display: block;
+	border-radius: 5px;
+	padding: 5px 10px 5px 5px;
+	cursor: pointer;
+}
+
+.chatSingle.leftChat .message {
+	background: #fff;
+	color: #000;
+}
+.chatSingle.rightChat .message {
+	background: #5885bd;
+  color: #fff;
+}
+.chatSingle .messageTime {
+	font-size: 80%;
+}
+
+.reply {
+	margin: 3px 10%;
+  position: relative;
+  background: #fff;
+  padding: 5px 5px 5px 10px;
+  border-left: 2px solid #8b7678;
+  border-radius: 10px 10px 0 0;
+  font-size: 90%;
+}
+.reply > span {
+	display: block;
+}
+.reply .person {
+	color: coral;
+  font-weight: bold;
+  margin: 3px 0;
+  font-size: 94%;
+}
+
+.reply .closeReply {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	cursor: pointer;
 }
 
 .messageInput {
@@ -799,7 +943,6 @@ h1, h2, h3, h4, h5, h6 {
 	width: 100% !important;
 }
 .messageField .input textarea {
-	font-size: 14px;
 	overflow-y: scroll !important;
 }
 
@@ -829,7 +972,10 @@ h1, h2, h3, h4, h5, h6 {
 	}
 
 	.chats {
-		padding: 0 7%;
+		padding: 0 6%;
+	}
+	.reply {
+		margin: 3px 7%;
 	}
 	.messageInput {
 		margin: 0 7%;
@@ -849,10 +995,10 @@ h1, h2, h3, h4, h5, h6 {
 		/*font-size: 15.5px !important;*/
 	}
 	.SMRContainer header h1 {
-		font-size: 1.35rem !important;
+		/*font-size: 1.35rem !important;*/
 	}
 	.SMRContainer header {
-		font-size: 14px !important;
+		/*font-size: 14px !important;*/
 	}
 	.altSignups {
     flex-direction: row;
@@ -871,11 +1017,11 @@ h1, h2, h3, h4, h5, h6 {
 		width: 40%;
 	}
 	.inputReset input {
-		font-size: 14px !important;
+		/*font-size: 14px !important;*/
 	}
 	
 	.appH6 {
-		font-size: 16px !important;
+		/*font-size: 16px !important;*/
 	}
 	/*.subSettings h6 {
 		font-size: 15px;
@@ -887,11 +1033,14 @@ h1, h2, h3, h4, h5, h6 {
 		margin: 0 5px;
 	}
 	.chats {
-		font-size: 13.7px !important;
+		/*font-size: 13.7px !important;*/
 		padding: 0;
 	}
+	.reply {
+		margin: 3px 5px;
+	}
 	.dateNotice {
-		font-size: 12.7px
+		/*font-size: 12.7px*/
 	}
 
 }
@@ -933,7 +1082,7 @@ h1, h2, h3, h4, h5, h6 {
 		font-size: 1rem;
 	}
 	.chats .message .chat_ {
-		font-size: .85rem;
+		/*font-size: .85rem;*/
 	}
 	.loader {
 		/*height: calc(100vh - 84px) !important;*/

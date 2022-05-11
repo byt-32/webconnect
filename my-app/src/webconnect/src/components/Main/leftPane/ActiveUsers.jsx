@@ -1,7 +1,12 @@
 import React from 'react'
 import styles from '../../../stylesheet/main.module.css'
 import { useSelector, useDispatch } from 'react-redux'
-import { setSelectedUser, fetchMessages, setComponents, handleSearch, hideCount } from '../../../Redux/globalPropsSlice'
+import { setSelectedUser, 
+	fetchMessages, 
+	setComponents, 
+	handleSearch,
+	handleReply, 
+	hideCount } from '../../../Redux/globalPropsSlice'
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 import ListItem from '@material-ui/core/ListItem'

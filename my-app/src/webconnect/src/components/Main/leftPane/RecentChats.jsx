@@ -3,7 +3,7 @@ import styles from '../../../stylesheet/main.module.css'
 import IconButton from '@material-ui/core/IconButton'
 import { useSelector, useDispatch } from 'react-redux'
 import { setSelectedUser, fetchMessages, updateUnreadReset,
-	setComponents, handleSearch } from '../../../Redux/globalPropsSlice'
+	setComponents, handleSearch, handleReply } from '../../../Redux/globalPropsSlice'
 
 import Typography from '@material-ui/core/Typography';
 import Menu from '@material-ui/core/Menu'

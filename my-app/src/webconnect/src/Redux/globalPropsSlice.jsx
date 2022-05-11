@@ -29,7 +29,16 @@ function chats() {
 
 let temp = []
 const initialState = {
-	oneTimeMessage: '',
+	oneTimeMessage: {
+		input: '',
+		chatId: Number()
+	},
+	highlightedId: '',
+	reply: {
+		open: false,
+		person: '',
+		to: '',
+	},
 	noMatch: {
 		recentChats: false,
 		activeUsers: false
@@ -61,9 +70,9 @@ const initialState = {
 		leftPane: true,
 		profile: false,
 		stack: [
-			{activeUsers: false}, 
-			{recentChats: true}, 
-			{settings: false}, 
+			{activeUsers: false, loader: false}, 
+			{recentChats: true, loader: false}, 
+			{settings: false, loader: false}, 
 			{resetPassword: false},
 			{contactInfo: false},
 			{privacy: false}
@@ -96,12 +105,17 @@ const globalPropsSlice = createSlice({
 			state.chatUpdate = action.payload
 		},
 		updateChatStatus: (state, action) => {
-			// let {count, username} = action.payload
-			// const find = state.privateChats.find(chat => chat.username === username).messages
-			// for (let i = find.length; i > count; i-=1) {
-			// 	console.log(find[i])
+			// let {count, username} = action.payload;
+
+			// const find = state.privateChats.find(chat => chat.username === username).messages;
+			// if (find !== undefined) {
+			// 	for (let i = 0; i < find.length; i+=1) {
+			// 		if (i >= (find.length - count)) {
+			// 			find[i].read = true
+			// 		}
+			// 	}
 			// }
-			
+				
 		},
 		addNewUser: (state, action ) => {
 			action.payload.forEach(user => {
@@ -201,9 +215,14 @@ const globalPropsSlice = createSlice({
 			}
 
 		},
-		
+		handleReply: (state, action) => {
+			state.reply = {...state.reply, ...action.payload}
+		},
+		setHighlightedId: (state, action) => {
+			state.highlightedId = action.payload
+		},
 		storePrivateChats: (state, action) => {
-			const {username, message, me} = action.payload
+			const {username, message, me, chatId, reply} = action.payload
 			const _date = new Date()
 			
 			const date =
@@ -236,12 +255,15 @@ const globalPropsSlice = createSlice({
 			function pushToLS() {
 				let ls = JSON.parse(localStorage.getItem('messages')) || []
 				if (ls.length === 0) {
-					ls.push({username: username, color: senderInUsers.color,  messages: [{me: me, message: message, timestamp: date}]})
+					ls.push({
+						username: username, color: senderInUsers.color, 
+						messages: [{me: me, message: message, reply: reply, timestamp: date, chatId: chatId}]
+					})
 					localStorage.setItem('messages', JSON.stringify(ls))
 				} else {
 					const foundIndex = ls.findIndex( chat => chat.username === username)
 					if (foundIndex !== -1) {
-						ls[foundIndex].messages.push({me: me, message: message, timestamp: date})
+						ls[foundIndex].messages.push({me: me, message: message, reply: reply, timestamp: date, chatId: chatId})
 						localStorage.setItem('messages', JSON.stringify(ls))
 						
 						// if (ls[foundIndex].messages.length >= 5) {
@@ -252,7 +274,7 @@ const globalPropsSlice = createSlice({
 						ls.push({
 							username: username, 
 							color: senderInUsers.color, 
-							messages: [{me: me, message: message,  timestamp: date}]
+							messages: [{me: me, message: message, reply: reply, timestamp: date, chatId: chatId}]
 						})
 						localStorage.setItem('messages', JSON.stringify(ls))
 					}
@@ -261,7 +283,12 @@ const globalPropsSlice = createSlice({
 			function pushToStore() {
 				const privateChats = state.privateChats
 				if (privateChats.length === 0) {
-					state.privateChats.push({username: username, messages: [{me: me, message: message, timestamp: date}]})
+					state.privateChats.push({
+						username: username, 
+						messages: [{
+							me: me, message: message, reply: reply, timestamp: date, chatId: chatId
+						}]
+					})
 
 				} else {
 					const foundIndex = privateChats.findIndex( chat => chat.username === username)
@@ -269,13 +296,21 @@ const globalPropsSlice = createSlice({
 						// if (state.privateChats[foundIndex].messages.length >= 5) {
 						// 	state.privateChats[foundIndex].messages.splice(0,1)
 						// }
-						state.privateChats[foundIndex].messages.push({me: me, message: message, timestamp: date})
+						state.privateChats[foundIndex].messages.push({
+							me: me, message: message, reply: reply, timestamp: date, chatId: chatId
+						})
 					} else {
-						state.privateChats.push({username: username, messages: [{me: me, message: message,  timestamp: date}]})
+						state.privateChats.push({
+							username: username, 
+							messages: [{
+								me: me, message: message, reply: reply, timestamp: date, chatId: chatId
+							}]
+						})
 					}
 					
 				}
 			}
+
 			pushToLS()
 			pushToStore()
 		},
@@ -341,7 +376,7 @@ const globalPropsSlice = createSlice({
 			}
 		},
 		retrieveOTM: (state, action) => {
-			state.oneTimeMessage = action.payload
+			state.oneTimeMessage = {...state.oneTimeMessage, ...action.payload}
 		},
 		hideCount: (state, action) => {
 			state.showCount = false
@@ -421,7 +456,6 @@ const globalPropsSlice = createSlice({
 		.addCase(fetchInitialData.fulfilled, (state, action) => {
 			const { users, settings, props, recentChats, unread} = action.payload
 			state.preload.recentChats = false
-			
 
 			state.activeUsers = users.sort((a, b) => {
 				if (a.username.toLowerCase() < b.username.toLowerCase()) return -1
@@ -474,8 +508,8 @@ const globalPropsSlice = createSlice({
 	}
 })
 
-export const { setLoginAlert, setComponents, handleSearch,
- storeProfileInfos, updateUnreadReset, updateChatStatus,
+export const { setLoginAlert, setComponents, handleSearch, handleReply,
+ storeProfileInfos, updateUnreadReset, updateChatStatus, setHighlightedId,
 	afterLogin, addNewUser,	setSelectedUser, afterRegistration, setStatus, hideCount,
 	storePrivateChats, retrieveOTM, userDisconnect, storeSocketId, setBio, changeSettings
 } = globalPropsSlice.actions

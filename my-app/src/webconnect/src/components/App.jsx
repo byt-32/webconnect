@@ -22,11 +22,7 @@ const App = () => {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
 	const showLoginPage = useSelector(state => state.globalProps.showLoginPage)
-	
-	document.querySelector('#root').style.height = `${window.innerHeight}px`
-	window.onresize = () => {
-		document.querySelector('#root').style.height = `${window.innerHeight}px`
-	}
+
 	React.useEffect(() => {
 		if (JSON.parse(localStorage.getItem('details'))) {
 			const token = JSON.parse(localStorage.getItem('details')).id
@@ -34,6 +30,13 @@ const App = () => {
 			navigate('/signup')
 		}
 	}, [])
+	const [height, setHeight] = React.useState(`${window.innerHeight}px`)
+	const root = document.querySelector('#root')
+	root.style.height = height
+
+	window.addEventListener('resize', () => {
+		setHeight(`${window.innerHeight}px`)
+	})
 
 	return (
 		<ThemeProvider theme={theme}>
