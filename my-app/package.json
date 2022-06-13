@@ -5,7 +5,7 @@
   "proxy": "http://localhost:3001",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --mode development --open --hot --port 3000",
+    "start": "webpack-dev-server --mode development --open --hot --port 3100",
     "build": "webpack --mode production"
   },
   "keywords": [],

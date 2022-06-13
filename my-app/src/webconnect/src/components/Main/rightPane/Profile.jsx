@@ -17,8 +17,11 @@ import Loader from './Loader'
 
 const useStyles = makeStyles({
 	app: {
-		background: '#fff',
+		background: '#fffffff7',
+		backdropFilter: 'blur(4px)',
 		boxShadow: 'none',
+		position: 'sticky',
+		top: 0,
 		borderBottom: '1px solid #d1d1d1',
 		fontSize: '90%',
 		padding: '11px 0'
@@ -88,6 +91,7 @@ const useStyles = makeStyles({
 
 const Profile = () => {
 	const dispatch = useDispatch()
+	const showThis = useSelector(state => state.globalProps.components.profile)
 	const id = useSelector(state => state.globalProps.user.contacts.id)
 	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
 	const profileInfos = useSelector(state => state.globalProps.profileInfos)
@@ -122,9 +126,12 @@ const Profile = () => {
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
 	}
-	const [height, setHeight] = React.useState(`${window.innerHeight - 30}px`)
+	const [height, setHeight] = React.useState(`${window.innerHeight - 40}px`)
   window.onresize = () => {
-  	setHeight(`${window.innerHeight - 30}px`)
+  	setHeight(`${window.innerHeight - 40}px`)
+  }
+  const handleCall = () => {
+
   }
 	return (
 		<section className={[styles.component, styles.profilePage, styles.animate__animated, styles.animate__fadeInRight].join(' ')}>
@@ -136,7 +143,7 @@ const Profile = () => {
 						</IconButton>
 					</div>
 					<div className={classes.headerItem}>
-						{/*<IconButton>
+						{/*<IconButton onClick={handleCall} >
 							<CallIcon />
 						</IconButton>
 						<IconButton>

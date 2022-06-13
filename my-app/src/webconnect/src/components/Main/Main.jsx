@@ -6,13 +6,15 @@ import RightPane from './rightPane/RightPane'
 import Profile from './rightPane/Profile'
 import styles from '../../stylesheet/main.module.css'
 import { storeSocketId, setStatus, handleReply,
+	fetchMessages, 
 	addNewUser, storePrivateChats, updateChatStatus,
 	userDisconnect, fetchInitialData } from '../../Redux/globalPropsSlice'
 import { io } from 'socket.io-client'
 import addNotification from 'react-push-notification';
 import { Route, Routes } from 'react-router-dom'
+import * as SW from './sw.js'
 const socket = io('/', {autoConnect: false})
-
+console.log(SW)
 let audio;
 if (!document.querySelector('audio')) {
 	audio = document.createElement('audio')
@@ -20,9 +22,38 @@ if (!document.querySelector('audio')) {
 	document.querySelector('body').appendChild(audio)
 }
 
-if (Notification.permission !== 'granted') {
-	Notification.requestPermission()
-}
+// if (Notification.permission !== 'granted') {
+// 	Notification.requestPermission()
+// }
+
+// const publicKey = 'BJaEYfMe3Ei35iNTxUtTFK09kzCfvgWxdRsVj-Fg9qUpFH18XAAtVyjot-znZIz2TikBBl1KIW6ZXbShn200Ruw';
+
+// if ('serviceWorker' in navigator) {
+// 	send().catch(err => console.log(err))
+// }
+
+// async function send() {
+// 	console.log('Registring SW')
+// 	const register = await navigator.serviceWorker.register(SW, {
+// 		scope: '/'
+// 	})
+// 	console.log('registered SW')
+
+// 	console.log('Registering push')
+
+// 	const sub = await register.pushManager.subscribe({
+// 		userVisibleOnly: true,
+// 		applicationServerKey: publicKey
+// 	})
+// 	await fetch('/subscribe', {
+// 		method: 'POST',
+// 		headers: {
+// 			'Content-Type': 'application/json'
+// 		},
+// 		body: JSON.stringify(sub),
+// 	})
+// 	console.log('push sent')
+// }
 
 const Main = () => {
 	const dispatch = useDispatch()
@@ -34,6 +65,7 @@ const Main = () => {
 	const chatUpdate = useSelector(state => state.globalProps.chatUpdate)
 	const recentChats = useSelector(state => state.globalProps.recentChats)
 	const reply = useSelector(state => state.globalProps.reply)
+	const userInChats = useSelector(state => state.globalProps.privateChats.findIndex(chat => chat.username === selectedUser.username))
 
 	const notify = useSelector(state => state.globalProps.user.settings.notifications)
 
@@ -45,6 +77,13 @@ const Main = () => {
 		dispatch(fetchInitialData(contacts.id))
 	}, [])
 
+	React.useEffect(() => {
+		if (Object.keys(selectedUser).length > 0) {
+			if (userInChats === -1) {
+				dispatch(fetchMessages({friendsName: selectedUser.username, token: contacts.id}))
+			}
+		}
+	}, [selectedUser])
 
 	React.useEffect(() => {
 		if (contacts.username !== '') {
@@ -118,17 +157,22 @@ const Main = () => {
 	socket.off('sentFromSocket').on('sentFromSocket', (username, message, chatId, reply) => {
 		if (!components.rightPane) {
 			if(notify) {
-				addNotification({
-          title: '1 new message',
-          theme: 'darkblue',
-          native: true // when using native, your OS will handle theming.
-        });
+				// navigator.serviceWorker.getRegistration().then(function(reg) {
+		  //     reg.showNotification('Hello world!');
+		  //   })
 			}
 			audio.play()
 		}
-		dispatch(storePrivateChats({
-			username: username, message: message, me: false, chatId: chatId, reply: reply
-		}))
+		if (userInChats === -1) {
+			dispatch(storePrivateChats({
+				username: username, message: message, me: false, chatId: chatId, reply: reply
+			}))
+			dispatch(fetchMessages({friendsName: username, token: contacts.id}))
+		} else {
+			dispatch(storePrivateChats({
+				username: username, message: message, me: false, chatId: chatId, reply: reply
+			}))
+		}
 		
 		if (Object.keys(selectedUser).length === 0) {
 			const find = recentChats.find(user => user.username === username)
@@ -142,14 +186,8 @@ const Main = () => {
 		}
 	})
 
-	const [height, setHeight] = React.useState(`${window.innerHeight}px`)
-  window.onresize = () => {
-  	setHeight(`${window.innerHeight}px`)
-  }
 	return (
-		<section className={styles.main} style={{
-			height: height
-		}} >
+		<section className={styles.main}>
 			{components.leftPane && <LeftPane /> }
 			{components.rightPane && <RightPane /> }
 			{components.profile && <Profile /> }

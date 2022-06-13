@@ -24,9 +24,7 @@ const App = () => {
 	const showLoginPage = useSelector(state => state.globalProps.showLoginPage)
 
 	React.useEffect(() => {
-		if (JSON.parse(localStorage.getItem('details'))) {
-			const token = JSON.parse(localStorage.getItem('details')).id
-		} else {
+		if (!JSON.parse(localStorage.getItem('details'))) {
 			navigate('/signup')
 		}
 	}, [])

@@ -2,7 +2,7 @@ import React from 'react'
 import styles from '../../../stylesheet/main.module.css'
 import IconButton from '@material-ui/core/IconButton'
 import { useSelector, useDispatch } from 'react-redux'
-import { setSelectedUser, fetchMessages, updateUnreadReset,
+import { setSelectedUser, updateUnreadReset,
 	setComponents, handleSearch, handleReply } from '../../../Redux/globalPropsSlice'
 
 import Typography from '@material-ui/core/Typography';
@@ -31,9 +31,6 @@ const useStyles = makeStyles({
 			top: '58px !important'
 		}
 	},
-	appBody: {
-		overflow: 'scroll'
-	},
 	unread: {
 		color: '#fff',
 		position: 'absolute',
@@ -55,8 +52,6 @@ const User = ({user, color}) => {
 	const token = useSelector(state => state.globalProps.user.contacts.id)
 
 	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
-	const userInChats = useSelector(state => state.globalProps.privateChats.findIndex(chat => chat.username === user.username))
-	
 	const setSelected = args => {
 		if (selectedUser.username !== args.username) {
 			if (user.unread !== 0) {
@@ -69,9 +64,6 @@ const User = ({user, color}) => {
 			dispatch(setSelectedUser(args))
 			dispatch(setComponents({component: 'rightPane', value: true}))
 
-			if (userInChats === -1) {
-				dispatch(fetchMessages({friendsName: args.username, token: token}))
-			}
 		}
 	}
 
@@ -121,10 +113,7 @@ const RecentChats = () => {
 		dispatch(handleSearch({input: searchVal, component: 'recentChats'}))
 	}
 	const classes = useStyles()
-	 const [height, setHeight] = React.useState(`${window.innerHeight - 30}px`)
-  window.onresize = () => {
-  	setHeight(`${window.innerHeight - 30}px`)
-  }
+	
 	return (
 		<section className={[styles.component, styles.recentChats, styles.animate__animated, styles.animate__fadeIn].join(' ')} >
 			
@@ -143,9 +132,7 @@ const RecentChats = () => {
 			  </div>
 			</div>
 			{ preload ? <GradientLoader /> :
-			<div className={styles.appBody} style={{
-				height: height,
-			}}>
+			<div className={styles.appBody} >
 				<div className={styles.menuBlock} >
 					<Menu open={open}
 						anchorEl={anchorEl}

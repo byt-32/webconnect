@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -9,7 +10,7 @@ const htmlPlugin = new HtmlWebpackPlugin({
 module.exports = {
   entry: "./src/webconnect/src",
   output: {
-    path: path.resolve(__dirname, "dist"),
+    path: path.resolve(__dirname, "../../webconnect_build/dist"),
     filename: "bundle.js",
   },
   "devServer": {
@@ -18,8 +19,8 @@ module.exports = {
     "open": true,
     "proxy": {
       "/": {
-        "target": "http://localhost:3000",
-        "router":  () => "http://localhost:3001"
+        "target": "http://localhost:3100",
+        "router":  () => "http://127.0.0.1:3001"
       }
     }
   },

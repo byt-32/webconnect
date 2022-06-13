@@ -129,6 +129,7 @@ const useStyles = makeStyles({
 
 const ContactInfo = () => {
 	const classes = useStyles()
+	const showThis = useSelector(state => state.globalProps.components.stack[4].contactInfo)
 	const user = useSelector(state => state.globalProps.user.contacts)
 	const gmailPrivacy = useSelector(state => state.globalProps.user.settings.privacy.gmail)
 	const dispatch = useDispatch()

@@ -158,7 +158,7 @@ const ResetPassword = () => {
   	setHeight(`${window.innerHeight - 30}px`)
   }
 	return (
-		<div className={[styles.component, styles.reset, styles.animate__animated, styles.animate__fadeInRight].join(' ')}>
+		<div className={[styles.component, styles.reset, styles.animate__animated, styles.animate__fadeInLeft].join(' ')}>
 			<AppBar position="static" className={classes.app} >
 			  <Toolbar className={classes.toolbar} >
 			  	<div className={classes.headerItem} >

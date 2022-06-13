@@ -20,14 +20,7 @@ const LeftPane = () => {
 			 <ActiveUsers />
 			}
 			{components[1].recentChats &&
-				<CSSTransition 
-					in={components[1].recentChats}
-					timeout={300}
-					unmountOnExit
-					classNames='alert'
-				>
 					<RecentChats />
-				</CSSTransition>
 			}
 			{components[2].settings && <Settings />}
 			{components[3].resetPassword && <ResetPassword />}

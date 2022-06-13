@@ -45,7 +45,7 @@ const Privacy = () => {
 		dispatch(setComponents(obj))
 	}
 	return (
-		<section className={[styles.privacy, styles.animate__animated, styles.animate__fadeInRight].join(' ')}>
+		<section className={[styles.privacy, styles.animate__animated, styles.animate__fadeInLeft].join(' ')}>
 			<AppBar position="static" className={classes.app} >
 			  <Toolbar className={classes.toolbar} >
 			  	<div className={classes.headerItem} >

@@ -474,9 +474,10 @@ const globalPropsSlice = createSlice({
 
 			state.preload.activeUsers = false
 			if (settings) state.user.settings = settings
-			if (props.bio) state.user.bio = props.bio
-			state.user.color = props.color
-
+			if (props !== undefined && props) {
+				if (props.bio) state.user.bio = props.bio
+				state.user.color = props.color
+			}
 			if (recentChats.chats) {
 				let _recentChats = [...recentChats.chats]
 

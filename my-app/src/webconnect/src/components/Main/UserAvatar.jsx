@@ -38,7 +38,7 @@ const UserAvatar = (props) => {
 				overlap='circular'
 				anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
 			>
-				<Avatar className={classes.avatar}
+				<Avatar className={[classes.avatar, props.className].join(' ')}
 					style={{background: props.color}}
 				 > 
 				 	{val} 

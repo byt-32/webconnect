@@ -5,12 +5,43 @@ const express = require('express'),
 	http = require('http'),
 	cors = require('cors'), 
 	host = '0.0.0.0',
+	webpush = require('web-push'),
+	multer = require('multer'),
+	uuid = require('uuid').v4,
+	AWS = require('aws-sdk'),
+	fs = require('fs'),
+	path = require('path'),
 	port = process.env.PORT || 3001;
+
 require('dotenv').config()
 
-let app = express()
+// const webpushPrivateKey = process.env.WEB_PUSH_PRIVATE_KEY
+// const webpushPublicKey = process.env.WEB_PUSH_PUBLIC_KEY
 
-const uri = process.env.URI
+// webpush.setVapidDetails('mailto:test@test.com', webpushPublicKey, webpushPrivateKey)
+
+// const s3 = new AWS.S3({
+// 	endpoint: 'https://s3.filebase.com', 
+// 	accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+// 	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,  
+// 	s3ForcePathStyle: true,
+// 	signatureVersion: 'v4',
+// })
+
+let app = express()
+app.use(express.json())
+app.use(express.static('webconnect_build/dist/'))
+app.use(cors())
+const server = http.createServer(app)
+
+// let server = https.createServer({
+// 	key: fs.readFileSync(path.join(__dirname, 'cert', 'key.pem')),
+// 	cert: fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem')),
+// }, app)
+
+const io = socketIO(server)
+
+const uri = process.env.LOCALURI
 
 const dbUrl = uri
 let db = mongoose.connection
@@ -72,9 +103,6 @@ const Chat = mongoose.model('chat', chatSchema)
 const UserPref = mongoose.model('userPref', userPrefSchema)
 const UnreadCount = mongoose.model('unreadCount', unreadCountSchema)
 
-let server = http.createServer(app)
-let io = socketIO(server)
-
 var connected = []
 io.use(async(socket, next) => {
 	const {username, sessionId} = socket.handshake.auth
@@ -103,7 +131,7 @@ function retrieveDate(date) {
 
 	return {year: year, day: day, fullDate: fullDate}
 }
-async function saveChats(token1, name, token2, recepientName, me, message, time) {
+async function saveChats(token1, name, token2, recepientName, me, message, time, chatId, reply) {
 	const _date = new Date()
 
 	const date =
@@ -119,7 +147,9 @@ async function saveChats(token1, name, token2, recepientName, me, message, time)
 				chats: [{
 					id: token2, username: recepientName,
 					lastSent: Date.now(),
-					messages: [{me: me, message: message, timestamp: date}]
+					messages: [{
+						me: me, message: message, timestamp: date, chatId: chatId, reply: reply
+					}]
 				}]
 			})
 		} else {
@@ -127,11 +157,16 @@ async function saveChats(token1, name, token2, recepientName, me, message, time)
 			let idx = await findChat.chats.findIndex(chat => chat.id === token2)
 			if (idx !== -1) {
 				findChat.chats[idx].lastSent = Date.now()
-				findChat.chats[idx].messages.push({me: me, message: message, timestamp: date})
+				findChat.chats[idx].messages.push({
+					me: me, message: message, timestamp: date, chatId: chatId, reply: reply
+				})
 				await Chat.findByIdAndUpdate(token1, {chats: findChat.chats})
 			} else {
 				findChat.chats.push({
-					id: token2, username: recepientName, lastSent: Date.now(), messages: [{me: true, message: message, timestamp: date}]
+					id: token2, username: recepientName, lastSent: Date.now(), 
+					messages: [{
+						me: me, message: message, timestamp: date, chatId: chatId, reply: reply
+					}]
 				})
 				await Chat.findByIdAndUpdate(token1, {chats: findChat.chats})
 			}
@@ -157,26 +192,25 @@ io.on('connection', socket => {
 		socket.broadcast.emit('user disconnect', socket.username, socket.id)
 	})
 	socket.on('updateChatStatus', (socketId, username, callerUsername, unreadLen) => {
-		console.log(unreadLen)
 		if (socketId !== null) {
 			io.to(socketId).emit('chatIsSeen', callerUsername, unreadLen)
 		}
 	})
-	socket.on('sendMessage', async (reciepientName, sendersToken, sendersName, message, time) => {
+	socket.on('sendMessage', async (reciepientName, sendersToken, sendersName, message, chatId, reply, time) => {
 		const reciepient = connected.find(user => user.username === reciepientName);
 		if (reciepient !== undefined) {//receiver is online
-			io.to(reciepient.socketId).emit('sentFromSocket', socket.username, message)
+			io.to(reciepient.socketId).emit('sentFromSocket', socket.username, message, chatId, reply)
 		} else {//reciever is offline
 			let offlineUser = await User.findOne({username: reciepientName}, {_id: 1})
 			saveUnread(offlineUser.id, sendersToken, reciepientName, sendersName)
-
 		}
 		const user = await User.findOne({username: reciepientName}, { _id: 1, username: 1})
-		saveChats(user.id, user.username, sendersToken, socket.username, false, message, time)
-		saveChats(sendersToken, sendersName, user.id, reciepientName, true, message, time)
+		saveChats(user.id, user.username, sendersToken, socket.username, false, message, time, chatId, reply)
+		saveChats(sendersToken, sendersName, user.id, reciepientName, true, message, time, chatId, reply)
 		
 	})
 })
+
 async function saveUnread(RecieverId, SenderId, RecieverName, SenderName) {
 	let unread = await UnreadCount.findOne({_id: RecieverId}, {_id: 0, users: 1})
 			
@@ -206,9 +240,20 @@ async function saveUnread(RecieverId, SenderId, RecieverName, SenderName) {
 		})
 	}
 }
-app.use(express.json())
-app.use(express.static('webconnect_build/dist/'))
-app.use(cors())
+
+// const upload = multer({
+// 	storage: {
+// 		s3: s3,
+// 		bucket: 'profile-pics',
+// 		metadata: (req, file, cb) => {
+// 			cb(null, {fileName: file.fileName})
+// 		}
+// 	}
+// })
+
+// app.put('/uploadProfilePhoto/:token', upload.single('file'), (request, response) => {
+// 	console.log(request.body)
+// })
 
 app.get('/fetchInitialData/:requesterId', async (request, response) => {
 	const { requesterId } = request.params
@@ -254,6 +299,7 @@ app.get('/resetUnread/:requesterId/:friendsName', async (request, response) => {
 	const {requesterId, friendsName} = request.params
 	const unread = await UnreadCount.findOne({
 		_id: requesterId}, {_id: 0})
+
 	if (unread !== null) {
 		const find = unread.users.findIndex(user => user.username === friendsName)
 		if (find !== -1) {
@@ -262,11 +308,18 @@ app.get('/resetUnread/:requesterId/:friendsName', async (request, response) => {
 			response.send({status: true})
 		}
 	}
+
 })
 app.get('/saveUnread/:requesterId/:requesterName/:friendsName/:unread', async (request, response) => {
 	const { friendsName, requesterName, requesterId, unread } = request.params
-	const friend = await User.findOne({username: friendsName}, {_id: 1})
-	saveUnread(requesterId, friend.id, requesterName, friendsName)
+	try {
+		const friend = await User.findOne({username: friendsName}, {_id: 1})
+		if (await friend !== null) {
+			saveUnread(requesterId, friend.id, requesterName, friendsName)
+		} 
+	} catch (err) {
+		
+	}
 })
 
 app.get('/chats/:friendsName/:requesterId', async (request, response) => {

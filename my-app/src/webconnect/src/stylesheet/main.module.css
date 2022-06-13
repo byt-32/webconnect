@@ -36,9 +36,6 @@ body {
 *::-webkit-scrollbar-track {
 	/*background: #d5d5d5;*/
 }
-.loaderUser {
-	width: 100%;
-}
 
 @-webkit-keyframes slideGradient {
 	0% {
@@ -49,25 +46,6 @@ body {
 		left: 100%;
 	}
 }
-.loaderUser > div {
-	position: relative;
-	margin: 10px 0;
-	height: 53px;
-	background: linear-gradient(268deg, transparent, #f7f7f740,transparent);
-}
-.loaderUser > div > div {
-  width: 20%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  background: linear-gradient(90deg, #ededed0f, #93939308, #ededed0d, #fff6f600);
-
-  animation-name: slideGradient;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-out;
-}
-
 
 @-webkit-keyframes fadeIn {
     0% {
@@ -224,6 +202,25 @@ body {
 }
 
 
+.loaderUser > div {
+	position: relative;
+	margin: 10px 0;
+	height: 53px;
+	background: linear-gradient(268deg, transparent, #f7f7f740,transparent);
+}
+.loaderUser > div > div {
+  width: 20%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  background: linear-gradient(90deg, #ededed0f, #93939308, #ededed0d, #fff6f600);
+
+  animation-name: slideGradient;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-out;
+}
+
 * {
 	margin: 0;
 	padding: 0;
@@ -231,6 +228,7 @@ body {
 	box-sizing: border-box;
 	font-family: Montserrat !important; 
 	letter-spacing: .2px;
+	user-select: none;
 }
 button, label {
 	cursor: pointer;
@@ -439,6 +437,8 @@ h1, h2, h3, h4, h5, h6 {
 .component {
 	display: flex;
 	flex-direction: column;
+	overflow: scroll;
+	height: 100%;
 }
 .main .panes  {
 	height: 100%;
@@ -475,7 +475,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .appBody {
-	overflow: scroll;
 	padding-bottom: 15px;
 }
 .settingsComp {
@@ -653,12 +652,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .app {
-	background: #fff;
+	background: #ffffffe0;
+	backdrop-filter: blur(4px);
 	box-shadow: none;
 	border-bottom: 1px solid #d1d1d1;
 	font-size: 90%;
 	padding: 5px 10px 0px 5px;
-	position: relative;
+	position: sticky;
+	top: 0;
+	z-index: 10;
 }
 .toolbar {
 	display: flex;
@@ -760,15 +762,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 .profilePage {
 	width: 40%;
+	height: 100%;
 	max-width: 50%;
 	background: #fff;
 	display: flex;
-	overflow: hidden;
+	overflow: scroll;
 	resize: horizontal;
 	flex-direction: column;
 }
 .profile {
 	display: flex;
+	overflow: initial;
   padding-top: 30px;
   flex-direction: column;
   align-items: center;
@@ -816,7 +820,7 @@ h1, h2, h3, h4, h5, h6 {
 .chatSingle {
 	max-width: 90%;
 	border-radius: 10px;
-	margin: 8.5px 0;
+	margin: 3.5px 0;
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -858,14 +862,17 @@ h1, h2, h3, h4, h5, h6 {
 	display: flex;
 	background: #fff;
 	border-radius: 5px;
-	z-index: 10;
-	top: -40px;
+	top: -47px;
+	z-index: 30;
 }
-.chatAction button.MuiIconButton-root {
+.chatAction button {
 	display: flex;
 	align-items: center;
-	padding: 10px;
+	padding: 10px !important;
 	cursor: pointer;
+}
+.chatAction button:first-child {
+	margin-right: 10px;
 }
 .chatAction .MuiIconButton-root:hover {
 

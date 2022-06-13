@@ -123,17 +123,14 @@ const MessagesPane = () => {
 				{fetchErr && <Alert className={classes.error} severity="warning"> You are currently offline </Alert>}
 				<ChatMessages />
 			</div>
-			{reply.open ? (
-				<Fade in={reply.open}>
-					<div className={styles.reply}>
-						<span className={styles.person}> {reply.person === user.contacts.username ? 'You' : reply.person} </span>
-						<span className={styles.replyTo} 
-							dangerouslySetInnerHTML={{__html: reply.to.replaceAll('\n', '<br/>')}} />
-						<span className={styles.closeReply} onClick={closeReply} > <CloseIcon style={{fontSize: '20px'}} /> </span>
-					</div>
-				</Fade> )
-				: null 
-			}
+			{reply.open ? <Fade in={reply.open}>
+				<div className={styles.reply}>
+					<span className={styles.person}> {reply.person === user.contacts.username ? 'You' : reply.person} </span>
+					<span className={styles.replyTo} 
+						dangerouslySetInnerHTML={{__html: reply.to.replaceAll('\n', '<br/>')}} />
+					<span className={styles.closeReply} onClick={closeReply} > <CloseIcon style={{fontSize: '20px'}} /> </span>
+				</div>
+			</Fade> : null }
 			<div className={styles.messageInput} >
 				<div style={{width: '10%'}}>
 					<IconButton onClick={openFilePicker} >

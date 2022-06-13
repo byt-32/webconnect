@@ -2,7 +2,6 @@ import React from 'react'
 import styles from '../../../stylesheet/main.module.css'
 import { useSelector, useDispatch } from 'react-redux'
 import { setSelectedUser, 
-	fetchMessages, 
 	setComponents, 
 	handleSearch,
 	handleReply, 
@@ -38,9 +37,6 @@ const useStyles = makeStyles({
 	arrow: {
 		textAlign: 'right',
 		cursor: 'pointer'
-	},
-	appBody: {
-		overflow: 'scroll'
 	}
 })
 
@@ -49,23 +45,15 @@ const User = ({user}) => {
 	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
 	const userInRecent = useSelector(state => state.globalProps.recentChats.find(_user => _user.username === user.username))
 	const token = useSelector(state => state.globalProps.user.contacts.id)
-			// userInRecent !== undefined && console.log(userInRecent)
-	const userInChats = useSelector(state => state.globalProps.privateChats.findIndex(chat => chat.username === user.username))
 	const setSelected = args => {
 		if (selectedUser.username !== args.username) {
-
 			if (userInRecent !== undefined) {
 				if (userInRecent.unread !== 0) {
 					fetch(`/resetUnread/${token}/${user.username}`)
 				}
 			}
-
 			dispatch(setSelectedUser(args))
 			dispatch(setComponents({component: 'rightPane', value: true}))
-			
-			if (userInChats === -1) {
-				dispatch(fetchMessages({friendsName: args.username, token: token}))
-			}
 		}
 	}
 	return (
@@ -111,12 +99,7 @@ const ActiveUsers = () => {
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
 	}
-	 const [height, setHeight] = React.useState(`${window.innerHeight - 30}px`)
-  window.onresize = () => {
-  	setHeight(`${window.innerHeight - 30}px`)
-  }
 	return (
-		<>
 		<section className={[styles.component, styles.animate__animated, styles.animate__fadeInLeft].join(' ')} >
 			<div position="static" className={styles.app} >
 			  <div className={styles.toolbar} >
@@ -133,9 +116,7 @@ const ActiveUsers = () => {
 			    </div>
 			  </div>
 			</div>
-			<section className={[styles.activeUsers, styles.appBody, classes.appBody].join(' ')} style={{
-				height: height
-			}} >
+			<section className={[styles.activeUsers, styles.appBody, classes.appBody].join(' ')}>
 				{noMatch && <div className={styles.noMatch} >
 					<Typography color='error' component='span'>Search query did not match any entry</Typography> <br/>
 					<Typography color='textPrimary' component='span'> Try another search </Typography>
@@ -154,8 +135,6 @@ const ActiveUsers = () => {
 				</List>
 			</section>
 		</section>
-		
-		</>
 	)
 }
 export default ActiveUsers

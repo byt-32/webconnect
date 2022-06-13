@@ -49,7 +49,7 @@ const ChatSingle = ({chatAndAttr}) => {
   	}))
   }
   const handleCopy = () => {
-  	
+    navigator.clipboard.writeText(chatAndAttr.message)
   }
   const highlightReply = () => {
   	if (chatAndAttr.chatId !== undefined) {
@@ -62,7 +62,7 @@ const ChatSingle = ({chatAndAttr}) => {
   	if (highlightedReply !== '') {
   		if (highlightedReply === chatAndAttr.chatId) {
   			selectedChat.current.scrollIntoView()
-  			setTimeout(() => setHighlight(true), 1000)
+  			setTimeout(() => setHighlight(true), 500)
   			
   			// document.querySelectorAll('.Wzm2GKa4C2sh_8jVswOw')[0].scrollTop = selectedChat.current.getBoundingClientRect().top -100
   			setTimeout(() => setHighlight(false), 3000)
@@ -76,16 +76,14 @@ const ChatSingle = ({chatAndAttr}) => {
 		  	styles.chatSingle, styles.animate__animated,
 		  	chatAndAttr.me ? styles.rightChat : styles.leftChat, highlight && styles.animate__headShake
 		  ].join(' ')} ref={selectedChat}>
-		  	{open ? (
-					<Fade in={open}>
-						<div className={styles.chatAction}>
-							<IconButton onClick={() => setReply()}> <ReplyIcon /> </IconButton>
-							<IconButton onClick={handleCopy}> <FileCopyOutlinedIcon /> </IconButton>
-						</div>
-					</Fade>
-				) : null}
+				{open ? <Fade in={open}>
+					<div className={styles.chatAction}>
+						<IconButton onClick={() => setReply()}> <ReplyIcon /> </IconButton>
+						<IconButton onClick={handleCopy}> <FileCopyOutlinedIcon /> </IconButton>
+					</div>
+				</Fade> : null }
 
-				 {
+				 {chatAndAttr.reply !== undefined &&
 					chatAndAttr.reply.open ? (
 						<div className={styles.chatReply}>
 							<div className={styles.replySingle} onClick={highlightReply} >
@@ -101,34 +99,26 @@ const ChatSingle = ({chatAndAttr}) => {
 					 		dangerouslySetInnerHTML={{__html: replace(chatAndAttr.message)}} />
 					 	)
 				 }
-		    {open ? (
-		    	<Fade in={open}>
-			      <span className={[styles.messageTime, styles.dropdown].join(' ')}>
-							{chatAndAttr.timestamp.time}
-						</span>
-					</Fade>
-		    ) : null}
+	    	{open ? <Fade in={open}>
+		      <span className={[styles.messageTime, styles.dropdown].join(' ')}>
+						{chatAndAttr.timestamp.time}
+					</span>
+				</Fade> : null }
 		  </div>
 		</ClickAwayListener>
 	)
 }
 
 const ChatsByDate = ({chat}) => {
-	const [dateNotice, setDateNotice] = React.useState(false)
-	document.querySelectorAll('.Wzm2GKa4C2sh_8jVswOw')[0].addEventListener('scroll', () => {
-		setDateNotice(true)
-	})
+	// const [dateNotice, setDateNotice] = React.useState(false)
+	// document.querySelectorAll('.Wzm2GKa4C2sh_8jVswOw')[0].addEventListener('scroll', () => {
+	// 	setDateNotice(true)
+	// })
 	return (
 		<div className={[styles.chatCollection].join(' ')}>
-			{
-				dateNotice ? (
-					<Fade in={dateNotice}>
-						<header className={styles.dateNotice} >
-							<div>{chat.day === day ? 'Today' : chat.day}</div>
-						</header>
-					</Fade>
-				) : null
-			}
+			<header className={styles.dateNotice} >
+				<div>{chat.day === day ? 'Today' : chat.day}</div>
+			</header>
 				
 			<div className={styles.indexedChats}>
 				{

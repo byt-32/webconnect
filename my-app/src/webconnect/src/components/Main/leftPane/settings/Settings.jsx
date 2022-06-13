@@ -37,7 +37,10 @@ import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles({
 	app: {
-		background: '#fff',
+		background: '#fffffff7',
+		position: 'sticky',
+		backdropFilter: 'blur(4px)',
+		top: 0,
 		boxShadow: 'none',
 		borderBottom: '1px solid #d1d1d1',
 		fontSize: '90%',
@@ -96,9 +99,6 @@ const useStyles = makeStyles({
 		margin: '0 10px',
 		cursor: 'pointer',
 		borderRadius: 0
-	},
-	appBody: {
-		overflow: 'scroll'
 	}
 })
 const Profile = () => {	
@@ -276,6 +276,7 @@ const Settings = () => {
   	dispatch(setComponents(obj))
   }
 	const user = useSelector(state => state.globalProps.user.contacts)
+	const showThis = useSelector(state => state.globalProps.components.stack[2].settings)
 
 	const [feedback, assignFeedbackInput] = React.useState('')
 	const setFeedback = (e) => {
