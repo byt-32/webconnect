@@ -201,26 +201,6 @@ body {
     animation-name: fadeIn
 }
 
-
-.loaderUser > div {
-	position: relative;
-	margin: 10px 0;
-	height: 53px;
-	background: linear-gradient(268deg, transparent, #f7f7f740,transparent);
-}
-.loaderUser > div > div {
-  width: 20%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  background: linear-gradient(90deg, #ededed0f, #93939308, #ededed0d, #fff6f600);
-
-  animation-name: slideGradient;
-  animation-duration: 2s;
-  animation-iteration-count: infinite;
-  animation-timing-function: ease-out;
-}
-
 * {
 	margin: 0;
 	padding: 0;

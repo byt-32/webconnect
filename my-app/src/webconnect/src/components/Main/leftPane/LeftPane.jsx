@@ -1,6 +1,5 @@
 import React from 'react'
 import styles from '../../../stylesheet/main.module.css'
-import '../../../stylesheet/styles.css'
 import ActiveUsers from './ActiveUsers'
 import RecentChats from './RecentChats'
 import Settings from './settings/Settings'

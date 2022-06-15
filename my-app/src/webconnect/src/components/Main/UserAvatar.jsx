@@ -4,6 +4,19 @@ import Badge from '@material-ui/core/Badge'
 import styles from '../../stylesheet/main.module.css'
 import { makeStyles } from '@material-ui/core/styles';
 
+const colors = [
+'#64ed94',
+ '#6495ed', 
+ '#cb64ed',
+  '#7364ed',
+  '#64a1ed',
+  '#64c7ed',
+  '#edb664',
+  '#eda364',
+  '#ed7d64',
+  '#ed6471'
+]
+
 const UserAvatar = (props) => {
 	const {name} = props
 	let val = '', split = name.split(' ')
@@ -30,6 +43,7 @@ const UserAvatar = (props) => {
 		}
 	})
 	const classes = useStyles()
+	const bg = colors[name.length -1] || '#ed6471'
 	return (
 		props.badge === 'true' ?
 			<Badge 
@@ -39,7 +53,7 @@ const UserAvatar = (props) => {
 				anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
 			>
 				<Avatar className={[classes.avatar, props.className].join(' ')}
-					style={{background: props.color}}
+					style={{background: bg}}
 				 > 
 				 	{val} 
 				</Avatar>
@@ -47,7 +61,7 @@ const UserAvatar = (props) => {
 
 		: <	Avatar 
 				className={[props.className, classes.avatar].join(' ')} 
-				style={{background: props.color}}
+				style={{background: bg}}
 				> 
 					{val} 
 			</Avatar>
