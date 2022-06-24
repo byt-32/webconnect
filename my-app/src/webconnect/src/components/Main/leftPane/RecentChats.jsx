@@ -62,8 +62,6 @@ const User = ({user, color}) => {
 				})
 			}
 			dispatch(setSelectedUser(args))
-			dispatch(setComponents({component: 'rightPane', value: true}))
-
 		}
 	}
 
@@ -73,13 +71,14 @@ const User = ({user, color}) => {
 			selected={user.username === selectedUser.username}
   		onClick={() =>{
   		 setSelected(user)
+
   		}}>
-    		<ListItemIcon>
+    		<ListItemIcon style={{marginRight: 10}}>
 		      <UserAvatar 
 		      	name={user.username} 
 		      	badge={user.status === 'online' ? 'true' : 'false'} 
-		      	color={user.color}
-		      	status={user.status}  
+		      	status={user.status} 
+		      	styles={{width: 50, height: 50}} 
 		      />
 		    </ListItemIcon>
       	<ListItemText primary={user.username} secondary={''} />
@@ -123,7 +122,6 @@ const RecentChats = () => {
 				  	<IconButton onClick={toggleMenu} style={{background: open && 'rgba(0, 0, 0, 0.04)'}} > 
 							<MenuIcon classes={{root: styles.menu}} fontSize='medium' />
 						</IconButton>
-						
 				   </div>
 				   <div className={styles.appSearch} > 
 							<TextField variant='standard' value={searchTerm} onChange={(e) => performSearch(e.target.value)}
@@ -131,7 +129,7 @@ const RecentChats = () => {
 				   </div> 
 			  </div>
 			</div>
-			{ preload ? <GradientLoader /> :
+			{ false ? <GradientLoader /> :
 			<div className={styles.appBody} >
 				<div className={styles.menuBlock} >
 					<Menu open={open}
@@ -150,19 +148,23 @@ const RecentChats = () => {
 			    className={classes.menu}
 					variant='menu' >
 						
-						<MenuItem onClick={() => {
-							handleClose()
-							setComp({component: 'activeUsers', value: true})
-						}} classes={{root: styles.menuItem}} >
+						<MenuItem onClick={
+							() => {
+								handleClose()
+								setComp({component: 'activeUsers'})
+							}
+						}>
 							<GroupIcon fontSize='small' />
 							<Typography variant='body1' component='span' classes={{root: styles.menuText}}>
 								Active users
 							</Typography>
 						</MenuItem>
-						 <MenuItem onClick={() => { 
-						 	handleClose()
-						 	setComp({component: 'settings', value: true})
-						 }} classes={{root: styles.menuItem}} >
+						 <MenuItem onClick={
+						 	() => {
+						 		handleClose()
+						 		setComp({component: 'settings'})
+						 	}
+						 }>
 							<SettingsApplicationsIcon fontSize='small' />
 							<Typography variant='body1' component='span' classes={{root: styles.menuText}}>
 								Settings

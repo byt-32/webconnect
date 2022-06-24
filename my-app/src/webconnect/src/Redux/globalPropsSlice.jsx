@@ -55,7 +55,6 @@ const initialState = {
 	},
 	currentSelectedUser: {},
 	showCount: true,
-	docTitle: 'webconnect',
 	loader: false,
 	chatUpdate: {},
 	preload: {
@@ -64,26 +63,25 @@ const initialState = {
 	},
 	recentChats: [],
 	activeUsers: [],
-	onlineUsers: [],
 	components: {
 		rightPane: false,
 		leftPane: true,
 		profile: false,
-		stack: [
-			{activeUsers: false, loader: false}, 
-			{recentChats: true, loader: false}, 
-			{settings: false, loader: false}, 
-			{resetPassword: false},
-			{contactInfo: false},
-			{privacy: false}
-		]
+		stack: {
+			recentChats: false,
+			activeUsers: true,
+			settings: false,
+			resetPassword: false,
+			contactInfo: false,
+			privacy: false,
+		}
+		
 	},
 	user: {
 		contacts: {...JSON.parse(localStorage.getItem('details'))},
 		socketId: '',
 		status: '',
 		bio: '',
-		color: '',
 		settings: JSON.parse(localStorage.getItem('settings')) || {
 			notifications: true,
 			privacy: {
@@ -97,130 +95,7 @@ const globalPropsSlice = createSlice({
 	name: 'globalProps',
 	initialState,
 	reducers: {
-		storeSocketId: (state, action) => {
-			state.user.socketId = action.payload
-			state.user.status = 'online'
-		},
-		updateUnreadReset: (state, action) => {
-			state.chatUpdate = action.payload
-		},
-		updateChatStatus: (state, action) => {
-			// let {count, username} = action.payload;
-
-			// const find = state.privateChats.find(chat => chat.username === username).messages;
-			// if (find !== undefined) {
-			// 	for (let i = 0; i < find.length; i+=1) {
-			// 		if (i >= (find.length - count)) {
-			// 			find[i].read = true
-			// 		}
-			// 	}
-			// }
-				
-		},
-		addNewUser: (state, action ) => {
-			action.payload.forEach(user => {
-				const userInRecentChats = state.recentChats.findIndex(chat => chat.username === user.username)
-				const userInActiveUsers = state.activeUsers.findIndex(chat => chat.username === user.username)
-				const online = state.onlineUsers.findIndex(i => i.username === user.username)
-
-				if (online !== -1) {
-					state.onlineUsers.splice(online, 1)
-					state.onlineUsers = [...state.onlineUsers, user]
-				} else {
-					state.onlineUsers = [...state.onlineUsers, user]
-				}
-
-				if (userInRecentChats !== -1) {
-					let selected = state.recentChats[userInRecentChats]
-
-					state.recentChats[userInRecentChats] = {...selected, ...user}
-
-				}
-				if (userInActiveUsers !== -1) {
-					let selected = state.activeUsers[userInActiveUsers]
-					state.activeUsers[userInActiveUsers] = {...selected, ...user}
-					const spliced = state.activeUsers.splice(userInActiveUsers,1)[0]
-					state.activeUsers.unshift(spliced)
-				} else {
-					state.activeUsers.unshift(user)
-				}
-				if (user.username === state.currentSelectedUser.username) {
-					let selected = state.currentSelectedUser
-					state.currentSelectedUser = {...selected, ...user}
-				}
-			})
-		},
-		userDisconnect: (state, action) => {
-			const {username, socketId} = action.payload
-			const offlineInRecentChats = state.recentChats.findIndex(chat => chat.username === username)
-			const userInOnline = state.onlineUsers.findIndex(i => i.username === username)
-
-			if (userInOnline !== -1) {
-				state.onlineUsers.splice(userInOnline, 1)
-			}
-
-			offlineInRecentChats !== -1 &&
-			(state.recentChats[offlineInRecentChats].status = 'offline')
-
-			state.activeUsers.forEach(user => {
-				if (user.username === username) {
-					user.status = 'offline'
-				}
-				if (state.currentSelectedUser.socketId === socketId || state.currentSelectedUser.username === username) {
-					state.currentSelectedUser.status = 'offline'
-				}
-			})
-			state.activeUsers = state.activeUsers.sort((a, b) => {
-				if (a.username.toLowerCase() < b.username.toLowerCase()) return -1
-				if (a.username.toLowerCase() > b.username.toLowerCase()) return 1
-			})
-		},
-		setLoginAlert: (state, action) => {
-			const values = action.payload
-			state.showLoginAlert.state = values.state
-			state.showLoginAlert.type = values.type
-		},
-		afterLogin: (state, action) => {
-			const responseFromServer = action.payload
-			const {id, username, email} = responseFromServer
-			localStorage.setItem('details', JSON.stringify({
-				id: id, username: username, email: email
-			}))
-			state.user.contacts = JSON.parse(localStorage.getItem('details'))
-			document.location.pathname = ''
-		},
-		afterRegistration: (state, action) => {
-			const responseFromServer = action.payload
-			const {id, username, email} = responseFromServer
-			localStorage.setItem('details', JSON.stringify({
-				id: id, username: username, email: email
-			}))
-			
-			state.user.contacts = JSON.parse(localStorage.getItem('details'))
-		},
-		setStatus: (state, action) => {
-			state.user.status = action.payload
-		},
-		setBio: (state, action) => {
-			state.user.bio = action.payload
-		},
-		setSelectedUser: (state, action) => {
-			if (state.components.profile) {
-				state.components.profile = false
-			}
-			state.currentSelectedUser = action.payload
-			const recentChatsInSelected = state.recentChats.findIndex(chat => chat.username === action.payload.username)
-			if (recentChatsInSelected !== -1) {
-				state.recentChats[recentChatsInSelected].unread = 0
-			}
-
-		},
-		handleReply: (state, action) => {
-			state.reply = {...state.reply, ...action.payload}
-		},
-		setHighlightedId: (state, action) => {
-			state.highlightedId = action.payload
-		},
+		
 		storePrivateChats: (state, action) => {
 			const {username, message, me, chatId, reply} = action.payload
 			const _date = new Date()
@@ -314,27 +189,24 @@ const globalPropsSlice = createSlice({
 			pushToLS()
 			pushToStore()
 		},
-		storeProfileInfos: (state, action) => {
-			const data = action.payload
-			state.profileInfos = [...state.profileInfos, ...data]
-		},
+		
 		handleSearch: (state, action) => {
 			const {input, component} = action.payload
 			state.searchTerm[`${component}`] = input
 			
-			function updateListProps(updater, updated) {
-				updater.forEach(user => {
-					const userInUpdater = updated.findIndex(recent => recent.username === user.username)
-					if (userInUpdater !== -1) {
-						updated[userInUpdater] = {
-							...updated[userInUpdater],
-							username: user.username,
-							status: user.status,
-							socketId: user.socketId
-						}
-					}
-				})
-			}
+			// function updateListProps(updater, updated) {
+			// 	updater.forEach(user => {
+			// 		const userInUpdater = updated.findIndex(recent => recent.username === user.username)
+			// 		if (userInUpdater !== -1) {
+			// 			updated[userInUpdater] = {
+			// 				...updated[userInUpdater],
+			// 				username: user.username,
+			// 				status: user.status,
+			// 				socketId: user.socketId
+			// 			}
+			// 		}
+			// 	})
+			// }
 			function matchUsername(arr) {
 				let matched = []
 				arr.forEach( (obj, i) => {
@@ -378,12 +250,10 @@ const globalPropsSlice = createSlice({
 		retrieveOTM: (state, action) => {
 			state.oneTimeMessage = {...state.oneTimeMessage, ...action.payload}
 		},
-		hideCount: (state, action) => {
-			state.showCount = false
-		},
 		
 		setComponents: (state, action) => {
 			const {component, value} = action.payload
+			const leftPaneComponents = state.components.stack
 
 			if (component === 'leftPane' 
 				|| component === 'rightPane' 
@@ -391,42 +261,15 @@ const globalPropsSlice = createSlice({
 			{
 				state.components[`${component}`] = value
 			} else {
-				state.components.stack.forEach((obj, i) => {
-					const key = Object.getOwnPropertyNames(obj)[0]
-					if (key === component) {
-						obj[`${key}`] = true
+				for (let val in leftPaneComponents) {
+					if (val === component) {
+						leftPaneComponents[val] = true
 					} else {
-						obj[`${key}`] = false
+						leftPaneComponents[val] = false
 					}
-				})
+				}
 			}
 
-			if (window.innerWidth <= 500) {
-				if (component === 'rightPane') {
-					if (value) state.components.leftPane = false
-					if (!value) {
-						state.components.leftPane = true
-						state.currentSelectedUser = {}
-					}
-				} 
-				if (component === 'profile') {
-					if (value) {
-						state.components.rightPane = false
-					} else {
-						state.components.rightPane = true
-					}
-				}
-			}
-			if (window.innerWidth <= 995 && window.innerWidth > 500) {
-				if (component === 'profile') {
-					if (value) {
-						state.components.leftPane = false
-					} else {
-						state.components.rightPane = true
-						state.components.leftPane = true
-					}
-				}
-			}
 		},
 		
 		changeSettings: (state, action) => {
@@ -452,59 +295,14 @@ const globalPropsSlice = createSlice({
 			state.loader = false
 		})
 		.addCase(fetchInitialData.pending, (state, action) => {
+
 		})
 		.addCase(fetchInitialData.fulfilled, (state, action) => {
-			const { users, settings, props, recentChats, unread} = action.payload
-			state.preload.recentChats = false
+			const { props, recentChats, settings, unread, users } = action.payload
+			state.activeUsers = users
+		})
+		.addCase(fetchInitialData.rejected, (state, action) => {
 
-			state.activeUsers = users.sort((a, b) => {
-				if (a.username.toLowerCase() < b.username.toLowerCase()) return -1
-				if (a.username.toLowerCase() > b.username.toLowerCase()) return 1
-			});
-
-			state.activeUsers.forEach((user, i) => {
-				const findOnline = state.onlineUsers.find(i => i.username === user.username);
-
-				if (findOnline !== undefined) {
-					state.activeUsers[i] = {...user, ...findOnline}
-					let spliced = state.activeUsers.splice(i, 1)[0]
-					state.activeUsers.unshift(spliced)
-				}
-			});
-
-			state.preload.activeUsers = false
-			if (settings) state.user.settings = settings
-			if (props !== undefined && props) {
-				if (props.bio) state.user.bio = props.bio
-				state.user.color = props.color
-			}
-			if (recentChats.chats) {
-				let _recentChats = [...recentChats.chats]
-
-				_recentChats.sort((a, b) => {
-					if (a.lastSent > b.lastSent) return -1
-					if (a.lastSent < b.lastSent) return 1
-				});
-				
-				_recentChats.forEach((user, i) => {
-
-					let userInUnread = unread.find(unread => unread.username === user.username)
-
-					const userInActiveUsers = 
-						state.activeUsers.find(_user => _user.username === user.username)
-					const userInOnline = state.onlineUsers.find(i => i.username === user.username) || {}
-					if (userInActiveUsers !== undefined) {
-						_recentChats[i] = {
-							...user, 
-							...userInOnline,
-							...userInActiveUsers, 
-							unread: userInUnread !== undefined ? userInUnread.count : 0
-						}
-					}
-				});
-
-				state.recentChats = _recentChats
-			} else {state.preload.recentChats = false}
 		})
 	}
 })

@@ -7,24 +7,32 @@ import ResetPassword from './settings/ResetPassword'
 import ContactInfo from './settings/ContactInfo'
 import Privacy from './settings/Privacy'
 import { CSSTransition } from 'react-transition-group'
+import { makeStyles } from '@material-ui/core/styles';
 
 import { useSelector } from 'react-redux'
 
-const LeftPane = () => {
-	const components = useSelector(state => state.globalProps.components.stack)
+const useStyles = makeStyles(() => ({
+	leftpane: {
+		flex: 4,
+	}
+}))
 
+const LeftPane = () => {
+	const classes = useStyles()
+	const {
+		activeUsers,
+		recentChats,
+		contactInfo,
+		privacy,
+		resetPassword
+	} = useSelector(state => state.globalProps.components.stack)
 	return (
-		<section className={[styles.leftPane, styles.panes].join(' ')}>
-			{components[0].activeUsers &&
-			 <ActiveUsers />
-			}
-			{components[1].recentChats &&
-					<RecentChats />
-			}
-			{components[2].settings && <Settings />}
-			{components[3].resetPassword && <ResetPassword />}
-			{components[4].contactInfo && <ContactInfo />}
-			{components[5].privacy && <Privacy />}
+		<section className={classes.leftpane} >
+			{activeUsers && <ActiveUsers />}
+			{recentChats && <RecentChats />}
+			{contactInfo && <ContactInfo />}
+			{resetPassword && <ResetPassword />}
+			{privacy && <Privacy />}
 		</section>
 			
 	)

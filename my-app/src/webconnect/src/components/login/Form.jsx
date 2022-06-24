@@ -71,6 +71,7 @@ const Form = ({login}) => {
 		})
 		.then(res => res.json())
 		.then(response => {
+			console.log(response)
 			if (response.type === 'success') {
 				handleSuccessLogin(response)
 				setLoginAlert(true)

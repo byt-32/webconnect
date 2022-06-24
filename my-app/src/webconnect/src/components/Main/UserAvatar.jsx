@@ -17,16 +17,8 @@ const colors = [
   '#ed6471'
 ]
 
-const UserAvatar = (props) => {
-	const {name} = props
-	let val = '', split = name.split(' ')
-	split.length <= 2 
-	? split.forEach(i => val += i[0]) 
-	: val = split[0].charAt(0) + split[split.length - 1].charAt(0)
-	
-	const useStyles = makeStyles({
+const useStyles = makeStyles({
 		avatar: {
-			fontSize: '1rem',
 			fontWeight: 'bold',
 			textTransform: 'uppercase'
 		},
@@ -42,28 +34,51 @@ const UserAvatar = (props) => {
 			}
 		}
 	})
-	const classes = useStyles()
-	const bg = colors[name.length -1] || '#ed6471'
-	return (
-		props.badge === 'true' ?
-			<Badge 
-				variant='dot'
-				className={props.status == 'online' ? classes.online : classes.offline}
-				overlap='circular'
-				anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
-			>
-				<Avatar className={[classes.avatar, props.className].join(' ')}
-					style={{background: bg}}
-				 > 
-				 	{val} 
-				</Avatar>
-			</Badge>
 
-		: <	Avatar 
+const AvatarWithBadge = ({props, style, firstAndLastName}) => {
+	const classes = useStyles()
+	return (
+		<Badge 
+			variant='dot'
+			className={ props.status == 'online' ? classes.online : classes.offline}
+			overlap='circular'
+			anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+		>
+			<Avatar className={[classes.avatar, props.className].join(' ')}
+				style={style}
+			 > 
+			 	{firstAndLastName}
+			</Avatar>
+		</Badge>
+	)
+}
+
+const UserAvatar = (props) => {
+	const classes = useStyles()
+	const background = colors[props.username.split(' ').join('').length -1] || '#ed6471'
+	const styles = {
+		background: background,
+		...props.styles
+	}
+
+	let firstAndLastName = '', 
+			namesToArray = props.username.split(' ')
+
+	if (namesToArray.length <= 2) {
+		namesToArray.forEach(i => firstAndLastName += i[0]) 
+	} else {
+		firstAndLastName = 
+			namesToArray[0][0] + namesToArray[namesToArray.length - 1][0]
+	}
+	
+	return (
+		props.badge ?
+			<AvatarWithBadge props={props} style={styles} firstAndLastName={firstAndLastName} />
+		: <Avatar 
 				className={[props.className, classes.avatar].join(' ')} 
-				style={{background: bg}}
+				style={styles}
 				> 
-					{val} 
+					{firstAndLastName} 
 			</Avatar>
 	)
 }
