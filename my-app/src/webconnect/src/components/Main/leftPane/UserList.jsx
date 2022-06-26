@@ -15,7 +15,7 @@ import UserAvatar from '../UserAvatar'
 const useStyles = makeStyles({
 	listItem: {
 		'& .MuiAvatar-root': {
-			width: 48, height: 48
+			width: 45, height: 45
 		},
 		'& .MuiListItemText-root': {
 			marginLeft: '.3rem'

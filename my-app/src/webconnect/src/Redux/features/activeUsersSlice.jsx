@@ -3,9 +3,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 export const fetchActiveUsers = createAsyncThunk(
 	'fetchActiveUsers', 
 	async (id) => {
-		const response = await fetch(`/api/users`)
+		const response = await fetch(`/api/users/${id}`)
 		if (response.ok) {
 			const users = await response.json()
+			console.log(users)
 			return users
 		}
 	}

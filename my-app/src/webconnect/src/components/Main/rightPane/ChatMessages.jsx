@@ -50,8 +50,7 @@ const useStyles = makeStyles({
 
 const ChatSingle = ({chat}) => {
 	const classes = useStyles()
-	const username = useSelector(state => state.globalProps.user.contacts.username)
-	// console.log(chat)
+	const username = useSelector(state => state.account.account.username)
 	function replace(text) {
 		return text.replaceAll('\n', '<br/>')
 	}
@@ -63,7 +62,8 @@ const ChatSingle = ({chat}) => {
 			{ chat.reply.open ?
 				<> 
 					<div className={classes.reply}>
-						<div style={{color: deepOrange[500],
+						<div style={{
+								color: deepOrange[500],
 								padding: '0 9px 3px 0',
 								fontSize: '.8rem', fontWeight: 'bold'}} >
 							{
@@ -74,8 +74,12 @@ const ChatSingle = ({chat}) => {
 					</div>
 					<div style={{
 						padding: '4px 8px 4px 3px'
-					}} > {chat.message} </div>
+					}} > 
+						{chat.message} 
+					</div>
+
 				</>
+				
 				: <> {chat.message} </>
 			}
 		</div>

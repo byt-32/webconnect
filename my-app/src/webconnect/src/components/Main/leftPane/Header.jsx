@@ -13,7 +13,10 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     height: '3.7rem',
     background: common.white,
-    boxShadow: '-3px 1px 1px 0px #cbcbcb',
+    top: 0,
+    opacity: .95,
+    backdropFilter: 'blur(5px)',
+    boxShadow: '-3px 1px 1px 0px #f1f1f1',
     '& .MuiToolbar-root': {
       padding: '0 5px',
       height: '100%'
@@ -28,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 const Header = ({children}) => {
 	const classes = useStyles()
 	return (
-		 <AppBar position="static" className={classes.root} >
+		 <AppBar position="sticky" className={classes.root} >
       <Toolbar variant="dense">
         {children}
       </Toolbar>

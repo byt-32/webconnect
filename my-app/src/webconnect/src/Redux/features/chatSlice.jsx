@@ -5,7 +5,6 @@ export const fetchMessages = createAsyncThunk('fetchMessages',
 		const response = await fetch(`/chat/fetchMessages/${args.friendsName}/${args.token}`)
 		if (response.ok) {
 			const messages = await response.json()
-			console.log(messages)
 			return messages
 		}
 	}

@@ -5,8 +5,9 @@ import Main from './main/Main'
 import { useSelector, useDispatch } from 'react-redux'
 import { Route, Routes, useNavigate } from 'react-router-dom'
 import { createTheme, ThemeProvider } from '@material-ui/core/styles'
-import LeftPane from './main/leftPane/LeftPane'
+
 import RightPane from './main/rightPane/RightPane'
+
 import {useWindowHeight} from '../customHooks/hooks'
 
 const theme = createTheme({
@@ -39,7 +40,7 @@ const App = () => {
 			<section style={{height: useWindowHeight() + 'px'}} >
 				<Routes>
 					{JSON.parse(localStorage.getItem('details')) && 
-						<Route path='/' element={<Main /> } > 
+						<Route path='/' element={<Main /> } >
 							<Route path='/chat' element={<RightPane />} />
 						</Route>
 					}

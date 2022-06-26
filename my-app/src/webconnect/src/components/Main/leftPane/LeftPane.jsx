@@ -17,7 +17,8 @@ const useStyles = makeStyles(() => ({
 		background: common.white,
 		minWidth: 250,
 		maxWidth: 400,
-		width: 300
+		width: 300,
+		overflowY: 'scroll'
 	}
 }))
 
@@ -28,12 +29,14 @@ const LeftPane = () => {
 		recentChats,
 		contactInfo,
 		privacy,
+		settings,
 		resetPassword
 	} = useSelector(state => state.components.component.stack)
 	return (
 		<section className={classes.leftpane} >
 			{activeUsers && <ActiveUsers />}
 			{recentChats && <RecentChats />}
+			{settings && <Settings />}
 			{contactInfo && <ContactInfo />}
 			{resetPassword && <ResetPassword />}
 			{privacy && <Privacy />}

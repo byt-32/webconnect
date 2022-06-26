@@ -5,6 +5,8 @@ import { io } from 'socket.io-client'
 import { Outlet } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
+import {fetchRecentChats} from '../../Redux/features/recentChatsSlice'
+import { fetchActiveUsers } from '../../Redux/features/activeUsersSlice'
 
 import LeftPane from './leftPane/LeftPane'
 
@@ -24,8 +26,9 @@ const Main = () => {
 	const dispatch = useDispatch()
 	const { useEffect } = React
 	useEffect(() => {
+		dispatch(fetchRecentChats(id))
+		dispatch(fetchActiveUsers(id))
 		// socket.connect()
-		// dispatch(fetchInitialData(id))
 	}, [])
 
 	return (

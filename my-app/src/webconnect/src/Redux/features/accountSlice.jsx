@@ -10,12 +10,13 @@ const fetchAccountData = createAsyncThunk(
 
 const initialState = {
 	account: {
-		login: JSON.parse(localStorage.getItem('details')),
+		...JSON.parse(localStorage.getItem('details')),
 		socketId: '',
 		status: '',
 		bio: '',
 		settings: JSON.parse(localStorage.getItem('settings')) || {
 			notifications: true,
+			sound: true,
 			privacy: {
 				gmail: true
 			}
@@ -27,9 +28,10 @@ const accountSlice = createSlice({
 	name: 'account',
 	initialState,
 	reducers: {
-		changeSettings: (state, action) => {
+		updateSettings: (state, action) => {
 			const payload = action.payload
-			state.account.settings = {...payload}
+			console.log(payload)
+			state.account.settings = {...state.account.settings, ...payload}
 			localStorage.setItem('settings', JSON.stringify(state.account.settings))
 		},
 	},
@@ -42,7 +44,7 @@ const accountSlice = createSlice({
 })
 
 export const {
-	changeSettings
+	updateSettings
 } = accountSlice.actions
 
 export default accountSlice.reducer

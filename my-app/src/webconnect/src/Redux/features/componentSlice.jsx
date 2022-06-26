@@ -6,9 +6,9 @@ const initialState = {
 		leftPane: true,
 		profile: false,
 		stack: {
-			recentChats: true,
+			recentChats: false,
 			activeUsers: false,
-			settings: false,
+			settings: true,
 			resetPassword: false,
 			contactInfo: false,
 			privacy: false,
@@ -20,10 +20,10 @@ const initialState = {
 const componentSlice = createSlice({
 	name: 'components',
 	initialState,
-	reducer: {
+	reducers: {
 		setComponents: (state, action) => {
 			const {component, value} = action.payload
-			const leftPaneComponents = state.components.stack
+			const leftPaneComponents = state.component.stack
 
 			if (component === 'leftPane' 
 				|| component === 'rightPane' 

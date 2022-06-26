@@ -2,21 +2,23 @@ import React from 'react'
 import styles from '../../../stylesheet/main.module.css'
 import IconButton from '@material-ui/core/IconButton'
 import { useSelector, useDispatch } from 'react-redux'
-import {fetchRecentChats} from '../../../Redux/features/recentChatsSlice'
+
 import {setComponents} from '../../../Redux/features/componentSlice'
 
 import Typography from '@material-ui/core/Typography';
 import Menu from '@material-ui/core/Menu'
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { makeStyles } from '@material-ui/core/styles';
-import GroupIcon from '@material-ui/icons/Group'
-import MenuIcon from '@material-ui/icons/Menu'
-import AddCircleIcon from '@material-ui/icons/AddCircle'
 import TextField from '@material-ui/core/TextField'
 import MenuItem from '@material-ui/core/MenuItem';
 import InputBase from '@material-ui/core/InputBase'
 
-import UserAvatar from '../UserAvatar'	
+import GroupIcon from '@material-ui/icons/Group'
+import MenuIcon from '@material-ui/icons/Menu'
+import AddCircleIcon from '@material-ui/icons/AddCircle'
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
+
+import UserAvatar from '../UserAvatar'	
 import { Link } from 'react-router-dom'
 import Preloader from '../../Preloader'
 
@@ -53,10 +55,14 @@ const useStyles = makeStyles({
 		'& .MuiInputBase-root': {height: '100%'}
 
 	},
+	menu: {
+		'& .MuiListItemIcon-root': {
+			minWidth: 40
+		}
+	}
 })
 
 const RecentChats = () => {
-	const {id} = JSON.parse(localStorage.getItem('details'))
 	const { useEffect } = React
 	const classes = useStyles()
 	const dispatch = useDispatch()
@@ -79,9 +85,6 @@ const RecentChats = () => {
 	const performSearch = (searchVal) => {
 		dispatch(handleSearch({input: searchVal, component: 'recentChats'}))
 	}
-	useEffect(() => {
-		dispatch(fetchRecentChats(id))
-	}, [])
 	return (
 		<>
 			<Header>
@@ -98,7 +101,7 @@ const RecentChats = () => {
 			</Header>
 			<div className={classes.userslist}>
 				{
-					showLoader ? <Preloader /> :
+					showLoader ? <Preloader /> : 
 					recentChats.map(user => {
 						return (
 							<UserList user={user} key={user.username} />
@@ -106,6 +109,25 @@ const RecentChats = () => {
 					})
 				}
 			</div>
+			<Menu open={open} 
+		  transformOrigin={{
+		    vertical: 'top',
+		    horizontal: 'left',
+		  }}
+			onClose={handleClose} anchorEl={anchorEl} className={classes.menu} >
+				<MenuItem onClick={() => { 
+					handleClose()
+					setComp({component: 'activeUsers', value: true})
+				}} >
+					<Typography variant='inherit'> users </Typography>
+				</MenuItem>
+				<MenuItem onClick={() => { 
+					handleClose()
+					setComp({component: 'settings', value: true})
+				}} >
+					<Typography variant='inherit'> profile </Typography>
+				</MenuItem>
+			</Menu>
 		</>
 
 	)
