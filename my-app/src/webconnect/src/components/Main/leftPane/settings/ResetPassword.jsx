@@ -10,12 +10,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import { useDispatch, useSelector } from 'react-redux'
-import { setComponents } from '../../../../Redux/globalPropsSlice'
 import { Preloader, ThreeDots } from 'react-preloader-icon'
 import LockSharpIcon  from '@material-ui/icons/LockSharp'
 import SecurityIcon  from '@material-ui/icons/Security'
 import Snackbar from '@material-ui/core/Snackbar'
 import { Alert } from '@material-ui/lab';
+import { setComponents } from '../../../../Redux/features/componentSlice'
 
 const useStyles = makeStyles({
 	input: {

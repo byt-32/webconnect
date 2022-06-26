@@ -8,12 +8,16 @@ import ContactInfo from './settings/ContactInfo'
 import Privacy from './settings/Privacy'
 import { CSSTransition } from 'react-transition-group'
 import { makeStyles } from '@material-ui/core/styles';
+import common from '@material-ui/core/colors/common';
 
 import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles(() => ({
 	leftpane: {
-		flex: 4,
+		background: common.white,
+		minWidth: 250,
+		maxWidth: 400,
+		width: 300
 	}
 }))
 
@@ -25,7 +29,7 @@ const LeftPane = () => {
 		contactInfo,
 		privacy,
 		resetPassword
-	} = useSelector(state => state.globalProps.components.stack)
+	} = useSelector(state => state.components.component.stack)
 	return (
 		<section className={classes.leftpane} >
 			{activeUsers && <ActiveUsers />}

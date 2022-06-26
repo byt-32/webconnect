@@ -6,7 +6,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import IconButton from '@material-ui/core/IconButton';
-import { setComponents } from '../../../../Redux/globalPropsSlice'
+import { setComponents } from '../../../../Redux/features/componentSlice'
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles({

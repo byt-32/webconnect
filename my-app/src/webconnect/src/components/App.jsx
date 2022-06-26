@@ -27,7 +27,6 @@ const theme = createTheme({
 const App = () => {
 	const dispatch = useDispatch()
 	const navigate = useNavigate()
-	const showLoginPage = useSelector(state => state.globalProps.showLoginPage)
 
 	React.useEffect(() => {
 		if (!JSON.parse(localStorage.getItem('details'))) {
@@ -37,7 +36,7 @@ const App = () => {
 	
 	return (
 		<ThemeProvider theme={theme}>
-			<section style={{height: useWindowHeight()}} >
+			<section style={{height: useWindowHeight() + 'px'}} >
 				<Routes>
 					{JSON.parse(localStorage.getItem('details')) && 
 						<Route path='/' element={<Main /> } > 

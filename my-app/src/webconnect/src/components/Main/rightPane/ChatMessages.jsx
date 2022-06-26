@@ -1,8 +1,5 @@
 import React from 'react'
-import styles from '../../../stylesheet/main.module.css'
 import { useSelector, useDispatch } from 'react-redux'
-import retrieveDate from '../../../retrieveDate'
-import Loader from './Loader'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
 import DoneIcon from '@material-ui/icons/Done'
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
@@ -10,175 +7,125 @@ import Fade from '@material-ui/core/Fade';
 import ReplyIcon from '@material-ui/icons/Reply'
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined'
 import IconButton from '@material-ui/core/IconButton';
-import { handleReply, setHighlightedId } from '../../../Redux/globalPropsSlice'
+import { makeStyles } from '@material-ui/core/styles';
 
-const day = retrieveDate(new Date().toDateString()).day
+import { handleReply, setHighlightedId } from '../../../Redux/features/chatSlice'
+import common from '@material-ui/core/colors/common';
+import blue from '@material-ui/core/colors/blue';
+import deepOrange from '@material-ui/core/colors/deepOrange';
 
-const ChatSingle = ({chatAndAttr}) => {
+
+const useStyles = makeStyles({
+	indexedChats: {
+		display: 'flex',
+		flexDirection: 'column'
+	},
+	dateNotice: {
+		textAlign: 'center',
+		position: 'sticky',
+		top: 0,
+		'& span:first-child': {
+			fontSize: '.83rem',
+			padding: '3px 7px',
+			background: common.white,
+			boxShadow: '0 0 2px 1px #d3d3d3'
+		}
+	},
+	chatSingle: {
+		width: 'max-content',
+		color: common.white,
+		borderRadius: 5,
+		marginTop: 8,
+		padding: '4px 8px',
+		background: blue[400]
+	},
+	reply: {
+		background: common.white,
+		color: common.black,
+		fontSize: '.85rem',
+		padding: 5,
+		borderRadius: '0 5px 0 0'
+	}
+})
+
+const ChatSingle = ({chat}) => {
+	const classes = useStyles()
+	const username = useSelector(state => state.globalProps.user.contacts.username)
+	// console.log(chat)
 	function replace(text) {
 		return text.replaceAll('\n', '<br/>')
 	}
-	const currentSelectedUser = useSelector(state => state.globalProps.currentSelectedUser)
-	const accountOwner = useSelector(state => state.globalProps.user.contacts.username)
-	const highlightedReply = useSelector(state => state.globalProps.highlightedId)
-	const [highlight, setHighlight] = React.useState(false)
-	const dispatch = useDispatch()
-	const [open, setOpen] = React.useState(false);
-	const selectedChat = React.useRef(null)
-
-  const handleClick = () => {
-    setOpen((prev) => !prev);
-  };
-
-  const person = () => {
-  	if (chatAndAttr.reply.person === accountOwner) {
-  		return 'You'
-  	} else {
-  		return chatAndAttr.reply.person
-  	}
-  }
-  const handleClickAway = () => {
-    setOpen(false);
-  };
-  const setReply = (e) => {
-  	dispatch(handleReply({
-  		open: true,
-  		person: chatAndAttr.me ? accountOwner : currentSelectedUser.username,
-  		to: chatAndAttr.message,
-  		chatId: chatAndAttr.chatId
-  	}))
-  }
-  const handleCopy = () => {
-    navigator.clipboard.writeText(chatAndAttr.message)
-  }
-  const highlightReply = () => {
-  	if (chatAndAttr.chatId !== undefined) {
-  		if (chatAndAttr.reply.chatId !== undefined && chatAndAttr.reply.chatId !== '') {
-  			dispatch(setHighlightedId(chatAndAttr.reply.chatId))
-  		}
-  	}
-  }
-  React.useEffect(() => {
-  	if (highlightedReply !== '') {
-  		if (highlightedReply === chatAndAttr.chatId) {
-  			selectedChat.current.scrollIntoView()
-  			setTimeout(() => setHighlight(true), 500)
-  			
-  			// document.querySelectorAll('.Wzm2GKa4C2sh_8jVswOw')[0].scrollTop = selectedChat.current.getBoundingClientRect().top -100
-  			setTimeout(() => setHighlight(false), 3000)
-  		}
-  	}
-  }, [highlightedReply])
 	return (
-		<ClickAwayListener onClickAway={handleClickAway}>
-			
-		  <div className={[
-		  	styles.chatSingle, styles.animate__animated,
-		  	chatAndAttr.me ? styles.rightChat : styles.leftChat, highlight && styles.animate__headShake
-		  ].join(' ')} ref={selectedChat}>
-				{open ? <Fade in={open}>
-					<div className={styles.chatAction}>
-						<IconButton onClick={() => setReply()}> <ReplyIcon /> </IconButton>
-						<IconButton onClick={handleCopy}> <FileCopyOutlinedIcon /> </IconButton>
-					</div>
-				</Fade> : null }
-
-				 {chatAndAttr.reply !== undefined &&
-					chatAndAttr.reply.open ? (
-						<div className={styles.chatReply}>
-							<div className={styles.replySingle} onClick={highlightReply} >
-								<div className={styles.person}> {person()} 
-								</div>
-								<div className={styles.to}> {chatAndAttr.reply.to} </div>
-							</div>
-							<div className={styles.message} onClick={handleClick}
-					 			dangerouslySetInnerHTML={{__html: replace(chatAndAttr.message)}} />
+		<div className={classes.chatSingle} style={{
+			alignSelf: chat.me ? 'flex-end' : 'flex-start',
+			padding: chat.reply.open && '0 0 0 2px'
+		}} >
+			{ chat.reply.open ?
+				<> 
+					<div className={classes.reply}>
+						<div style={{color: deepOrange[500],
+								padding: '0 9px 3px 0',
+								fontSize: '.8rem', fontWeight: 'bold'}} >
+							{
+								chat.reply.person === username ? 'You' : chat.reply.person
+							}
 						</div>
-					) : (
-						<div className={styles.message} onClick={handleClick}
-					 		dangerouslySetInnerHTML={{__html: replace(chatAndAttr.message)}} />
-					 	)
-				 }
-	    	{open ? <Fade in={open}>
-		      <span className={[styles.messageTime, styles.dropdown].join(' ')}>
-						{chatAndAttr.timestamp.time}
-					</span>
-				</Fade> : null }
-		  </div>
-		</ClickAwayListener>
+						{chat.reply.to}
+					</div>
+					<div style={{
+						padding: '4px 8px 4px 3px'
+					}} > {chat.message} </div>
+				</>
+				: <> {chat.message} </>
+			}
+		</div>
 	)
 }
 
 const ChatsByDate = ({chat}) => {
-	// const [dateNotice, setDateNotice] = React.useState(false)
-	// document.querySelectorAll('.Wzm2GKa4C2sh_8jVswOw')[0].addEventListener('scroll', () => {
-	// 	setDateNotice(true)
-	// })
+	const classes = useStyles()
+	const day = new Date().toDateString().slice(0, -4);
 	return (
-		<div className={[styles.chatCollection].join(' ')}>
-			<header className={styles.dateNotice} >
-				<div>{chat.day === day ? 'Today' : chat.day}</div>
+		<div >
+			<header className={classes.dateNotice} >
+				<span> {chat.day === day ? 'Today' : chat.day} </span>
 			</header>
 				
-			<div className={styles.indexedChats}>
+			<div className={classes.indexedChats}>
 				{
 					chat.chats.length > 0 &&
-						chat.chats.map((message, i) => <ChatSingle key={i} chatAndAttr={message} /> )
+						chat.chats.map((message, i) => <ChatSingle key={i} chat={message} /> )
 				}
 			</div>
 		</div>
 	)
 }
 
-const ChatMessages = () => {
-	const [chats, setChats] = React.useState([])
-	const [indexedChats, setIndexChats] = React.useState([])
-	const currentSelectedUser = useSelector(state => state.globalProps.currentSelectedUser)
-	const privateChats = useSelector(state => state.globalProps.privateChats.find(chat => chat.username === currentSelectedUser.username))
-	const showLoader = useSelector(state => state.globalProps.loader)
+const ChatMessages = ({chats}) => {
+	const classes = useStyles()
 
-	React.useEffect(() => {
-		if (privateChats !== undefined) {
-			if (privateChats.messages.length > 0) {
-				setChats(privateChats.messages)
-			} else {
-				setChats([])
-			}
-		} else {
-			setChats([])
+	let dates = [], _chats = []
+
+	chats.forEach(i => {
+		const dateInDates = dates.findIndex(d => d === i.timestamp.day)
+		if (dateInDates === -1) {
+			dates.push(i.timestamp.day)
 		}
+	})
 
-	}, [privateChats, currentSelectedUser])
-
-	React.useEffect(() => {
-		let dates = [], _chats = []
-		chats.forEach(i => {
-			const dateInDates = dates.findIndex(d => d === i.timestamp.day)
-			if (dateInDates === -1) {
-				dates.push(i.timestamp.day)
-			}
-		})
-		dates.forEach(day => {
-			const chatByDate = chats.filter(chat => chat.timestamp.day === day)
-			_chats.push({day: day, chats: [...chatByDate]})
-		})
-		setIndexChats([..._chats])
-	}, [chats])
-
-	React.useEffect(() => {
-		// console.log(indexedChats)
-	}, [indexedChats])
+	dates.forEach(day => {
+		const chatByDate = chats.filter(chat => chat.timestamp.day === day)
+		_chats.push({day: day, chats: [...chatByDate]})
+	})
 
 	return (
-		<> {
-			showLoader ? <Loader /> :
-			<div className={styles.chats}>
-				{
-					indexedChats.length > 0 &&
-						indexedChats.map((chatCollection, i) => <ChatsByDate key={i} chat={chatCollection} />)
-				}
-			</div>
-		} </>
+		<> 
+				<div className={classes.chats}>
+					{ _chats.length > 0 &&
+							_chats.map((chatCollection, i) => <ChatsByDate key={i} chat={chatCollection} />)
+					}
+				</div>
+		</>
 	)
 }
 

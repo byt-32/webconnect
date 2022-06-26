@@ -8,17 +8,15 @@ import styles from '../../stylesheet/main.module.css'
 import { Preloader, ThreeDots } from 'react-preloader-icon'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
-import { afterLogin } from '../../Redux/globalPropsSlice'
 import Snackbar from '@material-ui/core/Snackbar'
 import Alert from '@material-ui/lab/Alert';
 
 const Form = ({login}) => {
-	sessionStorage.setItem('refresh', 'false')
+	// sessionStorage.setItem('refresh', 'false')
 	let navigate = useNavigate()
 	const dispatch = useDispatch()
-	const id = useSelector(state => state.globalProps.user.id)
 	const [showPassword, changePasswordVisibility] = React.useState(false)
-  const [formSubmit, setFormsubmit] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
   const [input, setInputValues] = React.useState({
   	username: '', password: ''
   })
@@ -32,9 +30,6 @@ const Form = ({login}) => {
   	open: false, type: '', text: ''
   })
   const [showLoginAlert, setLoginAlert] = React.useState(false)
-	const handleSuccessLogin = responseFromServer => {
-		dispatch(afterLogin(responseFromServer));
-	}
 	const handlePasswordValue = e => {
 		setInputValues({...input, password: e.target.value})
 		setLoginAlert(false)
@@ -60,9 +55,9 @@ const Form = ({login}) => {
 	}
 	const submitForm = (e) => {
 		e.preventDefault()
-		setFormsubmit(true)
+		setIsSubmitting(true)
 		
-		fetch('/api/form/login', {
+		fetch('/user/login', {
 			method: 'POST', 
 			headers: {
 				'Content-Type': 'application/json'
@@ -71,23 +66,22 @@ const Form = ({login}) => {
 		})
 		.then(res => res.json())
 		.then(response => {
-			console.log(response)
 			if (response.type === 'success') {
-				handleSuccessLogin(response)
+				localStorage.setItem('details', JSON.stringify(response))
+				document.location.pathname = ''
 				setLoginAlert(true)
 				setAlert({...alert, open: true, type: 'success', text: 'Log in successful'})
-
 			} else {
 				setLoginAlert(true)
 				setAlert({...alert, open: true, type: 'error', text: 'Invalid credentials'})
 			}
-			setFormsubmit(false)
+			setIsSubmitting(false)
 		})
 		.catch(err => {
 			console.log('error:' + err)
 			setLoginAlert(true)
 			setAlert({...alert, open: true, type: 'error', text: 'Connection timeout'})
-			setFormsubmit(false)
+			setIsSubmitting(false)
 		})
 		 
 	}
@@ -151,13 +145,13 @@ const Form = ({login}) => {
 				<div className={styles.formField}>
 					<Button 
 					variant='contained' 
-					disabled={formSubmit}
+					disabled={isSubmitting}
 					classes={{root: styles.button}} 
 					type='submit'> 
-						{formSubmit && 
+						{isSubmitting && 
 							<Preloader use={ThreeDots} size={25} strokeColor='#fff' duration={1000} /> 
 						}
-						{!formSubmit && 'Login'}
+						{!isSubmitting && 'Login'}
 					</Button>
 				</div>
 			</fieldset>

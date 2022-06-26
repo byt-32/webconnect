@@ -2,8 +2,8 @@ import React from 'react'
 import styles from '../../../stylesheet/main.module.css'
 import IconButton from '@material-ui/core/IconButton'
 import { useSelector, useDispatch } from 'react-redux'
-import { setSelectedUser, updateUnreadReset,
-	setComponents, handleSearch, handleReply } from '../../../Redux/globalPropsSlice'
+import {fetchRecentChats} from '../../../Redux/features/recentChatsSlice'
+import {setComponents} from '../../../Redux/features/componentSlice'
 
 import Typography from '@material-ui/core/Typography';
 import Menu from '@material-ui/core/Menu'
@@ -13,14 +13,15 @@ import MenuIcon from '@material-ui/icons/Menu'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import TextField from '@material-ui/core/TextField'
 import MenuItem from '@material-ui/core/MenuItem';
-import List from '@material-ui/core/List'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemText from '@material-ui/core/ListItemText'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
+import InputBase from '@material-ui/core/InputBase'
+
 import UserAvatar from '../UserAvatar'	
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 import { Link } from 'react-router-dom'
-import GradientLoader from '../../Preloaders'
+import Preloader from '../../Preloader'
+
+import UserList from './UserList'
+import Header from './Header'
 
 const useStyles = makeStyles({
 	add: {
@@ -44,49 +45,20 @@ const useStyles = makeStyles({
 		background: '#6495ed',
 		alignItems: 'center',
 		justifyContent: 'center'
-	}
+	},
+	searchbar: {
+		width: '100%',
+		marginLeft: 20,
+		alignSelf: 'stretch',
+		'& .MuiInputBase-root': {height: '100%'}
+
+	},
 })
-const User = ({user, color}) => {
-	const dispatch = useDispatch()
-	const classes = useStyles()
-	const token = useSelector(state => state.globalProps.user.contacts.id)
 
-	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
-	const setSelected = args => {
-		if (selectedUser.username !== args.username) {
-			if (user.unread !== 0) {
-				fetch(`/resetUnread/${token}/${user.username}`)
-				.then(res => res.json())
-				.then(res => {
-					dispatch(updateUnreadReset(args))
-				})
-			}
-			dispatch(setSelectedUser(args))
-		}
-	}
-
-	return (
-		<ListItem	button 
-			style={{position: 'relative'}}
-			selected={user.username === selectedUser.username}
-  		onClick={() =>{
-  		 setSelected(user)
-
-  		}}>
-    		<ListItemIcon style={{marginRight: 10}}>
-		      <UserAvatar 
-		      	name={user.username} 
-		      	badge={user.status === 'online' ? 'true' : 'false'} 
-		      	status={user.status} 
-		      	styles={{width: 50, height: 50}} 
-		      />
-		    </ListItemIcon>
-      	<ListItemText primary={user.username} secondary={''} />
-      	{user.unread > 0 && <div className={classes.unread} > {user.unread} </div>}
-    </ListItem>
-	)
-}
 const RecentChats = () => {
+	const {id} = JSON.parse(localStorage.getItem('details'))
+	const { useEffect } = React
+	const classes = useStyles()
 	const dispatch = useDispatch()
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const open = Boolean(anchorEl)
@@ -97,12 +69,8 @@ const RecentChats = () => {
 		setAnchorEl(null)
 	}
 
-	const recentChats = useSelector(state => state.globalProps.recentChats)
-	const noMatch = useSelector(state => state.globalProps.noMatch.recentChats)
-	const searchTerm = useSelector(state => state.globalProps.searchTerm.recentChats)
-	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
-	const USER = useSelector(state => state.globalProps.user.contacts)
-	const preload = useSelector(state => state.globalProps.preload.recentChats)
+	const recentChats = useSelector(state => state.recentChats.recentChats)
+	const showLoader = useSelector(state => state.recentChats.showRecentUsersLoader)
 
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
@@ -111,87 +79,35 @@ const RecentChats = () => {
 	const performSearch = (searchVal) => {
 		dispatch(handleSearch({input: searchVal, component: 'recentChats'}))
 	}
-	const classes = useStyles()
-	
+	useEffect(() => {
+		dispatch(fetchRecentChats(id))
+	}, [])
 	return (
-		<section className={[styles.component, styles.recentChats, styles.animate__animated, styles.animate__fadeIn].join(' ')} >
-			
-			<div position="static" className={styles.app} >
-			  <div className={styles.toolbar} >
-			  	<div className={styles.headerItem} >
-				  	<IconButton onClick={toggleMenu} style={{background: open && 'rgba(0, 0, 0, 0.04)'}} > 
-							<MenuIcon classes={{root: styles.menu}} fontSize='medium' />
-						</IconButton>
-				   </div>
-				   <div className={styles.appSearch} > 
-							<TextField variant='standard' value={searchTerm} onChange={(e) => performSearch(e.target.value)}
-							color='primary' classes={{root: styles.contactsSearch}} placeholder='Search' />
-				   </div> 
-			  </div>
-			</div>
-			{ false ? <GradientLoader /> :
-			<div className={styles.appBody} >
-				<div className={styles.menuBlock} >
-					<Menu open={open}
-						anchorEl={anchorEl}
-						onClose={handleClose} 
-						disableAutoFocusItem={true}
-						getContentAnchorEl={null}
-				    anchorOrigin={{
-				      vertical: 'bottom',
-				      horizontal: 'center',
-				    }}
-				    transformOrigin={{
-			      vertical: 'top',
-			      horizontal: 'center',
-			    }}
-			    className={classes.menu}
-					variant='menu' >
-						
-						<MenuItem onClick={
-							() => {
-								handleClose()
-								setComp({component: 'activeUsers'})
-							}
-						}>
-							<GroupIcon fontSize='small' />
-							<Typography variant='body1' component='span' classes={{root: styles.menuText}}>
-								Active users
-							</Typography>
-						</MenuItem>
-						 <MenuItem onClick={
-						 	() => {
-						 		handleClose()
-						 		setComp({component: 'settings'})
-						 	}
-						 }>
-							<SettingsApplicationsIcon fontSize='small' />
-							<Typography variant='body1' component='span' classes={{root: styles.menuText}}>
-								Settings
-							</Typography>
-						</MenuItem>
-					</Menu>
-	   		</div>
-				{noMatch && <div className={styles.noMatch} >
-					<Typography color='error' component='span'>Search query did not match any entry</Typography> <br/>
-					<Typography color='textPrimary' component='span'> Try another search </Typography>
-				</div> }
-				<List component="nav" style={{
-					visibility: !noMatch ? 'visible' : 'hidden'
-				}}>
+		<>
+			<Header>
+				<IconButton onClick={toggleMenu} >
+					<MenuIcon />
+				</IconButton>
+
+				<InputBase
+					className={classes.searchbar}
+		      placeholder='@user'
+		      type="text"
+		    />
+
+			</Header>
+			<div className={classes.userslist}>
 				{
-					recentChats.map((user, i) => {
+					showLoader ? <Preloader /> :
+					recentChats.map(user => {
 						return (
-							<User key={i} user={user} />
+							<UserList user={user} key={user.username} />
 						)
 					})
-
 				}
-				</List>
 			</div>
-		}
-			
-		</section>
+		</>
+
 	)
 }
 

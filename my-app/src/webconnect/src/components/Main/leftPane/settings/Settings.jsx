@@ -27,7 +27,7 @@ import PhotoIcon from '@material-ui/icons/Photo'
 import CheckIcon from '@material-ui/icons/Check'
 import NavigateNextIcon from '@material-ui/icons/NavigateNext'
 import { Preloader, Oval } from 'react-preloader-icon'
-import { setComponents, setBio, changeSettings } from '../../../../Redux/globalPropsSlice'
+// import { setComponents } from '../../../Redux/features/componentSlice'
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';

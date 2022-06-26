@@ -1,7 +1,7 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import styles from '../../../stylesheet/main.module.css'
-import { setComponents } from '../../../Redux/globalPropsSlice'
+import { setComponents } from '../../../Redux/features/componentSlice'
 import TextField from '@material-ui/core/TextField'
 import Menu from '@material-ui/core/Menu'
 import MessagePane from './MessagePane'
@@ -17,9 +17,12 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles({
 	rightPane: {
-		flex: 7,
+		flex: 9,
 		display: 'flex',
-		
+		paddingLeft: 5
+	},
+	messagesPane: {
+		flex: 1
 	}
 })
 
@@ -27,10 +30,10 @@ const useStyles = makeStyles({
 const RightPane = ({user}) => {
 	const dispatch = useDispatch()
 	const classes = useStyles()
-	const privateChats = useSelector(state => state.globalProps.privateChats)
-	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
+	const privateChats = useSelector(state => state.chat.privateChats)
+	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 
-	const profile = useSelector(state => state.globalProps.components.profile)
+	const profile = useSelector(state => state.components.component.profile)
 
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const open = Boolean(anchorEl)
@@ -50,7 +53,7 @@ const RightPane = ({user}) => {
 				{
 					privateChats.map( friend => {
 						return (
-							<MessagePane friend={friend} />
+							<MessagePane friend={friend} key={friend.username} />
 						)
 					})
 				}

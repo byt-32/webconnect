@@ -33,12 +33,6 @@ const initialState = {
 		input: '',
 		chatId: Number()
 	},
-	highlightedId: '',
-	reply: {
-		open: false,
-		person: '',
-		to: '',
-	},
 	noMatch: {
 		recentChats: false,
 		activeUsers: false
@@ -54,9 +48,6 @@ const initialState = {
 		activeUsers: ''
 	},
 	currentSelectedUser: {},
-	showCount: true,
-	loader: false,
-	chatUpdate: {},
 	preload: {
 		recentChats: true, 
 		activeUsers: true
@@ -68,8 +59,8 @@ const initialState = {
 		leftPane: true,
 		profile: false,
 		stack: {
-			recentChats: false,
-			activeUsers: true,
+			recentChats: true,
+			activeUsers: false,
 			settings: false,
 			resetPassword: false,
 			contactInfo: false,
@@ -95,7 +86,9 @@ const globalPropsSlice = createSlice({
 	name: 'globalProps',
 	initialState,
 	reducers: {
-		
+		setSelectedUser: (state, action) => {
+			state.currentSelectedUser = action.payload
+		},
 		storePrivateChats: (state, action) => {
 			const {username, message, me, chatId, reply} = action.payload
 			const _date = new Date()
@@ -283,13 +276,14 @@ const globalPropsSlice = createSlice({
 			state.loader = true
 		})
 		.addCase(fetchMessages.fulfilled, (state, action) => {
-			const payload = action.payload
-			const idx = state.privateChats.findIndex( chat => chat.username === payload.username)
+			const { username, messages } = action.payload
+
+			const idx = state.privateChats.findIndex( chat => chat.username === username)
 			
-			if (idx !== -1) {
-				state.privateChats[idx] = payload
+			if (idx === -1) {
+				state.privateChats.push(action.payload)
 			} else {
-				state.privateChats.push(payload)
+				state.privateChats[idx].messages = messages
 			}
 			
 			state.loader = false
@@ -300,6 +294,7 @@ const globalPropsSlice = createSlice({
 		.addCase(fetchInitialData.fulfilled, (state, action) => {
 			const { props, recentChats, settings, unread, users } = action.payload
 			state.activeUsers = users
+			state.recentChats = recentChats.chats
 		})
 		.addCase(fetchInitialData.rejected, (state, action) => {
 

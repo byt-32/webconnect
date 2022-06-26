@@ -4,25 +4,9 @@ import { Visibility, VisibilityOff, LockSharp, AccountCircle, AlternateEmail } f
 import styles from '../../stylesheet/main.module.css'
 import { createTheme, ThemeProvider } from '@material-ui/core/styles'
 import { Preloader, ThreeDots } from 'react-preloader-icon'
-import { afterRegistration } from '../../Redux/globalPropsSlice'
-import { useDispatch } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-
-const theme = createTheme({
-	palette: {
-		primary: {
-			main: '#6495ed'
-		}, 
-		secondary: {
-			main: '#344f7e'
-		}
-	}
-})
 
 const Form = () => {
-	sessionStorage.setItem('refresh', 'false')
-	const dispatch = useDispatch()
-	const navigate = useNavigate()
+	// sessionStorage.setItem('refresh', 'false')
   const [input, setInputValues] = React.useState({
   	email: '', password: '', name: ''
   })
@@ -36,7 +20,7 @@ const Form = () => {
   	username: false, password: false, email: false
   })
 
-  const [formSubmit, setFormsubmit] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
 
 	const [showPassword, changePasswordVisibility] = React.useState(false)
 
@@ -70,8 +54,8 @@ const Form = () => {
 	}
 	const submitForm = (e) => {
 		e.preventDefault()
-		setFormsubmit(true)
-		fetch('/api/form/register', {
+		setIsSubmitting(true)
+		fetch('/user/register', {
 			method: 'POST', 
 			headers: {
 				'Content-Type': 'application/json'
@@ -80,34 +64,29 @@ const Form = () => {
 		})
 		.then(res => res.json())
 		.then(response => {
-			console.log(response)
 			if (response.nameError) {
 				setErrorState({...error, username: true})
 				setHelperText({...helperText, username: response.nameError})
-				setFormsubmit(false)
-			}
-			if (response.emailError) {
+				setIsSubmitting(false)
+			} else if (response.emailError) {
 				setErrorState({...error, email: true})
 				setHelperText({...helperText, email: response.emailError})
-				setFormsubmit(false)
+				setIsSubmitting(false)
+			} else {
+				localStorage.setItem('details', JSON.stringify(response))
+				setIsSubmitting(false)
+				document.location.pathname = ''
 			}
-			if (response.sent) {
-				dispatch(afterRegistration(response))
-				setFormsubmit(false)
-				if (sessionStorage.getItem('refresh') == 'false') {
-					document.location.pathname = ''
-				}
-			}
+			
 		})
 		.catch(err => {
 			console.log('error:' + err)
-			setFormsubmit(false)
+			setIsSubmitting(false)
 		})
 		 
 	}
 	return (
 		<form className={styles.Form} onSubmit={submitForm} >
-			<ThemeProvider theme={theme}>
 			<fieldset>
 			<div className={styles.formField}>
 					<label htmlFor='username' className={styles.fieldset_1_label}> Name </label>
@@ -186,20 +165,19 @@ const Form = () => {
 				<div className={styles.formField}>
 					<Button 
 					variant='contained' 
-					disabled={formSubmit}
+					disabled={isSubmitting}
 					classes={{root: styles.button}} 
 					type='submit'> 
-						{formSubmit && <Preloader
+						{isSubmitting && <Preloader
 						 use={ThreeDots}
 						 size={25}
 						 strokeColor='#fff'
 						 duration={1000}
 						  />} 
-						 {!formSubmit && 'Register' }
+						 {!isSubmitting && 'Register' }
 					</Button>
 				</div>
 			</fieldset>
-			</ThemeProvider>	
 		</form>
 	)
 }

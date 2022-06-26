@@ -15,7 +15,7 @@ const useStyles = makeStyles({
 	}
 
 })
-const GradientLoader = () => {
+const Preloader = () => {
 	const classes = useStyles()
 	return (
 		<div className={classes.loaderUser} >
@@ -38,4 +38,4 @@ const GradientLoader = () => {
 	)
 }
 
-export default GradientLoader
+export default Preloader

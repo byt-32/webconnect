@@ -1,9 +1,9 @@
 import React from 'react'
 
 export const useWindowHeight = () => {
-	const [height, setHeight] = React.useState(`${window.innerHeight}px`)
+	const [height, setHeight] = React.useState(`${window.innerHeight}`)
 	window.addEventListener('resize', () => {
-		setHeight(`${window.innerHeight}px`)
+		setHeight(`${window.innerHeight}`)
 	})
 	return height
 }

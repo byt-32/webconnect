@@ -2,17 +2,27 @@ import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton'
-import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import { makeStyles } from '@material-ui/core/styles';
+import InputBase from '@material-ui/core/InputBase';
+import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
+import { 
+	setComponents,
+} from '../../../Redux/features/componentSlice'
 
 import UserList from './UserList'
 import Header from './Header'
-import SearchBar from './SearchBar'
 
 const useStyles = makeStyles({
 	backBtn: {
 		fontSize: '1.2rem !important',
 	},	
+	searchbar: {
+		width: '100%',
+		marginLeft: 20,
+		alignSelf: 'stretch',
+		'& .MuiInputBase-root': {height: '100%'}
+
+	},
 	arrow: {
 		textAlign: 'right',
 		cursor: 'pointer'
@@ -22,29 +32,29 @@ const useStyles = makeStyles({
 	}
 })
 
-
-
 const ActiveUsers = () => {
+	const {id} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const activeUsers = useSelector(state => state.globalProps.activeUsers)
+	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
 
-	const thisUser = useSelector(state => state.globalProps.user)
-	const registeredUsers = useSelector(state => state.globalProps.registeredUsers)
-	const searchTerm = useSelector(state => state.globalProps.searchTerm.activeUsers)
-
-	const colors = useSelector(state => state.globalProps.colors)
-	const noMatch = useSelector(state => state.globalProps.noMatch.activeUsers)
-	
+	const setComponent = () => {
+		dispatch(setComponents({component: 'recentChats', value: true}))
+	}
+	dispatch(fetchActiveUsers(id))
 	return (
 		<>
 			<Header>
-				<IconButton>
+				<IconButton onClick={setComponent} >
 					<KeyboardBackspaceIcon />
 				</IconButton>
 
-				<SearchBar />
-				
+				<InputBase
+					className={classes.searchbar}
+		      placeholder='@user'
+		      type="text"
+		    />
+
 			</Header>
 			<div className={classes.userslist}>
 				{

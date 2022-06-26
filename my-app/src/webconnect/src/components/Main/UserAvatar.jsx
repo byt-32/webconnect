@@ -18,22 +18,22 @@ const colors = [
 ]
 
 const useStyles = makeStyles({
-		avatar: {
-			fontWeight: 'bold',
-			textTransform: 'uppercase'
-		},
-		offline: {
-			'& .MuiBadge-dot': {
-				boxShadow: '0px 0px 0px 2px #fff'
-			}
-		},
-		online: {
-			'& .MuiBadge-dot': {
-				background: '#8ae76b',
-				boxShadow: '0px 0px 0px 2px #fff'
-			}
+	avatar: {
+		fontWeight: 'bold',
+		textTransform: 'uppercase'
+	},
+	offline: {
+		'& .MuiBadge-dot': {
+			boxShadow: '0px 0px 0px 2px #fff'
 		}
-	})
+	},
+	online: {
+		'& .MuiBadge-dot': {
+			background: '#8ae76b',
+			boxShadow: '0px 0px 0px 2px #fff'
+		}
+	}
+})
 
 const AvatarWithBadge = ({props, style, firstAndLastName}) => {
 	const classes = useStyles()
@@ -56,9 +56,9 @@ const AvatarWithBadge = ({props, style, firstAndLastName}) => {
 const UserAvatar = (props) => {
 	const classes = useStyles()
 	const background = colors[props.username.split(' ').join('').length -1] || '#ed6471'
-	const styles = {
+	const style = {
 		background: background,
-		...props.styles
+		...props.style
 	}
 
 	let firstAndLastName = '', 
@@ -73,10 +73,10 @@ const UserAvatar = (props) => {
 	
 	return (
 		props.badge ?
-			<AvatarWithBadge props={props} style={styles} firstAndLastName={firstAndLastName} />
+			<AvatarWithBadge props={props} style={style} firstAndLastName={firstAndLastName} />
 		: <Avatar 
 				className={[props.className, classes.avatar].join(' ')} 
-				style={styles}
+				style={style}
 				> 
 					{firstAndLastName} 
 			</Avatar>

@@ -1,11 +1,7 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { 
-	setSelectedUser, 
-	setComponents, 
-	handleReply, 
-	hideCount 
-} from '../../../Redux/globalPropsSlice'
+import { setSelectedUser } from '../../../Redux/features/otherSlice'
+import { fetchMessages } from '../../../Redux/features/chatSlice'
 
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
@@ -28,37 +24,29 @@ const useStyles = makeStyles({
 })
 
 const UserList = ({user, style, secondaryItems}) => {
+	const {id} = JSON.parse(localStorage.getItem('details'))
 	const classses = useStyles()
 	const dispatch = useDispatch()
-	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
-	// const userInRecent = useSelector(state => state.globalProps.recentChats.find(_user => _user.username === user.username))
-	const token = useSelector(state => state.globalProps.user.contacts.id)
-	// const setSelected = args => {
-	// 	if (selectedUser.username !== args.username) {
-	// 		if (userInRecent !== undefined) {
-	// 			if (userInRecent.unread !== 0) {
-	// 				fetch(`/resetUnread/${token}/${user.username}`)
-	// 			}
-	// 		}
-	// 		dispatch(setSelectedUser(args))
-	// 	}
-	// }
-	const setComp = (obj) => {
-		dispatch(setComponents(obj))
+	const selectedUser = useSelector(state => state.other.currentSelectedUser)
+	const handleClick = () => {
+		if (selectedUser.username !== user.username) {
+				// if (userInRecent.unread !== 0) {
+				// 	fetch(`/resetUnread/${token}/${user.username}`)
+				// }
+			dispatch(setSelectedUser(user))
+			dispatch(fetchMessages({friendsName: user.username, token: id}))
+		}
 	}
 	return (
 		<Link to='chat'>
 			<ListItem	button 
 				className={classses.listItem}
 				selected={user.username === selectedUser.username}
-	  		onClick={() => {
-	  		 setSelected(user)
-	  		}}>
+	  		onClick={handleClick}>
 	    		<ListItemIcon>
 			      <UserAvatar 
 				      username={user.username} 
 				      badge={user.status === 'online' ? true : false}
-				      status={user.status}
 				     />
 			    </ListItemIcon>
 	      	<ListItemText primary={user.username} />

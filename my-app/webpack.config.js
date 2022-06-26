@@ -20,7 +20,7 @@ module.exports = {
     "proxy": {
       "/": {
         "target": "http://localhost:3100",
-        "router":  () => "http://127.0.0.1:3001"
+        "router":  () => "http://localhost:3001"
       }
     }
   },

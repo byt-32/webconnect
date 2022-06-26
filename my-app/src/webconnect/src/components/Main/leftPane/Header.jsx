@@ -8,14 +8,12 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import common from '@material-ui/core/colors/common';
 
-
 const useStyles = makeStyles((theme) => ({
 	root: {
     flexGrow: 1,
     height: '3.7rem',
     background: common.white,
-    boxShadow: 'none',
-    borderBottom: '1px solid #bdbdbd',
+    boxShadow: '-3px 1px 1px 0px #cbcbcb',
     '& .MuiToolbar-root': {
       padding: '0 5px',
       height: '100%'
