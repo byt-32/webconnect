@@ -17,7 +17,7 @@ const useStyles = makeStyles(() => ({
 		background: common.white,
 		minWidth: 250,
 		maxWidth: 400,
-		width: 300,
+		width: 330,
 		overflowY: 'scroll'
 	}
 }))

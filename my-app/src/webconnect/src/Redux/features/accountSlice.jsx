@@ -30,7 +30,6 @@ const accountSlice = createSlice({
 	reducers: {
 		updateSettings: (state, action) => {
 			const payload = action.payload
-			console.log(payload)
 			state.account.settings = {...state.account.settings, ...payload}
 			localStorage.setItem('settings', JSON.stringify(state.account.settings))
 		},

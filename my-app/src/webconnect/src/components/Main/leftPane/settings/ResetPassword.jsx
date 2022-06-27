@@ -1,75 +1,82 @@
-import styles from '../../../../stylesheet/main.module.css'
+import React from 'react'
+
 import TextField from '@material-ui/core/TextField'
 import Button from '@material-ui/core/Button'
 import InputAdornment from '@material-ui/core/InputAdornment'
 import { makeStyles } from '@material-ui/core/styles';
-import React from 'react'
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
+import { Alert } from '@material-ui/lab';
+
+import { Visibility, VisibilityOff } from '@material-ui/icons'
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
-import { useDispatch, useSelector } from 'react-redux'
-import { Preloader, ThreeDots } from 'react-preloader-icon'
 import LockSharpIcon  from '@material-ui/icons/LockSharp'
 import SecurityIcon  from '@material-ui/icons/Security'
 import Snackbar from '@material-ui/core/Snackbar'
-import { Alert } from '@material-ui/lab';
+import RepeatIcon from '@material-ui/icons/Repeat';
+
+import { Preloader, ThreeDots } from 'react-preloader-icon'
+
 import { setComponents } from '../../../../Redux/features/componentSlice'
+import { useDispatch, useSelector } from 'react-redux'
+
+import Header from '../Header'
+import NetworkProgress from './NetworkProgress'
 
 const useStyles = makeStyles({
-	input: {
-		'& .MuiOutlinedInput-root input': {
-			padding: '10px',
-			fontSize: '17px'
-		}
+	body: {
+		margin: '20px 0'
 	},
-	app: {
-		background: '#fff',
-		boxShadow: 'none',
-		borderBottom: '1px solid #d1d1d1',
-		fontSize: '90%',
-		padding: '13px 0'
-	},
-	toolbar:{
-		justifyContent: 'space-between',
-		minHeight: 'auto',
-		paddingLeft: '15px'
-	},
-	headerItem: {
+	form: {
+		width: '90%',
+		margin: '0 auto',
 		display: 'flex',
-		alignItems: 'center',
-		marginLeft: '5px'
-	},
-	h6: {
-		fontSize: '17px',
-		marginLeft: '10px',
-		position: 'relative',
-	},
-	backBtn: {
-		fontSize: '1.2rem !important'
-	},
-	input: {
-		width: '100%',
-		'& .MuiInputBase-input': {
-			padding: '10px',
-			fontSize: '13.5px'
+		flexDirection: 'column',
+		'& button, span, input': {
+			fontFamily: 'helvetica !important',
+			fontSize: '.9rem'
+		},
+		'& .MuiFormControl-root': {
+			paddingBottom: 10
+		},
+		'& .MuiButtonGroup-root': {
+			marginTop: 10,
+			flexDirection: 'column',
+			'& button': {
+				marginBottom: 10,
+				color: '#fff',
+			}
 		}
 	},
-	alert: {
-		width: '100%'
+	input: {
+		'& .MuiOutlinedInput-root': {
+			'& input': {
+				padding: '10px',
+				fontSize: '.95rem',
+			},
+			'& .MuiSvgIcon-root': {
+				fontSize: '1.2rem'
+			}
+		}
 	},
-	appBody: {
-		overflow: 'scroll'
-	}
+	
 })
 
 const ResetPassword = () => {
-	const userId = useSelector(state => state.globalProps.user.contacts.id)
+	const {id} = JSON.parse(localStorage.getItem('details'))
 	const dispatch = useDispatch()
 	const classes = useStyles()
+	const [showProgress, setProgress] = React.useState(false)
 	const [open, setOpen] = React.useState(false)
 	const [passwordUpdate, setUpdate] = React.useState(false)
+
+	const [showPassword, handlePV] = React.useState({
+		former: false, _new: false, confirm: false
+	})
+
 	const [values, setInputs] = React.useState({
 		former: '', _new: '', confirm: ''
 	})
@@ -84,7 +91,7 @@ const ResetPassword = () => {
 	}
 	const updatePassword  = async (val) => {
 		setUpdate(true)
-		fetch(`/api/form/updatePassword/${userId}`, {
+		fetch(`/user/updatePassword/${id}`, {
 			method: 'post',
 			headers: {
 				'Content-Type': 'application/json'
@@ -104,8 +111,8 @@ const ResetPassword = () => {
 	}
 	const matchPassword = async (val) => {
 		setUpdate(true)
-		return await fetch(`/api/form/matchPassword/${userId}`, {
-			method: 'post',
+		return await fetch(`/user/matchPassword/${id}`, {
+			method: 'put',
 			headers: {
 				'Content-Type': 'application/json'
 			},
@@ -153,98 +160,106 @@ const ResetPassword = () => {
 		if (ele === '_new') setInputs({...values, _new: input})
 		if (ele === 'confirm') setInputs({...values, confirm: input})
 	}
- const [height, setHeight] = React.useState(`${window.innerHeight - 30}px`)
-  window.onresize = () => {
-  	setHeight(`${window.innerHeight - 30}px`)
-  }
+
+	const setPasswordVisibility = which => {
+		handlePV( {...showPassword, [`${which}`]: !showPassword[`${which}`] } )
+	}
+ 
 	return (
-		<div className={[styles.component, styles.reset, styles.animate__animated, styles.animate__fadeInLeft].join(' ')}>
-			<AppBar position="static" className={classes.app} >
-			  <Toolbar className={classes.toolbar} >
-			  	<div className={classes.headerItem} >
-				    <IconButton edge="start" color="inherit" aria-label="menu" onClick={() => {
-				    	setComp({component: 'settings', value: true})
-				    }} >
-				      <KeyboardBackspaceIcon className={classes.backBtn} />
-				    </IconButton>
-				    <Typography variant="h6" className={classes.h6} classes={{root: styles.appH6}} >
-				      Reset Password
-				    </Typography>
-			    </div>
-			  </Toolbar>
-			</AppBar>
-			<div className={[styles.resetBody, styles.settingsComp, styles.appBody].join(' ')} style={{
-				height: height
-			}} >
-				<form onSubmit={performReset}>
-					<div className={styles.inputGroup}>
-						<div className={styles.inputField}>
-							<TextField variant='outlined' className={classes.input} classes={{root: styles.inputReset}}
-							onChange={e => setValue(e.target.value, 'former')} value={values.former} 
-							placeholder='Former password' type='password'
-							required
-							error={error.former}
-							helperText={help.former}
-							InputProps={{
-					    	startAdornment: <InputAdornment classes={{root: styles.passwordIcon}} position='start'>
-					    		<SecurityIcon fontSize='small' color='secondary' />
-					    	</InputAdornment>
-					    }}
-							/>
-						</div>
-						<div className={styles.inputField}>
-							<TextField variant='outlined' className={classes.input} classes={{root: styles.inputReset}}
-							onChange={e => setValue(e.target.value, '_new')} value={values._new} 
-							placeholder='New password' type='password'
-							required
-							error={error._new}
-							InputProps={{
-					    	startAdornment: <InputAdornment classes={{root: styles.passwordIcon}} position='start'>
-					    		<LockSharpIcon fontSize='small' color='secondary' />
-					    	</InputAdornment>
-					    }}
-							/>
-						</div>
-						<div className={styles.inputField}>
-							<TextField variant='outlined' className={classes.input} classes={{root: styles.inputReset}}
-							onChange={e => setValue(e.target.value, 'confirm')} value={values.confirm} 
-							placeholder='Confirm password' type='password'
-							required
-							error={error.confirm}
-							helperText={help.confirm}
-							InputProps={{
-					    	startAdornment: <InputAdornment classes={{root: styles.passwordIcon}} position='start'>
-					    		<LockSharpIcon fontSize='small' color='secondary' />
-					    	</InputAdornment>
-					    }}
-							/>
-						</div>
-					</div>
-					<div className={[styles.inputGroup, styles.inputGroupButton].join(' ')}>
+		<div className={classes.resetPassword} >
+	  	<Header>
+				<IconButton onClick={() => setComp({component: 'settings', value: true})}>
+					<KeyboardBackspaceIcon />
+				</IconButton>
+				<Typography > Reset Password </Typography>
+				{ passwordUpdate &&
+					<NetworkProgress />
+				}
+			</Header>
+			<div className={classes.body}>
+				<form onSubmit={performReset} className={classes.form} >
+					<TextField 
+						variant='outlined'
+						onChange={e => setValue(e.target.value, 'former')} 
+						className={classes.input}
+						value={values.former} 
+						placeholder='Former password' type='password'
+						required
+						error={error.former}
+					  type={showPassword.former ? 'text' : 'password'}
+						helperText={help.former}
+						InputProps={{
+							startAdornment: <InputAdornment position='start'>
+				    		<SecurityIcon color='secondary' />
+				    	</InputAdornment>,
+				    	endAdornment: <InputAdornment position='end' >
+				    		<IconButton color='secondary' aria-label='Toggle password visibility' 
+				    			onClick={() => setPasswordVisibility('former')}>
+				    			{showPassword.former ? <Visibility /> : <VisibilityOff />}
+				    		</IconButton>
+				    	</InputAdornment>
+				    }}
+					/>
+					<TextField variant='outlined' 
+						className={classes.input}
+						onChange={e => setValue(e.target.value, '_new')} 
+						value={values._new} 
+						placeholder='New password' type='password'
+						required
+						error={error._new}
+					  type={showPassword._new ? 'text' : 'password'}
+						InputProps={{
+							startAdornment: <InputAdornment position='start'>
+				    		<LockSharpIcon color='secondary' />
+				    	</InputAdornment>,
+				    	endAdornment: <InputAdornment position='end' >
+				    		<IconButton color='secondary' aria-label='Toggle password visibility' 
+				    			onClick={() => setPasswordVisibility('_new')}>
+				    			{showPassword._new ? <Visibility /> : <VisibilityOff />}
+				    		</IconButton>
+				    	</InputAdornment>
+				    }}
+					/>
+					<TextField variant='outlined' 
+						className={classes.input} 
+						onChange={e => setValue(e.target.value, 'confirm')} value={values.confirm} 
+						placeholder='Confirm password' type='password'
+						required
+						error={error.confirm}
+						helperText={help.confirm}
+					  type={showPassword.confirm ? 'text' : 'password'}
+						InputProps={{
+							startAdornment: <InputAdornment position='start'>
+				    		<RepeatIcon color='secondary' />
+				    	</InputAdornment>,
+				    	endAdornment: <InputAdornment position='end' >
+				    		<IconButton color='secondary' aria-label='Toggle password visibility' 
+				    			onClick={() => setPasswordVisibility('confirm')}>
+				    			{showPassword.confirm ? <Visibility /> : <VisibilityOff />}
+				    		</IconButton>
+				    	</InputAdornment>
+				    }}
+					/>
+					<ButtonGroup>
 						<Button 
-						variant='contained' 
-						disabled={passwordUpdate}
-						classes={{root: [styles.buttonUpdate, styles.resetButton].join(' ')}} 
-						type='submit'> 
-							{passwordUpdate && <Preloader
-							 use={ThreeDots}
-							 strokeWidth={10}
-							 size={25}
-							 strokeColor='#fff'
-							 duration={1000}
-							  />} 
-							 &nbsp; {!passwordUpdate && 'Update Password' }
+							variant='contained' 
+							disabled={passwordUpdate}
+							type='submit'
+							color='primary'
+						> 
+							Update password
 						</Button>
 						<Button 
-						onClick={() => {
-							setComp({component: 'settings', value: true})
-						}}
-						variant='contained' 
-						classes={{root: [styles.buttonCancel, styles.resetButton].join(' ')}}
-						type='button'> 
-							 &nbsp;Cancel
+							onClick={() => {
+								setComp({component: 'settings', value: true})
+							}}
+							color='primary'
+							variant='contained' 
+							type='button'
+							> 
+								Cancel
 						</Button>
-					</div>
+					</ButtonGroup>
 				</form>
 			</div>
 			<Snackbar open={open} className={classes.alert} autoHideDuration={6000} onClose={handleClose}>

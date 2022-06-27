@@ -8,8 +8,8 @@ const initialState = {
 		stack: {
 			recentChats: false,
 			activeUsers: false,
-			settings: true,
-			resetPassword: false,
+			settings: false,
+			resetPassword: true,
 			contactInfo: false,
 			privacy: false,
 		}
