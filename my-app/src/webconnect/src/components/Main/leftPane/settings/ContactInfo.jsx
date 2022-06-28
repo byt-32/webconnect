@@ -14,7 +14,9 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Switch from '@material-ui/core/Switch';
 import Collapse from '@material-ui/core/Collapse';
+import Fade from '@material-ui/core/Fade';
 import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 
 import Divider from '@material-ui/core/Divider';
 import SpeedDial from '@material-ui/lab/SpeedDial';
@@ -37,11 +39,12 @@ import InstagramIcon from '@material-ui/icons/Instagram';
 import LinkedInIcon from '@material-ui/icons/LinkedIn';
 import TwitterIcon from '@material-ui/icons/Twitter';
 import WhatsAppIcon from '@material-ui/icons/WhatsApp';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import { makeStyles } from '@material-ui/core/styles'
 
 import { setComponents } from '../../../../Redux/features/componentSlice'
-import { addSocial, updateSocial } from '../../../../Redux/features/accountSlice'
+import { updateSocial } from '../../../../Redux/features/accountSlice'
 
 import Header from '../Header'
 import NetworkProgress from './NetworkProgress'
@@ -57,7 +60,8 @@ const useStyles = makeStyles({
 				backgroundColor: '#9696b9'
 			},
 			'& .MuiListItemText-primary': {
-				color: '#3c1908'
+				color: '#3c1908',
+				wordBreak: 'break-all'
 			},
 			'& .MuiTypography-body2': {
 				display: 'flex',
@@ -73,7 +77,8 @@ const useStyles = makeStyles({
 	speedDial: {
 		alignItems: 'flex-end',
 		position: 'absolute',
-		bottom: 0,
+		bottom: '8rem',
+		right: '1rem',
 		'& .MuiFab-primary': {
 			background: 'cornflowerblue',
 			color: '#fff'
@@ -85,11 +90,30 @@ const useStyles = makeStyles({
 	},
 	addLinkInput: {
 		width: '70%'
+	},
+	socialList: {
+		'& .MuiButton-text': {
+			textTransform: 'initial'
+		},
+		'& .MuiListItemSecondaryAction-root': {
+			right: 5,
+			'& .MuiIconButton-root': {
+				'& svg': {
+					fontSize: '1.3rem',
+					color: '#e98181'
+				}
+			},
+			'& .MuiIconButton-root:first-child': {
+				'& svg': {
+					color: '#5d7297'
+				}
+			},
+			
+		}
 	}
 })
 
 const actions = [
-	// {icon: <WhatsAppIcon  style={{color: '#04af04'}}/> , name: 'Whatsapp'},
 	{icon: <TwitterIcon style={{color: '#1DA1F2'}} /> , name: 'Twitter'},
 	{icon: <FacebookIcon style={{color: '#4267B2'}} /> , name: 'Facebook'},
 	{icon: <InstagramIcon style={{color: '#C13584'}} /> , name: 'Instagram'},
@@ -99,6 +123,7 @@ const ContactInfo = () => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const dispatch = useDispatch()
 	const classes = useStyles()
+	const [showDial, setDial] = React.useState(false)
 	let {username, gmail, privacy, socials} = useSelector(state => state.account.account)
 	const [showProgress, setProgress] = React.useState(false)
 	const [open, setOpen] = React.useState(false);
@@ -138,23 +163,23 @@ const ContactInfo = () => {
 			  		},
 			  		body: JSON.stringify({
 			  			name: openNewInput.name, 
-			  			link: input
+			  			link: input.replace('https://', '')
 			  		})
 			  	})
 			  	.then(res => res.json())
 			  	.then(res => {
 			  		setProgress(false)
-			  		const findIndex = socials.findIndex(social => social.name === res.name)
-			  		if (findIndex !== -1) {
-			  			dispatch(updateSocial(res))
-			  		} else {
-			  			dispatch(addSocial(res))
-			  		}
+			  		dispatch(updateSocial(res))
 			  	})
 				}
+			} else {
+				setNewInput({open: false})
 			}
 		}
 	}
+	// React.useEffect(() => {
+
+	// }, [])
 
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
@@ -174,13 +199,29 @@ const ContactInfo = () => {
  		setNewInput({open: true, ...which})
  	}
 
-  const toggleChecked = () => {
-  	fetch('/savePreferences', {
+ 	const handleDelete = (which) => {
+ 		setProgress(true)
+ 		fetch(`/user/deleteSocial/${id}`, {
+ 			method: 'delete',
+ 			headers: {
+  			'Content-Type': 'application/json'
+  		},
+  		body: JSON.stringify(which)
+ 		}).then(res => res.json())
+ 		.then(res => {
+ 			dispatch(updateSocial(res))
+ 			setProgress(false)
+ 		})
+ 	}
+
+  const handlePrivacySettings = (which) => {
+  	console.log(which)
+  	fetch('/user/updatePrivacy', {
   		method: 'post',
   		headers: {
   			'Content-Type': 'application/json'
   		},
-  		body: JSON.stringify({id: user.id, obj: {privacy: {gmail: !gmailPrivacy}}})
+  		body: JSON.stringify({})
   	})
   	.then(res => res.json())
   	.then(res => {
@@ -200,9 +241,7 @@ const ContactInfo = () => {
 				}
 			</Header>
 
-			<div className={classes.contactBody} style={{
-				height: '100%'
-			}} >
+			<div className={classes.contactBody}>
 				<List className={classes.list} >
 					<ListItem button>
 						<ListItemAvatar>
@@ -220,12 +259,11 @@ const ContactInfo = () => {
 			      		</>
 			      } />
 			     </ListItem>
-			     <Divider />
 
 			     {
-			     	<List subheader={
+			     	<List className={classes.socialList} subheader={
 			        <ListSubheader component="div" id="nested-list-subheader">
-			          Your social handles
+			          Other social handles
 			        </ListSubheader>
 			      }>
 			      	{socials.map(social => {
@@ -238,17 +276,34 @@ const ContactInfo = () => {
 								          {find.icon}
 								        </IconButton>
 								      </ListItemAvatar>
-								      <ListItemText primary={<a style={{textDecoration: 'underline'}} href={social.link}> {social.link} </a>}
+								      <ListItemText primary={<a style={{textDecoration: 'underline'}} target='_blank' href={`https://${social.link}`}> {social.link} </a>}
 								      	secondary={
-								      	privacy[`${name}`] ? 
+								      	<Button onClick={() => {
+								      		handlePrivacySettings(social)
+								      	}} >
+								      		{privacy[`${find.name}`] ? 
 								      		<><LockIcon />
 								      			<Typography variant='subtitle2' component='span' > Only me </Typography>
 								      		</> : 
 								      		<> <PublicIcon />
 								      			<Typography variant='subtitle2' component='span'> Public </Typography>
-								      		</>
+								      		</>}
+								      	</Button>
+								      	
 								      } />
-								     </ListItem>
+								      <ListItemSecondaryAction>
+								      	<IconButton onClick={() => {
+	            						addNewInfo(find)
+								      	}}>
+								      		<EditIcon />
+								      	</IconButton>
+							      		<IconButton onClick={() => {
+							      			handleDelete(social)
+							      		}} >
+								      		<DeleteIcon />
+								      	</IconButton>
+								      </ListItemSecondaryAction>
+								    </ListItem>
 			      			)
 			      		}
 			      	})}
@@ -257,20 +312,22 @@ const ContactInfo = () => {
 
 			     {
 			     	openNewInput.open &&
-			     	<ListItem>
-				      <ListItemAvatar>
-				        {openNewInput.icon}
-				      </ListItemAvatar>
-				      <TextField
-				      	className={classes.addLinkInput}
-						  	placeholder={`Enter a link`}
-						  	onKeyUp={listenForEnter}
-						  	onChange={handleInput}
-								error={error}
-								helperText={help}
-						  	value={input}
-						  />
-				    </ListItem>
+			     	<Fade in={openNewInput.open}>
+				     	<ListItem>
+					      <ListItemAvatar>
+					        {openNewInput.icon}
+					      </ListItemAvatar>
+					      <TextField
+					      	className={classes.addLinkInput}
+							  	placeholder={`Enter a link`}
+							  	onKeyUp={listenForEnter}
+							  	onChange={handleInput}
+									error={error}
+									helperText={help}
+							  	value={input}
+							  />
+					    </ListItem>
+					   </Fade>
 			     }
 
 				</List>

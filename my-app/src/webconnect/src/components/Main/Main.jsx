@@ -7,6 +7,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
 import {fetchRecentChats} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers } from '../../Redux/features/activeUsersSlice'
+import { fetchAccountData } from '../../Redux/features/accountSlice'
 
 import LeftPane from './leftPane/LeftPane'
 
@@ -28,6 +29,7 @@ const Main = () => {
 	useEffect(() => {
 		dispatch(fetchRecentChats(id))
 		dispatch(fetchActiveUsers(id))
+		dispatch(fetchAccountData(id))
 		// socket.connect()
 	}, [])
 

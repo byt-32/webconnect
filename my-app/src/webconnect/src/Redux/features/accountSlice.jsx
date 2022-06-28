@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-const fetchAccountData = createAsyncThunk(
+export const fetchAccountData = createAsyncThunk(
 	'fetchAccountData',
 	async (id) => {
 		const response = await fetch(`user/accountData/${id}`)
-
+		return response.json()
 	}
 )
 
@@ -16,7 +16,6 @@ const initialState = {
 		bio: '',
 		socials: [],
 		privacy: JSON.parse(localStorage.getItem('privacy')) || {
-			gmail: true,
 			Twitter: true,
 			Facebook: true,
 			Instagram: true
@@ -37,15 +36,11 @@ const accountSlice = createSlice({
 			state.account.settings = {...state.account.settings, ...payload}
 			localStorage.setItem('settings', JSON.stringify(state.account.settings))
 		},
-		addSocial: (state, action) => {
-			state.account.socials.push(action.payload)
-		},
 		updateSocial: (state, action) => {
-			const {name, link} = action.payload
-			const findIndex = state.account.socials.findIndex(social => social.name === name)
-			if (findIndex !== -1) {
-				state.account.socials[findIndex]  = action.payload
-			}
+			state.account.socials = [...action.payload]
+		},
+		updatePrivacy: (state, action) => {
+			state.account.privacy = {...state.account.privacy, ...action.payload}
 		}
 	},
 	extraReducers: builder => {
@@ -58,8 +53,8 @@ const accountSlice = createSlice({
 
 export const {
 	updateSettings,
-	addSocial,
-	updateSocial
+	updateSocial,
+	updatePrivacy
 } = accountSlice.actions
 
 export default accountSlice.reducer
