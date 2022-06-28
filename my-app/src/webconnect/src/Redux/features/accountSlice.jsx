@@ -16,6 +16,7 @@ const initialState = {
 		bio: '',
 		socials: [],
 		privacy: JSON.parse(localStorage.getItem('privacy')) || {
+			gmail: true,
 			Twitter: true,
 			Facebook: true,
 			Instagram: true
@@ -40,6 +41,7 @@ const accountSlice = createSlice({
 			state.account.socials = [...action.payload]
 		},
 		updatePrivacy: (state, action) => {
+			localStorage.setItem('privacy', JSON.stringify({ ...state.account.privacy, ...action.payload}))
 			state.account.privacy = {...state.account.privacy, ...action.payload}
 		}
 	},

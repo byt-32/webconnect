@@ -44,7 +44,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles'
 
 import { setComponents } from '../../../../Redux/features/componentSlice'
-import { updateSocial } from '../../../../Redux/features/accountSlice'
+import { updateSocial, updatePrivacy } from '../../../../Redux/features/accountSlice'
 
 import Header from '../Header'
 import NetworkProgress from './NetworkProgress'
@@ -91,10 +91,10 @@ const useStyles = makeStyles({
 	addLinkInput: {
 		width: '70%'
 	},
+	privacy: {
+		textTransform: 'initial'
+	},
 	socialList: {
-		'& .MuiButton-text': {
-			textTransform: 'initial'
-		},
 		'& .MuiListItemSecondaryAction-root': {
 			right: 5,
 			'& .MuiIconButton-root': {
@@ -124,7 +124,7 @@ const ContactInfo = () => {
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const [showDial, setDial] = React.useState(false)
-	let {username, gmail, privacy, socials} = useSelector(state => state.account.account)
+	const {username, gmail, privacy, socials} = useSelector(state => state.account.account)
 	const [showProgress, setProgress] = React.useState(false)
 	const [open, setOpen] = React.useState(false);
 	const [expand, setExpand] = React.useState(false)
@@ -215,17 +215,18 @@ const ContactInfo = () => {
  	}
 
   const handlePrivacySettings = (which) => {
-  	console.log(which)
-  	fetch('/user/updatePrivacy', {
-  		method: 'post',
+  	setProgress(true)
+  	fetch(`/user/updatePrivacy/${id}`, {
+  		method: 'put',
   		headers: {
   			'Content-Type': 'application/json'
   		},
-  		body: JSON.stringify({})
+  		body: JSON.stringify(which)
   	})
   	.then(res => res.json())
   	.then(res => {
-  		dispatch(changeSettings(res.data))
+  		setProgress(false)
+  		dispatch(updatePrivacy(which))
   	})
   }
 	return (
@@ -250,13 +251,17 @@ const ContactInfo = () => {
 			        </Avatar>
 			      </ListItemAvatar>
 			      <ListItemText primary={gmail} secondary={
-			      	privacy.gmail ? 
-			      		<><LockIcon />
-			      			<Typography variant='subtitle2' component='span' > Only me </Typography>
-			      		</> : 
-			      		<> <PublicIcon />
-			      			<Typography variant='subtitle2' component='span'> Public </Typography>
-			      		</>
+			      	<Button className={classes.privacy} onClick={() => {
+				      		handlePrivacySettings({gmail: !privacy.gmail})
+				      	}} >
+				      		{privacy.gmail ? 
+				      		<><LockIcon />
+				      			<Typography variant='subtitle2' component='span' > Only me </Typography>
+				      		</> : 
+				      		<> <PublicIcon />
+				      			<Typography variant='subtitle2' component='span'> Public </Typography>
+				      		</>}
+				      	</Button>
 			      } />
 			     </ListItem>
 
@@ -270,7 +275,7 @@ const ContactInfo = () => {
 			      		const find = actions.find(i => i.name === social.name)
 			      		if (find !== undefined) {
 			      			return (
-			      				<ListItem button key={social.name} > 
+			      				<ListItem key={social.name} > 
 											<ListItemAvatar>
 								        <IconButton>
 								          {find.icon}
@@ -278,10 +283,10 @@ const ContactInfo = () => {
 								      </ListItemAvatar>
 								      <ListItemText primary={<a style={{textDecoration: 'underline'}} target='_blank' href={`https://${social.link}`}> {social.link} </a>}
 								      	secondary={
-								      	<Button onClick={() => {
-								      		handlePrivacySettings(social)
+								      	<Button className={classes.privacy} onClick={() => {
+								      		handlePrivacySettings({[`${social.name}`]: !privacy[`${find.name}`]})
 								      	}} >
-								      		{privacy[`${find.name}`] ? 
+								      		{privacy[`${social.name}`] ? 
 								      		<><LockIcon />
 								      			<Typography variant='subtitle2' component='span' > Only me </Typography>
 								      		</> : 
