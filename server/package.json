@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js",
+    "dev": "nodemon ./src/server.js",
     "client": "cd client && cd my-app && npm start",
     "jsonserver": "cd client && cd my-app && npm run server",
     "start": "concurrently \"npm run dev\" \"npm run client \" "
   },
   "nodemonConfig": {
     "watch": [
-      "server.js"
+      "./src/"
     ]
   },
   "keywords": [],
@@ -36,6 +37,7 @@
     "node-sass-middleware": "^1.0.1",
     "peer": "^0.6.1",
     "peerjs": "^1.3.2",
+    "shado": "^1.5.0",
     "socket.io": "^4.4.1",
     "twilio": "^3.75.1",
     "uuid": "^8.3.2",

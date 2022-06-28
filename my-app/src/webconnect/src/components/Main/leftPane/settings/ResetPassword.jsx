@@ -9,7 +9,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import { Alert } from '@material-ui/lab';
+import MuiAlert from '@material-ui/lab/Alert';
 
 import { Visibility, VisibilityOff } from '@material-ui/icons'
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
@@ -35,10 +35,7 @@ const useStyles = makeStyles({
 		margin: '0 auto',
 		display: 'flex',
 		flexDirection: 'column',
-		'& button, span, input': {
-			fontFamily: 'helvetica !important',
-			fontSize: '.9rem'
-		},
+		
 		'& .MuiFormControl-root': {
 			paddingBottom: 10
 		},
@@ -46,9 +43,11 @@ const useStyles = makeStyles({
 			marginTop: 10,
 			flexDirection: 'column',
 			'& button': {
+				boxShadow: '-1px 1px 1px 0px #c3c3c3',
+				fontSize: '.84rem',
 				marginBottom: 10,
 				color: '#fff',
-			}
+			},
 		}
 	},
 	input: {
@@ -69,7 +68,6 @@ const ResetPassword = () => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const dispatch = useDispatch()
 	const classes = useStyles()
-	const [showProgress, setProgress] = React.useState(false)
 	const [open, setOpen] = React.useState(false)
 	const [passwordUpdate, setUpdate] = React.useState(false)
 
@@ -92,7 +90,7 @@ const ResetPassword = () => {
 	const updatePassword  = async (val) => {
 		setUpdate(true)
 		fetch(`/user/updatePassword/${id}`, {
-			method: 'post',
+			method: 'put',
 			headers: {
 				'Content-Type': 'application/json'
 			},
@@ -103,7 +101,7 @@ const ResetPassword = () => {
 				setUpdate(false)
 				setOpen(true)
 				setInputs({...values, former: '', _new: '', confirm: ''})
-				dispatch(setComponents({component: 'settings', value: true}))
+				// dispatch(setComponents({component: 'settings', value: true}))
 
 			}
 			// console.log(res)
@@ -130,7 +128,7 @@ const ResetPassword = () => {
 				if (_new === confirm) {
 					if (_new.length <= 4) {
 						setError({...error, confirm: true, _new: true})
-						setHelp({...help, confirm: 'Password is too short'})
+						setHelp({...help, confirm: 'Password is too short. Password length should be more than 5 characters'})
 					} else {
 						//update 
 						updatePassword({value: confirm})
@@ -188,6 +186,7 @@ const ResetPassword = () => {
 						error={error.former}
 					  type={showPassword.former ? 'text' : 'password'}
 						helperText={help.former}
+						autoComplete='current-password'
 						InputProps={{
 							startAdornment: <InputAdornment position='start'>
 				    		<SecurityIcon color='secondary' />
@@ -206,6 +205,7 @@ const ResetPassword = () => {
 						value={values._new} 
 						placeholder='New password' type='password'
 						required
+						autoComplete='new-password'
 						error={error._new}
 					  type={showPassword._new ? 'text' : 'password'}
 						InputProps={{
@@ -225,6 +225,7 @@ const ResetPassword = () => {
 						onChange={e => setValue(e.target.value, 'confirm')} value={values.confirm} 
 						placeholder='Confirm password' type='password'
 						required
+						autoComplete='new-password'
 						error={error.confirm}
 						helperText={help.confirm}
 					  type={showPassword.confirm ? 'text' : 'password'}
@@ -262,10 +263,11 @@ const ResetPassword = () => {
 					</ButtonGroup>
 				</form>
 			</div>
-			<Snackbar open={open} className={classes.alert} autoHideDuration={6000} onClose={handleClose}>
-			  <Alert onClose={handleClose} severity="success">
+			<Snackbar open={open} 
+				autoHideDuration={6000} onClose={handleClose}>
+			  <MuiAlert variant='filled' elevation={6} onClose={handleClose} severity="success">
 			    Password changed successfully
-			  </Alert>
+			  </MuiAlert>
 			</Snackbar>
 		</div>
 	)

@@ -9,8 +9,8 @@ const initialState = {
 			recentChats: false,
 			activeUsers: false,
 			settings: false,
-			resetPassword: true,
-			contactInfo: false,
+			resetPassword: false,
+			contactInfo: true,
 			privacy: false,
 		}
 		

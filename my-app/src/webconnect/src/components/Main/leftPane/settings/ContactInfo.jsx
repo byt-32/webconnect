@@ -1,143 +1,179 @@
 import React from 'react'
-import styles from '../../../../stylesheet/main.module.css'
 import { useDispatch, useSelector } from 'react-redux'
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
+
 import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton'
+
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import Avatar from '@material-ui/core/Avatar';
+import Switch from '@material-ui/core/Switch';
+import Collapse from '@material-ui/core/Collapse';
+import TextField from '@material-ui/core/TextField';
+
+import Divider from '@material-ui/core/Divider';
+import SpeedDial from '@material-ui/lab/SpeedDial';
+import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
+
+import CheckIcon from '@material-ui/icons/Check'
+import CircularProgress from '@material-ui/core/CircularProgress';
+import EditAttributesIcon from '@material-ui/icons/EditAttributes';
+import PublicIcon from '@material-ui/icons/Public';
+import AddCircleIcon from '@material-ui/icons/AddCircle'
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace'
 import EditIcon from '@material-ui/icons/Edit'
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline'
-import IconButton from '@material-ui/core/IconButton'
-import { setComponents } from '../../../../Redux/features/componentSlice'
-import { makeStyles } from '@material-ui/core/styles'
-import AddCircleIcon from '@material-ui/icons/AddCircle'
 import LockIcon from '@material-ui/icons/Lock'
-// import Menu from '@material-ui/core/Menu'
-// import MenuItem from '@material-ui/core/MenuItem'
-// import MoreVertIcon from '@material-ui/icons/MoreVert'
-// import FacebookIcon from '@material-ui/icons/Facebook'
-// import TwitterIcon from '@material-ui/icons/Twitter'
-// import TextField from '@material-ui/core/TextField';
-// import Dialog from '@material-ui/core/Dialog';
-// import DialogActions from '@material-ui/core/DialogActions';
-// import DialogContent from '@material-ui/core/DialogContent';
-// import DialogContentText from '@material-ui/core/DialogContentText';
-// import DialogTitle from '@material-ui/core/DialogTitle';
-import Switch from '@material-ui/core/Switch';
-import PublicIcon from '@material-ui/icons/Public';
+import CallIcon from '@material-ui/icons/Call';
+import DraftsIcon from '@material-ui/icons/Drafts';
+import FacebookIcon from '@material-ui/icons/Facebook';
+import InstagramIcon from '@material-ui/icons/Instagram';
+import LinkedInIcon from '@material-ui/icons/LinkedIn';
+import TwitterIcon from '@material-ui/icons/Twitter';
+import WhatsAppIcon from '@material-ui/icons/WhatsApp';
+
+import { makeStyles } from '@material-ui/core/styles'
+
+import { setComponents } from '../../../../Redux/features/componentSlice'
+import { addSocial, updateSocial } from '../../../../Redux/features/accountSlice'
+
+import Header from '../Header'
+import NetworkProgress from './NetworkProgress'
 
 const useStyles = makeStyles({
-	app: {
-		background: '#fff',
-		boxShadow: 'none',
-		borderBottom: '1px solid #d1d1d1',
-		fontSize: '90%',
-		padding: '13px 0'
-	},
-	toolbar:{
-		justifyContent: 'space-between',
-		minHeight: 'auto',
-		paddingRight: '10px',
-		paddingLeft: '15px'
-	},
-	headerItem: {
-		display: 'flex',
-		alignItems: 'center',
-		marginLeft: '5px'
-	},
-	h6: {
-		fontSize: '17px',
-		marginLeft: '10px',
+	contactInfo: {
 		position: 'relative',
+		height: '100%'
 	},
-	backBtn: {
-		fontSize: '1.2rem !important'
-	},
-	contactBody: {
-		padding: '20px 20px 20px 0',
-		position: 'relative'
-	},
-	contactsGroup: {
-
-	},
-	contactsItem: {
-		marginBottom: '20px',
-		position: 'relative',
-		overflow: 'hidden',
-		paddingLeft: '15px',
-		borderLeft: '1px solid #cdcdcd',
-		'& ::after': {
-			content: '',
-			position: 'absolute',
-			height: '10px',
-			width: '100%',
-			background: '#000'
+	list: {
+		'& .MuiListItem-root': {
+			'& .MuiAvatar-root': {
+				backgroundColor: '#9696b9'
+			},
+			'& .MuiListItemText-primary': {
+				color: '#3c1908'
+			},
+			'& .MuiTypography-body2': {
+				display: 'flex',
+				alignItems: 'center',
+				'& .MuiSvgIcon-root': {
+					fontSize: '1.1rem',
+					marginRight: 5,
+					color: '#858587'
+				}
+			},
 		}
 	},
-	itemHeader: {
-		'& h6': {
-			letterSpacing: '.5px',
-			fontSize: '101.5%'
-		},
-		'& h6:first-child': {
-			color: '#000'
-		},
-		'& h6:last-of-type': {
-			color: '#6495ed',
-			marginLeft: '5px',
-			'& span': {
-				fontSize: '90%',
-				color: '#9f9f9f',
-				fontStyle: 'italic'
-			}
-		}
-	},
-	addContact: {
+	speedDial: {
+		alignItems: 'flex-end',
 		position: 'absolute',
-		bottom: '30%',
-		right: '29px'
-	},
-	menu: {
-		'& div': {
-			boxShadow: 'none',
-			background: 'transparent'
-		},
-		'& button': {
-			display: 'block'
+		bottom: 0,
+		'& .MuiFab-primary': {
+			background: 'cornflowerblue',
+			color: '#fff'
 		}
 	},
-	itemBody: {
-		paddingLeft: '5px',
-	},
-	priv: {
-		'& span': {
-			fontSize: '14px',
-		},
-		display: 'flex', 
-		float: 'right'
-	},
-	privacyState: {
+	collapseDiv: {
 		display: 'flex',
-		alignItems: 'center',
-		marginLeft: '10px'
+		justifyContent: 'center'
 	},
-	appBody: {
-		overflow: 'scroll'
+	addLinkInput: {
+		width: '70%'
 	}
-
 })
 
+const actions = [
+	// {icon: <WhatsAppIcon  style={{color: '#04af04'}}/> , name: 'Whatsapp'},
+	{icon: <TwitterIcon style={{color: '#1DA1F2'}} /> , name: 'Twitter'},
+	{icon: <FacebookIcon style={{color: '#4267B2'}} /> , name: 'Facebook'},
+	{icon: <InstagramIcon style={{color: '#C13584'}} /> , name: 'Instagram'},
+]
+
 const ContactInfo = () => {
-	const classes = useStyles()
-	const showThis = useSelector(state => state.globalProps.components.stack[4].contactInfo)
-	const user = useSelector(state => state.globalProps.user.contacts)
-	const gmailPrivacy = useSelector(state => state.globalProps.user.settings.privacy.gmail)
+	const {id} = JSON.parse(localStorage.getItem('details'))
 	const dispatch = useDispatch()
+	const classes = useStyles()
+	let {username, gmail, privacy, socials} = useSelector(state => state.account.account)
+	const [showProgress, setProgress] = React.useState(false)
+	const [open, setOpen] = React.useState(false);
+	const [expand, setExpand] = React.useState(false)
+	const [value, setValue] = React.useState('');
+
+	const [error, setError] = React.useState(false)
+	const [help, setHelp] = React.useState('')
+
+	const [openNewInput, setNewInput] = React.useState({
+		open: false,
+	})
+	const [isValidatingLink, setValidating] = React.useState(false)
+	const [input, setInput] = React.useState('')
+
+	const handleInput = ({target}) => setInput(target.value.trim())
+	const listenForEnter = (e) => {
+		setError(false)
+		setHelp('')
+		if (e.key === "Escape") {
+			setNewInput({open: false})
+		}
+		if (e.key === 'Enter') {
+			if (input !== '') {
+				if (!input.includes('https://')) {
+					setError(true)
+					setHelp('Link must contain https://')
+				} else if (input === 'https://') {
+					setError(true)
+					setHelp('Complete the link with your username')
+				} else {
+					setProgress(true)
+					fetch(`/user/updateSocials/${id}`, {
+						method: 'put',
+			  		headers: {
+			  			'Content-Type': 'application/json'
+			  		},
+			  		body: JSON.stringify({
+			  			name: openNewInput.name, 
+			  			link: input
+			  		})
+			  	})
+			  	.then(res => res.json())
+			  	.then(res => {
+			  		setProgress(false)
+			  		const findIndex = socials.findIndex(social => social.name === res.name)
+			  		if (findIndex !== -1) {
+			  			dispatch(updateSocial(res))
+			  		} else {
+			  			dispatch(addSocial(res))
+			  		}
+			  	})
+				}
+			}
+		}
+	}
+
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
 	}
-	const [value, setValue] = React.useState('');
-  const [privacy, setPrivacy] = React.useState(false)
+	const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const showCollapse = () => {
+  	setExpand(!expand)
+  }
+
+ 	const addNewInfo = (which) => {
+ 		setNewInput({open: true, ...which})
+ 	}
+
   const toggleChecked = () => {
   	fetch('/savePreferences', {
   		method: 'post',
@@ -151,150 +187,116 @@ const ContactInfo = () => {
   		dispatch(changeSettings(res.data))
   	})
   }
-	// const [anchorEl, setAnchorEl] = React.useState({
- //  	addButton: null, dialog: null
- //  })
- //  const [clickedSocial, setClickedSocial] = React.useState('')
-	// const open = {
-	// 	addButton: Boolean(anchorEl.addButton),
-	// 	dialog: Boolean(anchorEl.dialog)
-	// }
-	// const handleClickSocials = (type) => {
-	// 	setClickedSocial(type)
-	// }
-	// const toggleMenu = (ele, event) => {
-	// 	if (ele === 'addButton') setAnchorEl({...anchorEl, addButton: event.target})
-	// 	if (ele === 'dialog') setAnchorEl({...anchorEl, dialog: event.target})
-	// }
-	
-	// const handleClose =(ele) => {
-	// 	if (ele === 'addButton') setAnchorEl({...anchorEl, addButton: null})
-	// 	if (ele === 'dialog') setAnchorEl({...anchorEl, dialog: null})
-	// }
-	 const [height, setHeight] = React.useState(`${window.innerHeight - 30}px`)
-  window.onresize = () => {
-  	setHeight(`${window.innerHeight - 30}px`)
-  }
 	return (
-		<section className={[styles.component, styles.contactInfo, styles.animate__animated, styles.animate__fadeInRight].join(' ')}>
-			<AppBar position="static" className={classes.app} >
-			  <Toolbar className={classes.toolbar} >
-			  	<div className={classes.headerItem} >
-				    <IconButton edge="start" color="inherit" aria-label="back" onClick={() => {
-				    	setComp({component: 'settings', value: true})
-				    }} >
-				      <KeyboardBackspaceIcon className={classes.backBtn} />
-				    </IconButton>
-				    <Typography variant="h6" className={classes.h6} classes={{root: styles.appH6}}>
-				      Contact Info
-				    </Typography>
-			    </div>
-			    
-			  </Toolbar>
-			</AppBar>
-			<div className={[classes.contactBody, styles.appBody, styles.settingsComp].join(' ')} style={{
-				height: height
+		<section className={classes.contactInfo} >
+			
+			<Header>
+				<IconButton onClick={() => setComp({component: 'settings', value: true})}>
+					<KeyboardBackspaceIcon />
+				</IconButton>
+				<Typography > Contact info </Typography>
+				{ showProgress &&
+					<NetworkProgress />
+				}
+			</Header>
+
+			<div className={classes.contactBody} style={{
+				height: '100%'
 			}} >
-				<div className={classes.contactsGroup}>
+				<List className={classes.list} >
+					<ListItem button>
+						<ListItemAvatar>
+			        <Avatar>
+			          <DraftsIcon />
+			        </Avatar>
+			      </ListItemAvatar>
+			      <ListItemText primary={gmail} secondary={
+			      	privacy.gmail ? 
+			      		<><LockIcon />
+			      			<Typography variant='subtitle2' component='span' > Only me </Typography>
+			      		</> : 
+			      		<> <PublicIcon />
+			      			<Typography variant='subtitle2' component='span'> Public </Typography>
+			      		</>
+			      } />
+			     </ListItem>
+			     <Divider />
 
-					<div className={classes.contactsItem}>
-						<div className={classes.itemHeader}>
-							<Typography component='h6'> Name </Typography>
-							<Typography component='h6'> {user.username} </Typography>
-						</div>
-					</div>
+			     {
+			     	<List subheader={
+			        <ListSubheader component="div" id="nested-list-subheader">
+			          Your social handles
+			        </ListSubheader>
+			      }>
+			      	{socials.map(social => {
+			      		const find = actions.find(i => i.name === social.name)
+			      		if (find !== undefined) {
+			      			return (
+			      				<ListItem button key={social.name} > 
+											<ListItemAvatar>
+								        <IconButton>
+								          {find.icon}
+								        </IconButton>
+								      </ListItemAvatar>
+								      <ListItemText primary={<a style={{textDecoration: 'underline'}} href={social.link}> {social.link} </a>}
+								      	secondary={
+								      	privacy[`${name}`] ? 
+								      		<><LockIcon />
+								      			<Typography variant='subtitle2' component='span' > Only me </Typography>
+								      		</> : 
+								      		<> <PublicIcon />
+								      			<Typography variant='subtitle2' component='span'> Public </Typography>
+								      		</>
+								      } />
+								     </ListItem>
+			      			)
+			      		}
+			      	})}
+			     	</List>
+			     }
 
-					<div className={classes.contactsItem}>
-						<div className={classes.itemHeader}>
-							<Typography component='h6'> Email Address </Typography>
-							<Typography component='h6'> {user.email} <span> (primary) </span>  </Typography>
-						</div>
-						<div className={classes.itemBody}>
-							<div className={classes.priv} >
-								<Typography component='span'> Privacy: </Typography>
-								<Switch name='privacy' size="small" checked={gmailPrivacy} onChange={toggleChecked} />
-								{gmailPrivacy ? 
-									<div className={classes.privacyState} >
-										<LockIcon style={{fontSize: '1rem', margin: '0px 2px 0px 5px'}} />
-										<Typography component='span'> Only me </Typography>
-									</div>
-								: <div className={classes.privacyState} >
-										<PublicIcon style={{fontSize: '1rem', margin: '0px 2px 0px 5px'}} />
-										<Typography component='span'> Public </Typography>
-									</div>
-								}
-							</div>
-							
-						</div>
-					</div>
+			     {
+			     	openNewInput.open &&
+			     	<ListItem>
+				      <ListItemAvatar>
+				        {openNewInput.icon}
+				      </ListItemAvatar>
+				      <TextField
+				      	className={classes.addLinkInput}
+						  	placeholder={`Enter a link`}
+						  	onKeyUp={listenForEnter}
+						  	onChange={handleInput}
+								error={error}
+								helperText={help}
+						  	value={input}
+						  />
+				    </ListItem>
+			     }
 
-					{/*<div className={classes.contactsItem}>
-						<div className={classes.itemHeader}>
-							<Typography component='h6'> Phone Number </Typography>
-							<Typography component='h6'> null </Typography>
-						</div>
-						<div className={classes.itemBody}>
-							
-						</div>
-					</div>*/}
-				</div>
+				</List>
 
-				{/*<div className={[classes.addContact, styles.animate__animated, styles.animate__fadeIn].join(' ')}>
-		    	<Menu open={open.addButton} variant='menu' anchorEl={anchorEl.addButton}
-		    	 onClose={() => handleClose('addButton')} getContentAnchorEl={null} anchorOrigin={{
-				      vertical: 'top',
-				      horizontal: 'center',
-				    }}
-				    transformOrigin={{
-			      vertical: 'bottom',
-			      horizontal: 'center',}}
-			      className={classes.menu}
-			      >
-						<IconButton onClick={(e) => {
-							handleClose('addButton')
-							toggleMenu('dialog', e)
-							handleClickSocials('facebook')
-							}
-						}>
-							<FacebookIcon style={{color: '#507bc7', fontSize: '3rem'}} />
-						</IconButton>
-						<IconButton onClick={(e) => {
-							handleClose('addButton')
-							toggleMenu('dialog', e)
-							handleClickSocials('twitter')
-							}
-						}>
-							<TwitterIcon style={{color: '#1DA1F2', fontSize: '3rem'}} />
-						</IconButton>
-					</Menu>
-					<IconButton onClick={ (e) => toggleMenu('addButton',e)}>
-						<AddCircleIcon color='primary' style={{fontSize: '2.8rem'}} />
-					</IconButton>
-				</div>*/}
+				<SpeedDial
+	        ariaLabel="SpeedDial openIcon"
+	        className={classes.speedDial}
+	        icon={<SpeedDialIcon openIcon={<EditIcon />} />}
+	        onClose={handleClose}
+	        onOpen={handleOpen}
+	        open={open}
+	      >
+	        {actions.map((action) => (
+	          <SpeedDialAction
+	          	style={{...action.style, color: '#000'}}
+	            key={action.name}
+	            icon={action.icon}
+	            tooltipTitle={action.name}
+	            onClick={() => {
+	            	handleClose()
+	            	addNewInfo(action)
+	            }}
+	          />
+	        ))}
+	      </SpeedDial>
 			</div>
-			{/*<Dialog open={open.dialog} onClose={(e) => handleClose('dialog')} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title"> Add contact information </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-           {`Enter your ${clickedSocial} handle`}
-          </DialogContentText>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="name"
-            type="text"
-            fullWidth
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={(e) => handleClose('dialog')} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={(e) => handleClose('dialog')} color="primary">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>*/}
 		</section>
 	)
 }

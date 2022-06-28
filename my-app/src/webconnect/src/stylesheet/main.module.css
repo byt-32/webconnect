@@ -6,11 +6,11 @@ html, body, div, button, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p
 	background: transparent;
 }
 @font-face {
-	font-family: Montserrat;
-	src: url('../../../../public/fonts/Montserrat/static/Montserrat-Regular.ttf');
+	font-family: Quicksand;
+	src: url('../../../../public/fonts/Quicksand/Quicksand-Regular.ttf');
 }
 body {
-  font-family: Montserrat, "Open Sans", sans-serif !important;
+  font-family: Quicksand, "Open Sans", sans-serif !important;
   color: #272829;
   overflow: hidden;
 }
@@ -206,7 +206,7 @@ body {
 	padding: 0;
 	font-size: 99.5%;
 	box-sizing: border-box;
-	font-family: Montserrat !important; 
+	font-family: Quicksand !important; 
 	letter-spacing: .2px;
 	user-select: none;
 }

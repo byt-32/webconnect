@@ -57,14 +57,14 @@ const chatSlice = createSlice({
 				let ls = JSON.parse(localStorage.getItem('messages')) || []
 				if (ls.length === 0) {
 					ls.push({
-						username: username, color: senderInUsers.color, 
-						messages: [{me: me, message: message, reply: reply, timestamp: date, chatId: chatId}]
+						username: username,
+						messages: [{me: me, message: message, reply: reply, read: false, timestamp: date, chatId: chatId}]
 					})
 					localStorage.setItem('messages', JSON.stringify(ls))
 				} else {
 					const foundIndex = ls.findIndex( chat => chat.username === username)
 					if (foundIndex !== -1) {
-						ls[foundIndex].messages.push({me: me, message: message, reply: reply, timestamp: date, chatId: chatId})
+						ls[foundIndex].messages.push({me: me, message: message, reply: reply, read: false, timestamp: date, chatId: chatId})
 						localStorage.setItem('messages', JSON.stringify(ls))
 						
 						// if (ls[foundIndex].messages.length >= 5) {
@@ -74,8 +74,7 @@ const chatSlice = createSlice({
 					} else {
 						ls.push({
 							username: username, 
-							color: senderInUsers.color, 
-							messages: [{me: me, message: message, reply: reply, timestamp: date, chatId: chatId}]
+							messages: [{me: me, message: message, reply: reply, read: false, timestamp: date, chatId: chatId}]
 						})
 						localStorage.setItem('messages', JSON.stringify(ls))
 					}
@@ -98,13 +97,13 @@ const chatSlice = createSlice({
 						// 	state.privateChats[foundIndex].messages.splice(0,1)
 						// }
 						state.privateChats[foundIndex].messages.push({
-							me: me, message: message, reply: reply, timestamp: date, chatId: chatId
+							me: me, message: message, reply: reply, read: false, timestamp: date, chatId: chatId
 						})
 					} else {
 						state.privateChats.push({
 							username: username, 
 							messages: [{
-								me: me, message: message, reply: reply, timestamp: date, chatId: chatId
+								me: me, message: message, reply: reply, read: false, timestamp: date, chatId: chatId
 							}]
 						})
 					}

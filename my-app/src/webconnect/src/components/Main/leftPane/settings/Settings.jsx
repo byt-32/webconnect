@@ -112,7 +112,7 @@ const useStyles = makeStyles((theme) => ({
     }
 	},
 	nested: {
-		paddingLeft: theme.spacing(4),
+		padding: '0 0 0 32px'
 	}
 }))
 
