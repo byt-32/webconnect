@@ -8,7 +8,6 @@ import grey from '@material-ui/core/colors/grey';
 import {fetchRecentChats, setRecentOnline, setRecentDisconnect} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
-import { storeOnlineUsers, storeSocketId } from '../../Redux/features/socketSlice'
 
 import LeftPane from './leftPane/LeftPane'
 
@@ -48,7 +47,6 @@ const Main = () => {
 			dispatch(setActiveDisconnect(user))
 			dispatch(setRecentDisconnect(user))
 		})
-		// dispatch(storeOnlineUsers(socket))
 
 		dispatch(fetchRecentChats(id))
 		dispatch(fetchActiveUsers(id))
