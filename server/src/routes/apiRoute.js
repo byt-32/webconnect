@@ -3,10 +3,9 @@ import User from '../models/User.js'
 
 const apiRoute = express.Router()
 
-apiRoute.get('/users/:requesterId', async (request, response) => {
-	const { requesterId } = request.params
- 	const users = await User.find({_id: {$ne: requesterId}}, {username: 1,  _id: 0})
- 	// console.log(users)
+apiRoute.get('/users/:id', async (request, response) => {
+	const { id } = request.params
+ 	const users = await User.find({_id: {$ne: id}}, {username: 1, bio: 1, joined: 1,  _id: 0})
  	response.send({users: users})
 })
 
