@@ -44,9 +44,9 @@ const UserList = ({user, style, secondaryItems}) => {
 				selected={user.username === selectedUser.username}
 	  		onClick={handleClick}>
 	    		<ListItemIcon>
-			      <UserAvatar 
+			      <UserAvatar
 				      username={user.username} 
-				      badge={user.status === 'online' ? true : false}
+				      badge={user.online ? true : false}
 				     />
 			    </ListItemIcon>
 	      	<ListItemText primary={user.username} />

@@ -5,14 +5,14 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
-import TextField from '@material-ui/core/TextField'
 import IconButton from '@material-ui/core/IconButton'
 import InputBase from "@material-ui/core/InputBase";
 import Menu from '@material-ui/core/Menu'
 import Typography from '@material-ui/core/Typography';
 import MenuItem from '@material-ui/core/MenuItem'
 import Fade from '@material-ui/core/Fade';
-import Alert from '@material-ui/lab/Alert'
+import MuiAlert from '@material-ui/lab/Alert';
+import Snackbar from '@material-ui/core/Snackbar'
 
 import SendIcon from '@material-ui/icons/Send';
 import TagFacesIcon from '@material-ui/icons/TagFaces';
@@ -87,16 +87,18 @@ const MessagesPane = ({friend}) => {
 	const classes = useStyles()
 
 	const dispatch = useDispatch()
+	// const user = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username))
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
-	const status = useSelector(state => state.account.account.status)
-	// const loader = useSelector(state => state.globalProps.loader)
+	const accountIsOnline = useSelector(state => state.account.account.online)
 	
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const [isTyping, typing] = React.useState(false)
 	const [input, setInput] = React.useState('')
 	const [showPicker, setPicker] = React.useState(false)
-	const [fetchErr, setFetchErr] = React.useState(false)
-	
+	const [networkError, setNetworkError] = React.useState(false)
+	const [online, setOnline] = React.useState('')
+
+	// console.log(user)
 	const toggleMenu = (event) => {
 		setAnchorEl(event.target)
 	}
@@ -107,6 +109,9 @@ const MessagesPane = ({friend}) => {
 	const handleTextInput = (e) => {
 		setInput(e.target.value)
 	}
+	const hideNetworkError = () => {
+		setNetworkError(false)
+	}
 
 	const sendMessage = async () => {
 		const dateNow = () => Date.now()
@@ -114,9 +119,10 @@ const MessagesPane = ({friend}) => {
 		let chatId = dateNow()
 
 		if (input !== '') {
-			if (status === 'offline') {
-				// setFetchErr(true)
-			} else if (status === 'online') {
+			if (accountIsOnline) {
+				setNetworkError(false)
+			} else {
+				setNetworkError(true)
 				// setFetchErr(false)
 				dispatch(storePrivateChats({
 					username: friend.username, 
@@ -130,7 +136,7 @@ const MessagesPane = ({friend}) => {
 					}
 				}))
 				setInput('')
-				dispatch(retrieveOTM({input: input, chatId: chatId}))
+				// dispatch(retrieveOTM({input: input, chatId: chatId}))
 			}
 		}
 	}
@@ -153,13 +159,20 @@ const MessagesPane = ({friend}) => {
           </IconButton>
         }
         title={friend.username}
-        subheader="offline"
+        subheader={online ? 'online' : 'offline'}
       />
       <CardContent style={{
       	height: `${useWindowHeight()  - 110}px`
       }}>
         <ChatMessages chats={friend.messages} />
+        <Snackbar open={networkError} 
+				autoHideDuration={6000} onClose={hideNetworkError}>
+			  <MuiAlert variant='filled' elevation={6} onClose={hideNetworkError} severity="error">
+			    Your're currently offline
+			  </MuiAlert>
+			</Snackbar>
       </CardContent>
+      
       <CardActions >
       	<InputBase 
       		multiline

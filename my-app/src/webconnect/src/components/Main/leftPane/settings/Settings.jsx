@@ -192,7 +192,7 @@ const Settings = () => {
 			if (value.length >= 3 ) {
 				callTimer()
 				setInputCloseIcon({name: false})
-			}
+			}	
 		}
 
 		function callTimer() {
@@ -287,7 +287,9 @@ const Settings = () => {
 					</div>
 					<div className={classes.profileInfo}>
 						<div className={classes.info}>
-							{showInput.name ? <Fade in={showInput.name}>
+
+							{/*I WILL VISIT THIS LATER, FOCUSING ON WHAT MATTERS*/}
+							{/*{showInput.name ? <Fade in={showInput.name}>
 								<div className={classes.inputs}>
 									<TextField 
 										placeholder='Update user name' 
@@ -304,11 +306,10 @@ const Settings = () => {
 											onClick={() => handleProfileUpdate({name: false})} />
 									}
 								</div>
-								</Fade> :
-								<Tooltip title="Double click to update user name" arrow>
+								</Fade> :*/}
+								{/*<Tooltip title="Double click to update user name" arrow>*/}
 									<Typography variant='h2' onDoubleClick={() => handleProfileUpdate({name: true})} > {username} </Typography>
-						    </Tooltip>
-							}
+						    {/*</Tooltip>*/}
 						</div>
 
 						{bio !== '' &&

@@ -31,7 +31,7 @@ const App = () => {
 
 	React.useEffect(() => {
 		if (!JSON.parse(localStorage.getItem('details'))) {
-			navigate('/signup')
+			navigate('/login')
 		}
 	}, [])
 	

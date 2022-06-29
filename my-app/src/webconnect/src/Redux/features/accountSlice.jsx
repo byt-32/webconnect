@@ -12,11 +12,11 @@ const initialState = {
 	account: {
 		...JSON.parse(localStorage.getItem('details')),
 		socketId: '',
-		status: '',
+		online: '',
 		bio: '',
 		socials: [],
 		privacy: JSON.parse(localStorage.getItem('privacy')) || {
-			gmail: true,
+			email: true,
 			Twitter: true,
 			Facebook: true,
 			Instagram: true
@@ -25,13 +25,16 @@ const initialState = {
 			notifications: true,
 			sound: true,
 		}
-	},
+	}
 }
 
 const accountSlice = createSlice({
 	name: 'account',
 	initialState,
 	reducers: {
+		setOnline: (state, action) => {
+			state.account.online = action.payload
+		},
 		updateSettings: (state, action) => {
 			const payload = action.payload
 			state.account.settings = {...state.account.settings, ...payload}
@@ -56,6 +59,7 @@ const accountSlice = createSlice({
 export const {
 	updateSettings,
 	updateSocial,
+	setOnline,
 	updatePrivacy
 } = accountSlice.actions
 

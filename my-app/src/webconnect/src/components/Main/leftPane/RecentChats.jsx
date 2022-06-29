@@ -91,7 +91,25 @@ const RecentChats = () => {
 				<IconButton onClick={toggleMenu} >
 					<MenuIcon />
 				</IconButton>
-
+				<Menu open={open} 
+				  transformOrigin={{
+				    vertical: 'top',
+				    horizontal: 'left',
+				  }}
+					onClose={handleClose} anchorEl={anchorEl} className={classes.menu} >
+						<MenuItem onClick={() => { 
+							handleClose()
+							setComp({component: 'activeUsers', value: true})
+						}} >
+							<Typography variant='inherit'> users </Typography>
+						</MenuItem>
+						<MenuItem onClick={() => { 
+							handleClose()
+							setComp({component: 'settings', value: true})
+						}} >
+							<Typography variant='inherit'> profile </Typography>
+						</MenuItem>
+				</Menu>
 				<InputBase
 					className={classes.searchbar}
 		      placeholder='@user'
@@ -109,25 +127,7 @@ const RecentChats = () => {
 					})
 				}
 			</div>
-			<Menu open={open} 
-		  transformOrigin={{
-		    vertical: 'top',
-		    horizontal: 'left',
-		  }}
-			onClose={handleClose} anchorEl={anchorEl} className={classes.menu} >
-				<MenuItem onClick={() => { 
-					handleClose()
-					setComp({component: 'activeUsers', value: true})
-				}} >
-					<Typography variant='inherit'> users </Typography>
-				</MenuItem>
-				<MenuItem onClick={() => { 
-					handleClose()
-					setComp({component: 'settings', value: true})
-				}} >
-					<Typography variant='inherit'> profile </Typography>
-				</MenuItem>
-			</Menu>
+			
 		</>
 
 	)

@@ -33,7 +33,7 @@ const RightPane = ({user}) => {
 	const privateChats = useSelector(state => state.chat.privateChats)
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 
-	const profile = useSelector(state => state.components.component.profile)
+	const profile = useSelector(state => state.components.profile)
 
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const open = Boolean(anchorEl)

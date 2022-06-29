@@ -61,7 +61,10 @@ const useStyles = makeStyles({
 			},
 			'& .MuiListItemText-primary': {
 				color: '#3c1908',
-				wordBreak: 'break-all'
+				overflow: 'hidden',
+				textOverflow: 'ellipsis',
+				whitSpace: 'nowrap',
+				padding: '0 14px 0 0'
 			},
 			'& .MuiTypography-body2': {
 				display: 'flex',
@@ -97,6 +100,8 @@ const useStyles = makeStyles({
 	socialList: {
 		'& .MuiListItemSecondaryAction-root': {
 			right: 5,
+			display: 'flex',
+			flexDirection: 'column',
 			'& .MuiIconButton-root': {
 				'& svg': {
 					fontSize: '1.3rem',
@@ -124,7 +129,7 @@ const ContactInfo = () => {
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const [showDial, setDial] = React.useState(false)
-	const {username, gmail, privacy, socials} = useSelector(state => state.account.account)
+	const {username, email, privacy, socials} = useSelector(state => state.account.account)
 	const [showProgress, setProgress] = React.useState(false)
 	const [open, setOpen] = React.useState(false);
 	const [expand, setExpand] = React.useState(false)
@@ -250,11 +255,11 @@ const ContactInfo = () => {
 			          <DraftsIcon />
 			        </Avatar>
 			      </ListItemAvatar>
-			      <ListItemText primary={gmail} secondary={
+			      <ListItemText primary={email} secondary={
 			      	<Button className={classes.privacy} onClick={() => {
-				      		handlePrivacySettings({gmail: !privacy.gmail})
+				      		handlePrivacySettings({email: !privacy.email})
 				      	}} >
-				      		{privacy.gmail ? 
+				      		{privacy.email ? 
 				      		<><LockIcon />
 				      			<Typography variant='subtitle2' component='span' > Only me </Typography>
 				      		</> : 
@@ -271,11 +276,11 @@ const ContactInfo = () => {
 			          Other social handles
 			        </ListSubheader>
 			      }>
-			      	{socials.map(social => {
+			      	{socials.map((social, i) => {
 			      		const find = actions.find(i => i.name === social.name)
 			      		if (find !== undefined) {
 			      			return (
-			      				<ListItem key={social.name} button > 
+			      				<><ListItem key={social.name} button > 
 											<ListItemAvatar>
 								        <IconButton>
 								          {find.icon}
@@ -309,6 +314,8 @@ const ContactInfo = () => {
 								      	</IconButton>
 								      </ListItemSecondaryAction>
 								    </ListItem>
+								    {i !== socials.length -1 && <Divider key={social.name} />}
+								    </>
 			      			)
 			      		}
 			      	})}

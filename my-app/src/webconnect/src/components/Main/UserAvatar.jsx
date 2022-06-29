@@ -40,7 +40,7 @@ const AvatarWithBadge = ({props, style, firstAndLastName}) => {
 	return (
 		<Badge 
 			variant='dot'
-			className={ props.status == 'online' ? classes.online : classes.offline}
+			className={ classes.online}
 			overlap='circular'
 			anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
 		>

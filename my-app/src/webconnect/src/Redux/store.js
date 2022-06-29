@@ -1,11 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
-// import globalPropsSlice from './globalPropsSlice'
 import accountSlice from './features/accountSlice'
 import chatSlice from './features/chatSlice'
 import componentSlice from './features/componentSlice'
 import recentChatsSlice from './features/recentChatsSlice'
 import activeUsersSlice from './features/activeUsersSlice'
 import otherSlice from './features/otherSlice'
+import socketSlice from './features/socketSlice'
 
 const store = configureStore({
 	reducer: {
@@ -14,8 +14,8 @@ const store = configureStore({
 		components: componentSlice,
 		recentChats: recentChatsSlice,
 		activeUsers: activeUsersSlice,
-		other: otherSlice
-		// globalProps: globalPropsSlice
+		other: otherSlice,
+		socketSlice: socketSlice
 	}
 })
 

@@ -31,7 +31,7 @@ const LeftPane = () => {
 		privacy,
 		settings,
 		resetPassword
-	} = useSelector(state => state.components.component.stack)
+	} = useSelector(state => state.components.stack)
 	return (
 		<section className={classes.leftpane} >
 			{activeUsers && <ActiveUsers />}

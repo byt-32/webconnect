@@ -66,14 +66,15 @@ const Form = ({login}) => {
 		})
 		.then(res => res.json())
 		.then(response => {
-			if (response.type === 'success') {
+			if (response.type === 'error') {
+				setLoginAlert(true)
+				setAlert({...alert, open: true, type: 'error', text: 'Invalid credentials'})
+
+			} else {
 				localStorage.setItem('details', JSON.stringify(response))
 				document.location.pathname = ''
 				setLoginAlert(true)
 				setAlert({...alert, open: true, type: 'success', text: 'Log in successful'})
-			} else {
-				setLoginAlert(true)
-				setAlert({...alert, open: true, type: 'error', text: 'Invalid credentials'})
 			}
 			setIsSubmitting(false)
 		})
