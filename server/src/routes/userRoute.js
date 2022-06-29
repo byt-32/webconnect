@@ -12,7 +12,6 @@ const userRoute = express.Router()
 
 userRoute.post('/register', async (request, response) => {
 	const login = request.body 
-	console.log(login)
 	const hashedPassword = await bcrypt.hash(login.password, 10)
 	try {
 		const foundName = await User.findOne({username: login.username})
@@ -130,10 +129,10 @@ userRoute.put('/updateName/:id', async (request, response) => {
 	} else {//oh, he has done it before
 		const daysSinceLastUpdate = 
 			shado.date.set(getLastUpdate.updateNameTimestamp, new Date()).getDays(true)
-		if (daysSinceLastUpdate >= 30) {
+		if (daysSinceLastUpdate >= 60) {
 			queryAndUpdate()
 		} else {
-			response.send({type: 'isMax', response: `You can only update your name once a month.\n Wait until ${30 - daysSinceLastUpdate} days` })
+			response.send({type: 'isMax', response: `You can only update your name once in 2 months.\n Wait until ${60 - daysSinceLastUpdate} days` })
 		}
 	}
 })
@@ -167,7 +166,6 @@ userRoute.put('/updateSocials/:id', async (request, response) => {
 	const {id} = request.params
 	const find = await User.findOne({_id: id}, {_id: 0, socials: 1})
 	const index = find.socials.findIndex(i => i.name === name)
-	// console.log(find.socials[0])
 
 	if (index !== -1) {
 		find.socials[index] = {name, link}

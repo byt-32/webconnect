@@ -5,7 +5,6 @@ import componentSlice from './features/componentSlice'
 import recentChatsSlice from './features/recentChatsSlice'
 import activeUsersSlice from './features/activeUsersSlice'
 import otherSlice from './features/otherSlice'
-import socketSlice from './features/socketSlice'
 
 const store = configureStore({
 	reducer: {
@@ -15,7 +14,6 @@ const store = configureStore({
 		recentChats: recentChatsSlice,
 		activeUsers: activeUsersSlice,
 		other: otherSlice,
-		socketSlice: socketSlice
 	}
 })
 
