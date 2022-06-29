@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt'
 import User from '../models/User.js'
 import Chat from '../models/Chat.js'
 import UserSettings from '../models/UserSettings.js'
+import UserPrivacy from '../models/UserPrivacy.js'
 
 import shado from 'shado'
 
@@ -105,10 +106,6 @@ userRoute.post('/editProfile', async (request, response) => {
 	}
 })
 
-userRoute.post('/updatePassword', async (request, response) => {
-
-})
-
 userRoute.put('/updateName/:id', async (request, response) => {
 	const { id } = request.params
 	const {newName} = request.body
@@ -163,20 +160,71 @@ userRoute.put('/matchPassword/:id', async (request, response) => {
 	if (user) response.send({type: 'success'})
 })
 
-userRoute.get('/recentChats/:requesterId', async (request, response) => {
-	const {requesterId} = request.params
+
+
+userRoute.put('/updateSocials/:id', async (request, response) => {
+	const {name, link} = request.body
+	const {id} = request.params
+	const find = await User.findOne({_id: id}, {_id: 0, socials: 1})
+	const index = find.socials.findIndex(i => i.name === name)
+	// console.log(find.socials[0])
+
+	if (index !== -1) {
+		find.socials[index] = {name, link}
+		const update = await User.findByIdAndUpdate(id, {socials: find.socials}, {upsert: true, new: true})
+		response.send(update.socials)
+	} else {
+		find.socials.push({link, name})
+		const update = await User.findByIdAndUpdate(id, {socials: find.socials}, {upsert: true, new: true})
+		response.send(update.socials)
+	}
+})
+
+userRoute.put('/updatePrivacy/:id', async (request, response) => {
+	const {id} = request.params
+	const obj = request.body
+	const update = await UserPrivacy.findById(id, {_id: 0, privacy: 1})
+	if (update !== null) {
+		const updateExisting = await UserPrivacy.findByIdAndUpdate(id, {privacy: {...update.privacy, ...obj}})
+		// console.log(updateExisting)
+		response.send(updateExisting.privacy)
+	} else {
+		const newUpdate = await UserPrivacy.create({
+			_id: id,
+			privacy: obj
+		})
+		// console.log(newUpdate)
+
+		response.send(newUpdate.privacy)
+	}
+})
+
+
+userRoute.delete('/deleteSocial/:id', async (request, response) => {
+	const {id} = request.params
+	const {name, link} = request.body
+	const find = await User.findOne({_id: id}, {_id: 0, socials: 1})
+	const index = find.socials.findIndex(i => i.name === name)
+	find.socials.splice(index, 1)
+
+	const update = await User.findByIdAndUpdate(id, {socials: find.socials}, {upsert: true, new: true})
+	response.send(update.socials)
+})
+
+
+userRoute.get('/recentChats/:id', async (request, response) => {
+	const {id} = request.params
 	const recentChats = 
-		await Chat.findOne({_id: requesterId}, 
+		await Chat.findOne({_id: id}, 
 			{_id: 0, 'chats.username': 1, 'chats.lastSent': 1})
 
 	response.send(recentChats === null ? [] : recentChats)
 })
 
-userRoute.put('/updateSocials/:id', async (request, response) => {
-	const {name, link} = request.body
+userRoute.get('/accountData/:id', async (request, response) => {
 	const {id} = request.params
-	const update = await User.findByIdAndUpdate(id, { [`socials.${name}`]: link }, {upsert: true, new: true})
-	response.send({link: update.socials[`${name}`], name: name})
+	const user = await User.findById(id, {_id: 0, socials: 1, bio: 1})
+	response.send(user)
 })
 
 export default userRoute

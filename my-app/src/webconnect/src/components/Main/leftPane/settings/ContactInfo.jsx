@@ -275,7 +275,7 @@ const ContactInfo = () => {
 			      		const find = actions.find(i => i.name === social.name)
 			      		if (find !== undefined) {
 			      			return (
-			      				<ListItem key={social.name} > 
+			      				<ListItem key={social.name} button > 
 											<ListItemAvatar>
 								        <IconButton>
 								          {find.icon}

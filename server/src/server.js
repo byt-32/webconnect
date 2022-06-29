@@ -6,6 +6,8 @@ import userRoute from './routes/userRoute.js'
 import chatRoute from './routes/chatRoute.js'
 import mongoose from 'mongoose'
 import path from 'path'
+import { createServer } from 'http'
+import { Server } from 'socket.io'
 
 const port = process.env.PORT || 3001;
 
@@ -25,11 +27,18 @@ app.use('/user/', userRoute)
 app.use('/api/', apiRoute)
 app.use('/chat/', chatRoute)
 
-app.use(express.static('./webconnect_build/dist'))
-// app.use('/', )
+const server = createServer(app)
+const io = new Server(server, {
+	
+})
 
-// app.get('/', (req, res) => {
-// 	res.sendFile('webconnect_build/dist/index.html')
-// })
+
+
+io.on('connection', socket => {
+	console.log(socket)
+})
+
+
+app.use(express.static('./webconnect_build/dist'))
 
 app.listen(port, () => console.log('webconnect running on port ' + port))
