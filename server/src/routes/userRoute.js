@@ -216,7 +216,7 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 		await Chat.findOne({_id: id}, 
 			{_id: 0, 'chats.username': 1, 'chats.lastSent': 1})
 
-	response.send(recentChats === null ? [] : recentChats)
+	response.send(recentChats === null ? [] : recentChats.chats)
 })
 
 userRoute.get('/accountData/:id', async (request, response) => {

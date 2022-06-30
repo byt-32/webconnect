@@ -33,10 +33,16 @@ const io = new Server(server, {
 
 })
 
-/** NEVER EMIT OR BROADCAST A USER, WITH TOKEN INCLUDED,
- ONLY THE NAME AND SOCKETID IS NEED. 
+/** ----- READ THIS ---------
+NEVER EMIT OR BROADCAST A USER, WITH TOKEN INCLUDED,
+ ONLY THE NAME AND SOCKETID IS NEEDED. 
  THAT EXPLAINS THE DIFFERENCE BTW ConnectedClients & OnlineUsers VARS ABOVE
-  **/
+
+ N/B: ConnectedCLients VAR STORES AN ONLINE USER WITH TOKEN INCLUDED
+ WHILE OnlineUsers VAR STORES AN ONLINE USER WITHOUT THE TOKEN
+
+ DONT FOWARD/EMIT/BROADCAST A USER FROM ConnectedClients VAR
+ **/
 
 io.use((socket, next) => {
 	const {token, username} = socket.handshake.auth
@@ -76,7 +82,18 @@ io.on('connection', socket => {
 
 		socket.broadcast.emit('userDisconnect', {username: socket.username, socketId: socket.id})
 
-		// io.emit('getOnileUsers', onlineUsers.filter(user => user.username !== socket.username))
+	})
+
+	socket.on('sentChat', chat => {
+		const {sentTo, sentBy, message} = chat
+		const find = onlineUsers.find(i => i.username === sentTo)
+		if (find !== undefined) {
+			//it means the user is currently online, forward to his socket
+			io.to(find.socketId).emit('chatFromUser', {sentBy, message})
+
+		} else {
+			console.log(find)
+		}
 	})
 })
 
