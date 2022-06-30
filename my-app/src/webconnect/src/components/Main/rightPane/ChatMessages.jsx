@@ -1,10 +1,12 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+
 import DoneAllIcon from '@material-ui/icons/DoneAll'
-import DoneIcon from '@material-ui/icons/Done'
+import ReplyIcon from '@material-ui/icons/Reply'
+import DoneIcon from '@material-ui/icons/Done';
+
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Fade from '@material-ui/core/Fade';
-import ReplyIcon from '@material-ui/icons/Reply'
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined'
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
@@ -13,7 +15,6 @@ import { handleReply, setHighlightedId } from '../../../Redux/features/chatSlice
 import common from '@material-ui/core/colors/common';
 import blue from '@material-ui/core/colors/blue';
 import deepOrange from '@material-ui/core/colors/deepOrange';
-
 
 const useStyles = makeStyles({
 	indexedChats: {
@@ -31,8 +32,12 @@ const useStyles = makeStyles({
 			boxShadow: '0 0 2px 1px #d3d3d3'
 		}
 	},
+	chatAndprop:{
+		display: 'flex',
+		alignItems: 'flex-end'
+	},
 	chatSingle: {
-		width: 'max-content',
+		width: 'auto',
 		color: common.white,
 		borderRadius: 5,
 		marginTop: 8,
@@ -45,42 +50,65 @@ const useStyles = makeStyles({
 		fontSize: '.85rem',
 		padding: 5,
 		borderRadius: '0 5px 0 0'
+	},
+	fromAccount: {
+		alignSelf: 'flex-end',
+		marginLeft: '1rem'
+	},
+	fromFriend: {
+		alignSelf: 'flex-start',
+		marginRight: '1rem'
+	},
+	chatRead: {
+		padding: '0 3px',
+		'& svg': {
+			fontSize: '.9rem'
+		}
 	}
 })
 
 const ChatSingle = ({chat}) => {
 	const classes = useStyles()
 	const username = useSelector(state => state.account.account.username)
+	let me = (chat.me || chat.sentBy === username) ? true : (!chat.me || chat.sentBy !== username) ? 
+	false : ''
+
 	function replace(text) {
 		return text.replaceAll('\n', '<br/>')
 	}
 	return (
-		<div className={classes.chatSingle} style={{
-			alignSelf: chat.me ? 'flex-end' : 'flex-start',
-			padding: chat.reply.open && '0 0 0 2px'
-		}} >
-			{ chat.reply.open ?
-				<> 
-					<div className={classes.reply}>
-						<div style={{
-								color: deepOrange[500],
-								padding: '0 9px 3px 0',
-								fontSize: '.8rem', fontWeight: 'bold'}} >
-							{
-								chat.reply.person === username ? 'You' : chat.reply.person
-							}
+		<div className={[classes.chatAndprop, me ? classes.fromAccount : classes.fromFriend].join(' ')} >
+			<div className={classes.chatSingle} style={{
+				padding: chat.reply.open && '0 0 0 2px'
+			}}>
+				{ chat.reply.open ?
+					<> 
+						<div className={classes.reply}>
+							<div style={{
+									color: deepOrange[500],
+									padding: '0 9px 3px 0',
+									fontSize: '.8rem', fontWeight: 'bold'}} >
+								{
+									chat.reply.person === username ? 'You' : chat.reply.person
+								}
+							</div>
+							{chat.reply.to}
 						</div>
-						{chat.reply.to}
-					</div>
-					<div style={{
-						padding: '4px 8px 4px 3px'
-					}} > 
-						{chat.message} 
-					</div>
+						<div style={{
+							padding: '4px 8px 4px 3px'
+						}} > 
+							{chat.message} 
+						</div>
 
-				</>
-				
-				: <> {chat.message} </>
+					</>
+					
+					: <> {chat.message} </>
+				}
+			</div>
+			{ me &&
+				<span className={classes.chatRead}>
+					{chat.read ? <DoneAllIcon style={{color: '#00c759'}} /> : <DoneIcon />}
+				</span>
 			}
 		</div>
 	)

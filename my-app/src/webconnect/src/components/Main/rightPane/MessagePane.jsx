@@ -29,7 +29,7 @@ import grey from '@material-ui/core/colors/grey';
 import blue from '@material-ui/core/colors/blue';
 
 import { useDispatch,useSelector } from 'react-redux'
-import { retrieveOTM, storePrivateChats, handleReply } from '../../../Redux/features/chatSlice'
+import { retrieveOTM, storeSentChat, handleReply } from '../../../Redux/features/chatSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
@@ -68,7 +68,7 @@ const useStyles = makeStyles({
 		},
 		'& .MuiCardContent-root': {
 			background: grey[200],
-			padding: '8px 16px',
+			padding: 8,
 			overflowY: 'scroll'
 		},
 		'& .MuiCardActions-root': {
@@ -83,10 +83,20 @@ const useStyles = makeStyles({
 		}
 	}
 })
+function retrieveDate(date) {
+	const index = (/[0-9](?=[0-9]{3})/).exec(date)['index']
+	const year = date.split('').splice(index).join('')
+	const day = date.split('').splice(0, index-1).join('')
+	const fullDate = date
+
+	return {year: year, day: day, fullDate: fullDate}
+}
+
 const MessagesPane = ({friend}) => {
 	const classes = useStyles()
 
 	const dispatch = useDispatch()
+	const {username} = JSON.parse(localStorage.getItem('details'))
 	// const user = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username))
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const accountIsOnline = useSelector(state => state.account.account.online)
@@ -115,28 +125,36 @@ const MessagesPane = ({friend}) => {
 
 	const sendMessage = async () => {
 		const dateNow = () => Date.now()
+		const _date = new Date()
+			
+		const date =
+		{...retrieveDate(_date.toDateString()), 
+			time: _date.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'})
+		}
 
 		let chatId = dateNow()
 
 		if (input !== '') {
 			if (accountIsOnline) {
 				setNetworkError(false)
+				const chatObj = {
+					sentTo: friend.username,
+					sentBy: username,
+					message: {
+						message: input,
+						chatId: chatId, 
+						sentBy: username,
+						read: false,
+						sentTo: friend.username,
+						timestamp: date,
+						reply: false
+					}
+				}
+				dispatch(storeSentChat(chatObj))
+				dispatch(retrieveOTM(chatObj))
+				setInput('')
 			} else {
 				setNetworkError(true)
-				// setFetchErr(false)
-				dispatch(storePrivateChats({
-					username: friend.username, 
-					message: input, 
-					me: true, 
-					chatId: chatId,
-					reply: {
-						open: false,
-						person: '',
-						to: '',
-					}
-				}))
-				setInput('')
-				// dispatch(retrieveOTM({input: input, chatId: chatId}))
 			}
 		}
 	}

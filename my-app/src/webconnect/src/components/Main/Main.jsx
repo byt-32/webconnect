@@ -8,6 +8,7 @@ import grey from '@material-ui/core/colors/grey';
 import {fetchRecentChats, setRecentOnline, setRecentDisconnect} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
+import { storeReceivedChat } from '../../Redux/features/chatSlice'
 
 import LeftPane from './leftPane/LeftPane'
 
@@ -25,13 +26,22 @@ const Main = () => {
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
+	const OTM = useSelector(state => state.chat.oneTimeMessage)
 	const { useEffect } = React
+
+	useEffect(() => {
+		if (Object.keys(OTM).length) {
+			socket.emit('sentChat', {...OTM, id: id})
+		}
+	}, [OTM])
+
 	useEffect(() => {
 		socket.auth =  {
 			token: id,
 			username: username
 		}
 		socket.connect()
+
 		socket.on('connect', () => {
 			dispatch(setOnline(true))
 		})
@@ -46,6 +56,10 @@ const Main = () => {
 		socket.off('userDisconnect').on('userDisconnect', user => {
 			dispatch(setActiveDisconnect(user))
 			dispatch(setRecentDisconnect(user))
+		})
+
+		socket.off('chatFromUser').on('chatFromUser', chat => {
+			dispatch(storeReceivedChat(chat))
 		})
 
 		dispatch(fetchRecentChats(id))

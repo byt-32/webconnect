@@ -47,7 +47,7 @@ const recentChatsSlice = createSlice({
 		})
 		.addCase(fetchRecentChats.fulfilled, (state, action) => {
 			state.showRecentUsersLoader = false
-			state.recentChats = action.payload.chats
+			state.recentChats = action.payload
 			state.recentChats.sort((a, b) => {
 				if (a.lastSent < b.lastSent) return -1
 				if (a.lastSent > b.lastSent) return 1

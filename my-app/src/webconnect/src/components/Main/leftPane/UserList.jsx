@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { setSelectedUser } from '../../../Redux/features/otherSlice'
+import { setSelectedUser, assertFetch } from '../../../Redux/features/otherSlice'
 import { fetchMessages } from '../../../Redux/features/chatSlice'
 
 import ListItemIcon from '@material-ui/core/ListItemIcon'
@@ -28,13 +28,23 @@ const UserList = ({user, style, secondaryItems}) => {
 	const classses = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
+	const fetched = useSelector(state => state.other.fetched)
 	const handleClick = () => {
+
 		if (selectedUser.username !== user.username) {
 				// if (userInRecent.unread !== 0) {
 				// 	fetch(`/resetUnread/${token}/${user.username}`)
 				// }
-			dispatch(setSelectedUser(user))
-			dispatch(fetchMessages({friendsName: user.username, token: id}))
+			if (fetched.find(i => i === user.username) !== undefined) {
+				dispatch(setSelectedUser(user))
+				
+			} else {
+				dispatch(assertFetch(user.username))
+				dispatch(fetchMessages({friendsName: user.username, token: id})).then(() => {
+					dispatch(setSelectedUser(user))
+				})
+			}
+			
 		}
 	}
 	return (
