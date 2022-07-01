@@ -1,11 +1,14 @@
 import 'dotenv/config'
 import express from 'express'
 import bcrypt from 'bcrypt'
+
 import apiRoute from './routes/apiRoute.js'
 import userRoute from './routes/userRoute.js'
 import chatRoute from './routes/chatRoute.js'
+import {saveChats} from './utils/script.js'
+
 import mongoose from 'mongoose'
-import path from 'path'
+
 import { createServer } from 'http'
 import { Server } from 'socket.io'
 
@@ -38,7 +41,7 @@ NEVER EMIT OR BROADCAST A USER, WITH TOKEN INCLUDED,
  ONLY THE NAME AND SOCKETID IS NEEDED. 
  THAT EXPLAINS THE DIFFERENCE BTW ConnectedClients & OnlineUsers VARS ABOVE
 
- N/B: ConnectedCLients VAR STORES AN ONLINE USER WITH TOKEN INCLUDED
+ N/B: ConnectedClients VAR STORES AN ONLINE USER WITH TOKEN INCLUDED
  WHILE OnlineUsers VAR STORES AN ONLINE USER WITHOUT THE TOKEN
 
  DONT FOWARD/EMIT/BROADCAST A USER FROM ConnectedClients VAR
@@ -87,12 +90,15 @@ io.on('connection', socket => {
 	socket.on('sentChat', chat => {
 		const {sentTo, sentBy, message} = chat
 		const find = onlineUsers.find(i => i.username === sentTo)
+
+		saveChats(chat)
+
 		if (find !== undefined) {
-			//it means the user is currently online, forward to his socket
+			//it means the user is currently online, forward to socket
 			io.to(find.socketId).emit('chatFromUser', {sentBy, message})
 
 		} else {
-			console.log(find)
+			// console.log(find)
 		}
 	})
 })

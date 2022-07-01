@@ -59,14 +59,14 @@ userRoute.post('/login', async (request, response) => {
 					response.send({type: 'error'})
 				}
 			} catch (e) {
-				e && console.log(e)
+				e && console.log('Err' + e)
 			}
 		} else {
 			response.send({type: 'error'})
 		}
 	} catch (e) {
 		if (e) {
-			console.log(e)
+			console.log('Err' + e)
 			response.status(404).send()
 		}
 	}
@@ -100,7 +100,7 @@ userRoute.post('/editProfile', async (request, response) => {
 			const update = await User.findByIdAndUpdate(id, {bio: bio}, {upsert: true, new: true})
 			response.send({bio: update.bio})
 		} catch (e) {
-			e && console.log(e)
+			e && console.log('Err' + e)
 		}
 	}
 })
@@ -116,7 +116,6 @@ userRoute.put('/updateName/:id', async (request, response) => {
 		if (checkName === null) {//if name has not been taken
 			await User.findByIdAndUpdate(id, {updateNameTimestamp: date})
 			const updateName = await User.findByIdAndUpdate(id, {username: newName}, {upsert: true, new: true})
-			console.log(updateName)
 			response.send({type: 'success', response: updateName.username})
 		} else {//name has been taken, leave!!!
 			response.send({type: 'error', response: 'This name is unavailable'})
@@ -184,14 +183,14 @@ userRoute.put('/updatePrivacy/:id', async (request, response) => {
 	const update = await UserPrivacy.findById(id, {_id: 0, privacy: 1})
 	if (update !== null) {
 		const updateExisting = await UserPrivacy.findByIdAndUpdate(id, {privacy: {...update.privacy, ...obj}})
-		// console.log(updateExisting)
+
 		response.send(updateExisting.privacy)
+		
 	} else {
 		const newUpdate = await UserPrivacy.create({
 			_id: id,
 			privacy: obj
 		})
-		// console.log(newUpdate)
 
 		response.send(newUpdate.privacy)
 	}
