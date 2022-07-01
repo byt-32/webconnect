@@ -132,7 +132,7 @@ const MessagesPane = ({friend}) => {
 			time: _date.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'})
 		}
 
-		let chatId = dateNow()
+		let thisDate = dateNow()
 
 		if (input !== '') {
 			if (accountIsOnline) {
@@ -140,9 +140,10 @@ const MessagesPane = ({friend}) => {
 				const chatObj = {
 					sentTo: friend.username,
 					sentBy: username,
+					lastSent: thisDate,
 					message: {
 						message: input,
-						chatId: chatId, 
+						chatId: thisDate, 
 						sentBy: username,
 						read: false,
 						sentTo: friend.username,
@@ -184,11 +185,11 @@ const MessagesPane = ({friend}) => {
       }}>
         <ChatMessages chats={friend.messages} />
         <Snackbar open={networkError} 
-				autoHideDuration={6000} onClose={hideNetworkError}>
-			  <MuiAlert variant='filled' elevation={6} onClose={hideNetworkError} severity="error">
-			    Your're currently offline
-			  </MuiAlert>
-			</Snackbar>
+					autoHideDuration={6000} onClose={hideNetworkError}>
+				  <MuiAlert variant='filled' elevation={6} onClose={hideNetworkError} severity="error">
+				    Your're currently offline
+				  </MuiAlert>
+				</Snackbar>
       </CardContent>
       
       <CardActions >

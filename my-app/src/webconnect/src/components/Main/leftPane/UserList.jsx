@@ -28,14 +28,14 @@ const UserList = ({user, style, secondaryItems}) => {
 	const classses = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
-	const fetched = useSelector(state => state.other.fetched)
+	const selectedUsersArr = useSelector(state => state.other.fetched)
 	const handleClick = () => {
 
 		if (selectedUser.username !== user.username) {
 				// if (userInRecent.unread !== 0) {
 				// 	fetch(`/resetUnread/${token}/${user.username}`)
 				// }
-			if (fetched.find(i => i === user.username) !== undefined) {
+			if (selectedUsersArr.find(i => i === user.username) !== undefined) {
 				dispatch(setSelectedUser(user))
 				
 			} else {

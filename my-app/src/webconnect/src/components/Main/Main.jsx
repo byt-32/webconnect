@@ -31,7 +31,7 @@ const Main = () => {
 
 	useEffect(() => {
 		if (Object.keys(OTM).length) {
-			socket.emit('sentChat', {...OTM, id: id})
+			socket.emit('sentChat', OTM)
 		}
 	}, [OTM])
 
