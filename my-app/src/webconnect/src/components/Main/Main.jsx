@@ -5,7 +5,7 @@ import { io } from 'socket.io-client'
 import { Outlet } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
-import {fetchRecentChats, setRecentOnline, setRecentDisconnect} from '../../Redux/features/recentChatsSlice'
+import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, handleUserTypingActivity} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
 import { storeReceivedChat } from '../../Redux/features/chatSlice'
@@ -26,14 +26,22 @@ const Main = () => {
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const OTM = useSelector(state => state.chat.oneTimeMessage)
+	const chatObj = useSelector(state => state.chat.chatObj)
+	const selectedUser = useSelector(state => state.other.currentSelectedUser)
+	const typingStatus = useSelector(state => state.other.typingStatus)
 	const { useEffect } = React
 
 	useEffect(() => {
-		if (Object.keys(OTM).length) {
-			socket.emit('sentChat', OTM)
+		if (Object.keys(chatObj).length) {
+			socket.emit('sentChat', chatObj)
 		}
-	}, [OTM])
+	}, [chatObj])
+
+	useEffect(() => {
+		if (Object.keys(typingStatus).length) {
+			socket.emit('userIsTyping', typingStatus)
+		}
+	}, [typingStatus])
 
 	useEffect(() => {
 		socket.auth =  {
@@ -42,30 +50,40 @@ const Main = () => {
 		}
 		socket.connect()
 
-		socket.on('connect', () => {
-			dispatch(setOnline(true))
-		})
-		socket.on('disconnect', reason => {
-			dispatch(setOnline(false))
-		})
-
-		socket.off('getOnileUsers').on('getOnileUsers', users => {
-			dispatch(setRecentOnline(users.filter(user => user.username !== username)))
-			dispatch(setActiveOnline(users.filter(user => user.username !== username)))
-		})
-		socket.off('userDisconnect').on('userDisconnect', user => {
-			dispatch(setActiveDisconnect(user))
-			dispatch(setRecentDisconnect(user))
-		})
-
-		socket.off('chatFromUser').on('chatFromUser', chat => {
-			dispatch(storeReceivedChat(chat))
-		})
-
 		dispatch(fetchRecentChats(id))
 		dispatch(fetchActiveUsers(id))
 		dispatch(fetchAccountData(id))
 	}, [])
+	socket.on('connect', () => {
+		dispatch(setOnline(true))
+	})
+	socket.on('disconnect', reason => {
+		dispatch(setOnline(false))
+	})
+
+	socket.off('getOnileUsers').on('getOnileUsers', users => {
+		dispatch(setRecentOnline(users.filter(user => user.username !== username)))
+		dispatch(setActiveOnline(users.filter(user => user.username !== username)))
+	})
+	socket.off('userDisconnect').on('userDisconnect', user => {
+		dispatch(setActiveDisconnect(user))
+		dispatch(setRecentDisconnect(user))
+	})
+
+
+	socket.off('chatFromUser').on('chatFromUser', chat => {
+		dispatch(storeReceivedChat(chat))
+
+		console.log(selectedUser)
+		if ((Object.keys(selectedUser).length !== 0 && selectedUser.username !== chat.sentBy) || Object.keys(selectedUser).length === 0) {
+			socket.emit('saveUnread', chat.sentBy, username, chat.message.chatId, () => {})
+			dispatch(setUnread(chat.sentBy))
+		}
+	})
+
+	socket.off('userIsTyping').on('userIsTyping', obj => {
+		dispatch(handleUserTypingActivity(obj))
+	})
 
 	return (
 		<section className={classes.main} >

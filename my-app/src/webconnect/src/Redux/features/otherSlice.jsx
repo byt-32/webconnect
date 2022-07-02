@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
 	fetched: [],
+	typingStatus: {},
 	currentSelectedUser: {}
 }
 
@@ -16,6 +17,9 @@ const otherSlice = createSlice({
 			const username = action.payload
 			state.fetched.push(username)
 		},
+		setTypingStatus: (state, action) => {
+			state.typingStatus = action.payload
+		},
 		handleSocket: (state, action) => {
 			// console.log(action.payload)
 		}
@@ -25,7 +29,8 @@ const otherSlice = createSlice({
 export const {
 	setSelectedUser,
 	assertFetch,
-	handleSocket
+	handleSocket,
+	setTypingStatus
 } = otherSlice.actions
 
 export default otherSlice.reducer

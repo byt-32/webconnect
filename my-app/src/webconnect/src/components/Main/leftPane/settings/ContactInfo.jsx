@@ -168,7 +168,7 @@ const ContactInfo = () => {
 			  		},
 			  		body: JSON.stringify({
 			  			name: openNewInput.name, 
-			  			link: input.replace('https://', '')
+			  			link: input
 			  		})
 			  	})
 			  	.then(res => res.json())
@@ -278,6 +278,7 @@ const ContactInfo = () => {
 			      }>
 			      	{socials.map((social, i) => {
 			      		const find = actions.find(i => i.name === social.name)
+			      		{/*const socialLink = social.link.replace('https://', '')*/}
 			      		if (find !== undefined) {
 			      			return (
 			      				<><ListItem key={social.name} button > 
@@ -286,7 +287,8 @@ const ContactInfo = () => {
 								          {find.icon}
 								        </IconButton>
 								      </ListItemAvatar>
-								      <ListItemText primary={<a style={{textDecoration: 'underline'}} target='_blank' href={`https://${social.link}`}> {social.link} </a>}
+								      <ListItemText primary={
+								      	<a style={{textDecoration: 'underline'}} target='_blank' href={social.link}> {social.link.replace('https://', '')} </a>}
 								      	secondary={
 								      	<Button className={classes.privacy} onClick={() => {
 								      		handlePrivacySettings({[`${social.name}`]: !privacy[`${find.name}`]})

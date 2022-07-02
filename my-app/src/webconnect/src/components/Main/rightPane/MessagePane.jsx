@@ -29,7 +29,8 @@ import grey from '@material-ui/core/colors/grey';
 import blue from '@material-ui/core/colors/blue';
 
 import { useDispatch,useSelector } from 'react-redux'
-import { retrieveOTM, storeSentChat, handleReply } from '../../../Redux/features/chatSlice'
+import { handleChatObj, storeSentChat, handleReply } from '../../../Redux/features/chatSlice'
+import { setTypingStatus } from '../../../Redux/features/otherSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
@@ -81,7 +82,7 @@ const useStyles = makeStyles({
 			maxHeight: 70,
 			overflowY: 'scroll !important'
 		}
-	}
+	},
 })
 function retrieveDate(date) {
 	const index = (/[0-9](?=[0-9]{3})/).exec(date)['index']
@@ -100,15 +101,18 @@ const MessagesPane = ({friend}) => {
 	// const user = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username))
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const accountIsOnline = useSelector(state => state.account.account.online)
+
+	const online = useSelector(state => state.activeUsers.activeUsers).find(i => i.username === friend.username).online
+	const friendIsTyping = useSelector(state => state.recentChats.recentChats).find(i => i.username === friend.username).typing
 	
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const [isTyping, typing] = React.useState(false)
 	const [input, setInput] = React.useState('')
 	const [showPicker, setPicker] = React.useState(false)
 	const [networkError, setNetworkError] = React.useState(false)
-	const [online, setOnline] = React.useState('')
+	const [timer, setTimer] = React.useState(null)
+	const typingStatus = useSelector(state => state.other.typingStatus)
 
-	// console.log(user)
 	const toggleMenu = (event) => {
 		setAnchorEl(event.target)
 	}
@@ -118,6 +122,12 @@ const MessagesPane = ({friend}) => {
 	
 	const handleTextInput = (e) => {
 		setInput(e.target.value)
+		clearTimeout(timer)
+		const newTimer = setTimeout(() => {
+			input !== '' && dispatch(setTypingStatus({typing: false, selectedUser: friend.username, user: username}))
+		}, 3000)
+		!typingStatus.typing && dispatch(setTypingStatus({typing: true, selectedUser: friend.username, user: username}))
+		setTimer(newTimer)
 	}
 	const hideNetworkError = () => {
 		setNetworkError(false)
@@ -152,12 +162,13 @@ const MessagesPane = ({friend}) => {
 					}
 				}
 				dispatch(storeSentChat(chatObj))
-				dispatch(retrieveOTM(chatObj))
+				dispatch(handleChatObj(chatObj))
 				setInput('')
 			} else {
 				setNetworkError(true)
 			}
 		}
+		dispatch(setTypingStatus({typing: false, selectedUser: friend.username, user: username}))
 	}
 	
 	return (
@@ -178,7 +189,10 @@ const MessagesPane = ({friend}) => {
           </IconButton>
         }
         title={friend.username}
-        subheader={online ? 'online' : 'offline'}
+        subheader={
+        	friendIsTyping ? <span style={{color: '#6495ed'}} > {'typing...'} </span>
+        	: online ? 'online' : 'offline'
+        }
       />
       <CardContent style={{
       	height: `${useWindowHeight()  - 110}px`

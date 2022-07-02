@@ -39,6 +39,30 @@ const recentChatsSlice = createSlice({
 			if (index !== -1) {
 				state.recentChats[index].online = false
 			}
+		},
+		resetUnread: (state, action) => {
+			const username = action.payload
+			const find = state.recentChats.findIndex(i => i.username === username)
+
+			if (find !== -1) {
+				state.recentChats[find].unread = 0
+			}
+		},
+		setUnread: (state, action) => {
+			const sentBy = action.payload
+			const find = state.recentChats.findIndex(i => i.username === sentBy)
+
+			if (find !== -1) {
+				state.recentChats[find].unread += 1
+			}
+			
+		},
+		handleUserTypingActivity: (state, action) => {
+			const {user, typing} = action.payload
+			const find = state.recentChats.findIndex(i => i.username === user)
+			if (find !== -1) {
+				state.recentChats[find].typing = typing
+			}
 		}
 	},
 	extraReducers: builder => {
@@ -46,13 +70,21 @@ const recentChatsSlice = createSlice({
 			state.showRecentUsersLoader = true
 		})
 		.addCase(fetchRecentChats.fulfilled, (state, action) => {
-			state.showRecentUsersLoader = false
-			state.recentChats = action.payload
-			state.recentChats.sort((a, b) => {
-				if (a.lastSent < b.lastSent) return -1
-				if (a.lastSent > b.lastSent) return 1
+			const {recentChats, unread} = action.payload
+
+			recentChats.forEach(i => {
+				const findInUnread = unread.find(user => user.username === i.username)
+				if (findInUnread !== undefined) {
+					i.unread = findInUnread.unreadArray.length
+				}
 			})
 
+			state.recentChats = recentChats.sort((a, b) => {
+				if (a.lastSent < b.lastSent) return 1
+				if (a.lastSent > b.lastSent) return -1
+			})
+
+			state.showRecentUsersLoader = false
 		})
 	}
 })
@@ -60,6 +92,9 @@ const recentChatsSlice = createSlice({
 export const {
 	search,
 	setRecentOnline,
+	resetUnread,
+	setUnread,
+	handleUserTypingActivity,
 	setRecentDisconnect
 } = recentChatsSlice.actions
 

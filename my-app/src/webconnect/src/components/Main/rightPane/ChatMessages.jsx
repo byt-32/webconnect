@@ -36,13 +36,27 @@ const useStyles = makeStyles({
 		display: 'flex',
 		alignItems: 'flex-end'
 	},
+	fromAccount: {
+		alignSelf: 'flex-end',
+		marginLeft: '1rem',
+		'& > div': {
+			background: blue[400],
+			color: common.white,
+		}
+	},
+	fromFriend: {
+		alignSelf: 'flex-start',
+		marginRight: '1rem',
+		'& > div': {
+			background: common.white,
+			color: common.black
+		}
+	},
 	chatSingle: {
 		width: 'auto',
-		color: common.white,
 		borderRadius: 5,
 		marginTop: 8,
 		padding: '4px 8px',
-		background: blue[400]
 	},
 	reply: {
 		background: common.white,
@@ -51,18 +65,11 @@ const useStyles = makeStyles({
 		padding: 5,
 		borderRadius: '0 5px 0 0'
 	},
-	fromAccount: {
-		alignSelf: 'flex-end',
-		marginLeft: '1rem'
-	},
-	fromFriend: {
-		alignSelf: 'flex-start',
-		marginRight: '1rem'
-	},
+
 	chatRead: {
 		padding: '0 3px',
 		'& svg': {
-			fontSize: '.9rem'
+			fontSize: '.8rem'
 		}
 	}
 })
