@@ -7,10 +7,10 @@ const unreadCountSchema = new mongoose.Schema({
 		{
 			_id: String,
 			username: String,
-			count: Number
+			unreadArray: Array
 		}
 	]
 })
 
 const UnreadCount = mongoose.model('unreadCount', unreadCountSchema)
-export default unreadCount
+export default UnreadCount

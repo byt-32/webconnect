@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'
 import apiRoute from './routes/apiRoute.js'
 import userRoute from './routes/userRoute.js'
 import chatRoute from './routes/chatRoute.js'
-import {saveChats} from './utils/script.js'
+import {saveChats, saveUnread} from './utils/script.js'
 
 import mongoose from 'mongoose'
 
@@ -80,11 +80,22 @@ io.on('connection', socket => {
 	io.emit('getOnileUsers', onlineUsers)
 
 	socket.on('disconnect', reason => {
-		onlineUsers = onlineUsers.filter(user => user.token !== socket.token)
+		onlineUsers = onlineUsers.filter(user => user.username !== socket.username)
 		connectedClients = connectedClients.filter(user => user.token !== socket.token)
 
 		socket.broadcast.emit('userDisconnect', {username: socket.username, socketId: socket.id})
+	})
 
+	socket.on('saveUnread', (sentBy, sentTo, chatId) => {
+		saveUnread(sentBy, sentTo, chatId)
+	})
+
+	socket.on('userIsTyping', obj => {
+		const {selectedUser, user, typing} = obj
+		const find = onlineUsers.find(i => i.username === selectedUser)
+		if (find !== undefined) {
+			io.to(find.socketId).emit('userIsTyping', {user, typing})
+		}
 	})
 
 	socket.on('sentChat', chat => {
@@ -98,7 +109,7 @@ io.on('connection', socket => {
 			io.to(find.socketId).emit('chatFromUser', {sentBy, message})
 
 		} else {
-			// console.log(find)
+			saveUnread(sentBy, sentTo, chat.message.chatId)
 		}
 	})
 })

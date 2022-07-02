@@ -1,10 +1,13 @@
 import express from 'express'
 import { v4 as uuidv4 } from 'uuid'
 import bcrypt from 'bcrypt'
+
 import User from '../models/User.js'
 import Chat from '../models/Chat.js'
+
 import UserSettings from '../models/UserSettings.js'
 import UserPrivacy from '../models/UserPrivacy.js'
+import UnreadCount from '../models/UnreadCount.js'
 
 import shado from 'shado'
 
@@ -213,9 +216,18 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 	const {id} = request.params
 	const recentChats = 
 		await Chat.findOne({_id: id}, 
-			{_id: 0, 'chats.username': 1, 'chats.lastSent': 1})
+			{_id: 0, 'chats.username': 1, 'chats.lastSent': 1}) || []
 
-	response.send(recentChats === null ? [] : recentChats.chats)
+	const unreadChatsArray = 
+		await UnreadCount.findOne({_id: id},
+			{_id: 0, 'users.username': 1, 'users.unreadArray': 1}
+		) || []
+
+	// console.log(recentChats, unreadChatsArray)
+	response.send({
+		recentChats: recentChats.chats || [],
+		unread: unreadChatsArray.users || []
+	})
 })
 
 userRoute.get('/accountData/:id', async (request, response) => {
