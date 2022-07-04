@@ -12,7 +12,6 @@ export const fetchMessages = createAsyncThunk('fetchMessages',
 
 const initialState = {
 	privateChats: [],
-	chatObj: {},
 }
 
 const chatSlice = createSlice({
@@ -31,9 +30,6 @@ const chatSlice = createSlice({
 				state.privateChats.push({username: sentTo, messages: [message]})
 			}
 
-		},
-		handleChatObj: (state, action) => {
-			state.chatObj = action.payload
 		},
 		storeReceivedChat: (state, action) => {
 			const {sentBy, message} = action.payload
@@ -82,7 +78,6 @@ const chatSlice = createSlice({
 export const {
 	storeSentChat,
 	storeReceivedChat,
-	handleChatObj,
 	setChatRead
 } = chatSlice.actions
 
