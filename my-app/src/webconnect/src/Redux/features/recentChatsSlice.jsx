@@ -70,11 +70,13 @@ const recentChatsSlice = createSlice({
 			}
 		},
 		updateRecentChats: (state, action) => {
-			const {lastSent, user, online} = action.payload
+			const {lastSent, user, online, lastChat} = action.payload
 
 			const findIndex = state.recentChats.findIndex(i => i.username === user)
 			if (findIndex !== -1) {
 				state.recentChats[findIndex].lastSent = lastSent
+				state.recentChats[findIndex].lastChat = lastChat
+
 			} else {
 				state.recentChats.unshift(action.payload)
 			}
@@ -96,6 +98,9 @@ const recentChatsSlice = createSlice({
 				if (findInUnread !== undefined) {
 					i.unread = findInUnread.unreadArray.length
 				}
+				i.typing = false
+				i.online = false
+				i.lastChat = {}
 			})
 
 			state.recentChats = recentChats.sort((a, b) => {
