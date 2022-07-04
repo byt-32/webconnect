@@ -8,11 +8,11 @@ import grey from '@material-ui/core/colors/grey';
 import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, handleUserTypingActivity} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
-import { storeReceivedChat } from '../../Redux/features/chatSlice'
+import { storeReceivedChat, setChatRead } from '../../Redux/features/chatSlice'
 
 import LeftPane from './leftPane/LeftPane'
 
-const socket = io('/', {autoConnect: false})
+export const socket = io('/', {autoConnect: false})
 
 const useStyles = makeStyles({
 	main: {
@@ -54,6 +54,7 @@ const Main = () => {
 		dispatch(fetchActiveUsers(id))
 		dispatch(fetchAccountData(id))
 	}, [])
+
 	socket.on('connect', () => {
 		dispatch(setOnline(true))
 	})
@@ -74,11 +75,18 @@ const Main = () => {
 	socket.off('chatFromUser').on('chatFromUser', chat => {
 		dispatch(storeReceivedChat(chat))
 
-		console.log(selectedUser)
 		if ((Object.keys(selectedUser).length !== 0 && selectedUser.username !== chat.sentBy) || Object.keys(selectedUser).length === 0) {
 			socket.emit('saveUnread', chat.sentBy, username, chat.message.chatId, () => {})
 			dispatch(setUnread(chat.sentBy))
 		}
+		if (Object.keys(selectedUser).length !== 0 && selectedUser.username === chat.sentBy) {
+			socket.emit('chatIsRead', selectedUser.username, username)
+		}
+	})
+
+	socket.off('chatHasBeenRead').on('chatHasBeenRead', (sender, receiver) => {
+		
+		dispatch(setChatRead(receiver))
 	})
 
 	socket.off('userIsTyping').on('userIsTyping', obj => {

@@ -18,11 +18,21 @@ import MenuIcon from '@material-ui/icons/Menu'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 
+import { setSelectedUser, assertFetch } from '../../../Redux/features/otherSlice'
+import { fetchMessages } from '../../../Redux/features/chatSlice'
+import { resetUnread } from '../../../Redux/features/recentChatsSlice'
+
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText'
+import ListItem from '@material-ui/core/ListItem'
+import List from '@material-ui/core/List'
+
 import UserAvatar from '../UserAvatar'	
 import { Link } from 'react-router-dom'
 import Preloader from '../../Preloader'
 
-import UserList from './UserList'
+import { socket } from '../Main'
+
 import Header from './Header'
 
 const useStyles = makeStyles({
@@ -32,21 +42,10 @@ const useStyles = makeStyles({
 	menu: {
 		'& div': {
 			top: '58px !important'
+		},
+		'& .MuiListItemIcon-root': {
+			minWidth: 40
 		}
-	},
-	unread: {
-		color: '#fff',
-		position: 'absolute',
-		right: '15px',
-		borderRadius: '200px',
-		height: '18px',
-		width: '18px',
-		fontFamily: 'sans-serif !important',
-		fontSize: '13px',
-		display: 'flex',
-		background: '#6495ed',
-		alignItems: 'center',
-		justifyContent: 'center'
 	},
 	searchbar: {
 		width: '100%',
@@ -55,12 +54,89 @@ const useStyles = makeStyles({
 		'& .MuiInputBase-root': {height: '100%'}
 
 	},
-	menu: {
-		'& .MuiListItemIcon-root': {
-			minWidth: 40
+	listItem: {
+		position: 'relative',
+		'& .MuiAvatar-root': {
+			width: 45, height: 45
+		},
+		'& .MuiListItemText-root': {
+			marginLeft: '.3rem'
+		}
+	},
+	unread: {
+		borderRadius: '100%',
+		minWidth: 20,
+		minHeight: 20,
+		background: '#6495ed',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		color: '#fff',
+		fontsize: '.8rem',
+		// padding: 3
+	},
+	typingStatus: {
+		color: '#6495ed'
+	},
+	
+})
+
+const UserList = ({user, style, secondaryItems}) => {
+	const {id, username} = JSON.parse(localStorage.getItem('details'))
+	const classses = useStyles()
+	const dispatch = useDispatch()
+	const selectedUser = useSelector(state => state.other.currentSelectedUser)
+	const selectedUsersArr = useSelector(state => state.other.fetched)
+	
+	const userInRecent = useSelector(state => state.recentChats.recentChats).find(i => i.username === user.username)
+
+	const handleClick = () => {
+
+		if (selectedUser.username !== user.username) {
+				
+			if (user.unread > 0) {
+				dispatch(resetUnread(user.username))
+				socket.emit('chatIsRead', user.username, username)
+			}
+			if (selectedUsersArr.find(i => i === user.username) !== undefined) {
+				dispatch(setSelectedUser(user))
+				
+			} else {
+				dispatch(assertFetch(user.username))
+				dispatch(
+					fetchMessages({friendsName: user.username, token: id})
+				).then(() => {
+					dispatch(setSelectedUser(user))
+				})
+			}
+			
 		}
 	}
-})
+	return (
+		<Link to='chat'>
+			<ListItem	button 
+				className={classses.listItem}
+				selected={user.username === selectedUser.username}
+	  		onClick={handleClick}>
+	    		<ListItemIcon>
+			      <UserAvatar
+				      username={user.username} 
+				      badge={user.online ? true : false}
+				     />
+			    </ListItemIcon>
+	      	<ListItemText 
+	      		primary={user.username} 
+	      		secondary={
+	      			user.typing && <span className={classses.typingStatus}> {'typing...'} </span>
+	      		}
+	      	/>
+		     { (user.unread !== 0 && user.unread) &&
+		     	<div className={classses.unread} > {user.unread} </div>
+		     }
+	    </ListItem>
+    </Link>
+	)
+}
 
 const RecentChats = () => {
 	const { useEffect } = React

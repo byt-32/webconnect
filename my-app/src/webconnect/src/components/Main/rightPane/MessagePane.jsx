@@ -103,7 +103,12 @@ const MessagesPane = ({friend}) => {
 	const accountIsOnline = useSelector(state => state.account.account.online)
 
 	const online = useSelector(state => state.activeUsers.activeUsers).find(i => i.username === friend.username).online
-	const friendIsTyping = useSelector(state => state.recentChats.recentChats).find(i => i.username === friend.username).typing
+	const friendInRecent = useSelector(state => state.recentChats.recentChats).find(i => i.username === friend.username)
+	let friendIsTyping = false
+
+	if (friendInRecent !== undefined) {
+		friendIsTyping = friendInRecent.typing
+	}
 	
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const [isTyping, typing] = React.useState(false)
@@ -125,7 +130,7 @@ const MessagesPane = ({friend}) => {
 		clearTimeout(timer)
 		const newTimer = setTimeout(() => {
 			input !== '' && dispatch(setTypingStatus({typing: false, selectedUser: friend.username, user: username}))
-		}, 3000)
+		}, 2000)
 		!typingStatus.typing && dispatch(setTypingStatus({typing: true, selectedUser: friend.username, user: username}))
 		setTimer(newTimer)
 	}

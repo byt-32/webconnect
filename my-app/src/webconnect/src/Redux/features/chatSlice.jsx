@@ -46,6 +46,19 @@ const chatSlice = createSlice({
 				state.privateChats.push({username: sentBy, messages: [message]})
 			}
 
+		},
+		setChatRead: (state, action) => {
+			const receiver = action.payload
+			const find = state.privateChats.find(i => i.username === receiver)
+			const index = state.privateChats.findIndex(i => i.username === receiver)
+
+			if (find !== undefined) {
+				find.messages.forEach( i => {
+					i.read = true
+				})
+				state.privateChats[index].messages = find.messages
+			}
+
 		}
 	},
 	extraReducers: builder => {
@@ -69,7 +82,8 @@ const chatSlice = createSlice({
 export const {
 	storeSentChat,
 	storeReceivedChat,
-	handleChatObj
+	handleChatObj,
+	setChatRead
 } = chatSlice.actions
 
 export default chatSlice.reducer

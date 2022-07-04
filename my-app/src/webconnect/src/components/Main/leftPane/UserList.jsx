@@ -14,6 +14,8 @@ import { Link } from 'react-router-dom'
 
 import UserAvatar from '../UserAvatar'
 
+import { socket } from '../Main'
+
 const useStyles = makeStyles({
 	listItem: {
 		position: 'relative',
@@ -42,7 +44,7 @@ const useStyles = makeStyles({
 })
 
 const UserList = ({user, style, secondaryItems}) => {
-	const {id} = JSON.parse(localStorage.getItem('details'))
+	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const classses = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
@@ -50,8 +52,11 @@ const UserList = ({user, style, secondaryItems}) => {
 	const handleClick = () => {
 
 		if (selectedUser.username !== user.username) {
-				user.unread && dispatch(resetUnread(user.username))
 				
+			if (user.unread > 0) {
+				dispatch(resetUnread(user.username))
+				socket.emit('chatIsRead', user.username, username)
+			}
 			if (selectedUsersArr.find(i => i === user.username) !== undefined) {
 				dispatch(setSelectedUser(user))
 				
