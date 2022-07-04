@@ -7,6 +7,9 @@ import userRoute from './routes/userRoute.js'
 import chatRoute from './routes/chatRoute.js'
 import {saveChats, saveUnread} from './utils/script.js'
 
+import UnreadCount from './models/UnreadCount.js'
+import Chat from './models/Chat.js'
+
 import mongoose from 'mongoose'
 
 import { createServer } from 'http'
@@ -88,6 +91,21 @@ io.on('connection', socket => {
 
 	socket.on('saveUnread', (sentBy, sentTo, chatId) => {
 		saveUnread(sentBy, sentTo, chatId)
+	})
+
+	socket.on('chatIsRead', async (sender, receiver) => {
+		const find = onlineUsers.find(i => i.username === sender)
+		if (find !== undefined) {
+			io.to(find.socketId).emit('chatHasBeenRead', sender, receiver)
+		}
+		
+		await Chat.findOneAndUpdate(
+			{username: sender, 'chats.username': receiver},
+			{'$set': {'chats.$.messages.$[message].read': true}}, 
+			{arrayFilters: [{'message.read': false}]}
+		)
+
+		await UnreadCount.findOneAndUpdate({username: receiver, 'users.username': sender}, {'users.$.unreadArray': []})
 	})
 
 	socket.on('userIsTyping', obj => {
