@@ -9,8 +9,6 @@ const chatRoute = express.Router()
 chatRoute.get('/fetchMessages/:friendsName/:requesterId', async (request, response) => {
 	const { friendsName, requesterId } = request.params
 
-	await UnreadCount.findOneAndUpdate({_id: requesterId, 'users.username': friendsName}, {'users.$.unreadArray': []})
-
 	if (requesterId !== '' && friendsName !== '') {
 		try {
 			const user = await Chat.findOne({_id: requesterId}, {chats: 1, _id: 0})
