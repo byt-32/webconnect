@@ -53,7 +53,12 @@ const recentChatsSlice = createSlice({
 			const find = state.recentChats.findIndex(i => i.username === sentBy)
 
 			if (find !== -1) {
-				state.recentChats[find].unread += 1
+				const value = state.recentChats[find].unread
+				if (typeof value === 'number') {
+					state.recentChats[find].unread = value + 1
+				} else {
+					state.recentChats[find].unread = 0
+				}
 			}
 			
 		},
