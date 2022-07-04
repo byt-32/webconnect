@@ -29,12 +29,14 @@ import grey from '@material-ui/core/colors/grey';
 import blue from '@material-ui/core/colors/blue';
 
 import { useDispatch,useSelector } from 'react-redux'
-import { handleChatObj, storeSentChat, handleReply } from '../../../Redux/features/chatSlice'
+import {  storeSentChat, handleReply } from '../../../Redux/features/chatSlice'
 import { setTypingStatus } from '../../../Redux/features/otherSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
 import { useWindowHeight } from '../../../customHooks/hooks'
+
+import { socket } from '../Main'
 
 const useStyles = makeStyles({
 	emoji: {
@@ -111,12 +113,12 @@ const MessagesPane = ({friend}) => {
 	}
 	
 	const [anchorEl, setAnchorEl] = React.useState(null)
-	const [isTyping, typing] = React.useState(false)
 	const [input, setInput] = React.useState('')
 	const [showPicker, setPicker] = React.useState(false)
 	const [networkError, setNetworkError] = React.useState(false)
 	const [timer, setTimer] = React.useState(null)
-	const typingStatus = useSelector(state => state.other.typingStatus)
+
+	const [typing, setTyping] = React.useState(false)
 
 	const toggleMenu = (event) => {
 		setAnchorEl(event.target)
@@ -125,29 +127,40 @@ const MessagesPane = ({friend}) => {
 		setAnchorEl(null)
 	}
 	
+	const handleTypingStatus = (bool) => {
+		socket.emit('userIsTyping', {typing: bool, selectedUser: friend.username, user: username})
+		setTyping(bool)
+	}
+
 	const handleTextInput = (e) => {
 		setInput(e.target.value)
+
 		clearTimeout(timer)
+
 		const newTimer = setTimeout(() => {
-			input !== '' && dispatch(setTypingStatus({typing: false, selectedUser: friend.username, user: username}))
+			handleTypingStatus(false)
 		}, 2000)
-		!typingStatus.typing && dispatch(setTypingStatus({typing: true, selectedUser: friend.username, user: username}))
+		if (!typing) {/// This is vital to prevent multiple dispatches
+			handleTypingStatus(true)
+		}
 		setTimer(newTimer)
 	}
+
 	const hideNetworkError = () => {
 		setNetworkError(false)
 	}
 
 	const sendMessage = async () => {
+		handleTypingStatus(false)
 		const dateNow = () => Date.now()
 		const _date = new Date()
+		const thisDate = dateNow()
 			
 		const date =
 		{...retrieveDate(_date.toDateString()), 
 			time: _date.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'})
 		}
 
-		let thisDate = dateNow()
 
 		if (input !== '') {
 			if (accountIsOnline) {
@@ -166,14 +179,14 @@ const MessagesPane = ({friend}) => {
 						reply: false
 					}
 				}
+				socket.emit('sentChat', chatObj)
+
 				dispatch(storeSentChat(chatObj))
-				dispatch(handleChatObj(chatObj))
 				setInput('')
 			} else {
 				setNetworkError(true)
 			}
 		}
-		dispatch(setTypingStatus({typing: false, selectedUser: friend.username, user: username}))
 	}
 	
 	return (

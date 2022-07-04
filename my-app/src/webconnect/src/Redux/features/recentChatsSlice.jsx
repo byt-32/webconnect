@@ -63,6 +63,24 @@ const recentChatsSlice = createSlice({
 			if (find !== -1) {
 				state.recentChats[find].typing = typing
 			}
+		},
+		updateRecentChats: (state, action) => {
+			const {sentBy, message} = action.payload
+
+			const findIndex = state.recentChats.findIndex(i => i.username === sentBy)
+			if (findIndex !== -1) {
+				state.recentChats[findIndex].lastSent = message.chatId
+			} else {
+				state.recentChats.unshift({
+					username: sentBy,
+					lastSent: message.chatId ,
+					online: true,
+				})
+			}
+			state.recentChats.sort((a, b) => {
+				if (a.lastSent < b.lastSent) return 1
+				if (a.lastSent > b.lastSent) return -1
+			})
 		}
 	},
 	extraReducers: builder => {
@@ -94,6 +112,7 @@ export const {
 	setRecentOnline,
 	resetUnread,
 	setUnread,
+	updateRecentChats,
 	handleUserTypingActivity,
 	setRecentDisconnect
 } = recentChatsSlice.actions

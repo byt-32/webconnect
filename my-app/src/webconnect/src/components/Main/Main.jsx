@@ -5,7 +5,8 @@ import { io } from 'socket.io-client'
 import { Outlet } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
-import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, handleUserTypingActivity} from '../../Redux/features/recentChatsSlice'
+import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, 
+	handleUserTypingActivity, updateRecentChats} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
 import { storeReceivedChat, setChatRead } from '../../Redux/features/chatSlice'
@@ -26,22 +27,8 @@ const Main = () => {
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const chatObj = useSelector(state => state.chat.chatObj)
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
-	const typingStatus = useSelector(state => state.other.typingStatus)
 	const { useEffect } = React
-
-	useEffect(() => {
-		if (Object.keys(chatObj).length) {
-			socket.emit('sentChat', chatObj)
-		}
-	}, [chatObj])
-
-	useEffect(() => {
-		if (Object.keys(typingStatus).length) {
-			socket.emit('userIsTyping', typingStatus)
-		}
-	}, [typingStatus])
 
 	useEffect(() => {
 		socket.auth =  {
@@ -74,6 +61,7 @@ const Main = () => {
 
 	socket.off('chatFromUser').on('chatFromUser', chat => {
 		dispatch(storeReceivedChat(chat))
+		dispatch(updateRecentChats(chat))
 
 		if ((Object.keys(selectedUser).length !== 0 && selectedUser.username !== chat.sentBy) || Object.keys(selectedUser).length === 0) {
 			socket.emit('saveUnread', chat.sentBy, username, chat.message.chatId, () => {})
