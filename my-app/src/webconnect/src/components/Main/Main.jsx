@@ -37,8 +37,8 @@ const Main = () => {
 		}
 		socket.connect()
 
-		dispatch(fetchRecentChats(id))
-		dispatch(fetchActiveUsers(id))
+		dispatch(fetchRecentChats(id)).then(() => socket.emit('getOnileUsers'))
+		dispatch(fetchActiveUsers(id)).then(() => socket.emit('getOnileUsers'))
 		dispatch(fetchAccountData(id))
 	}, [])
 
@@ -49,7 +49,7 @@ const Main = () => {
 		dispatch(setOnline(false))
 	})
 
-	socket.off('getOnileUsers').on('getOnileUsers', users => {
+	socket.off('onlineUsers').on('onlineUsers', users => {
 		dispatch(setRecentOnline(users.filter(user => user.username !== username)))
 		dispatch(setActiveOnline(users.filter(user => user.username !== username)))
 	})
@@ -61,7 +61,7 @@ const Main = () => {
 
 	socket.off('chatFromUser').on('chatFromUser', chat => {
 		dispatch(storeReceivedChat(chat))
-		dispatch(updateRecentChats(chat))
+		dispatch(updateRecentChats({user: chat.sentBy, lastSent: chat.message.chatId, online: true}))
 
 		if ((Object.keys(selectedUser).length !== 0 && selectedUser.username !== chat.sentBy) || Object.keys(selectedUser).length === 0) {
 			socket.emit('saveUnread', chat.sentBy, username, chat.message.chatId, () => {})
