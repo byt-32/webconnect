@@ -65,17 +65,13 @@ const recentChatsSlice = createSlice({
 			}
 		},
 		updateRecentChats: (state, action) => {
-			const {sentBy, message} = action.payload
+			const {lastSent, user, online} = action.payload
 
-			const findIndex = state.recentChats.findIndex(i => i.username === sentBy)
+			const findIndex = state.recentChats.findIndex(i => i.username === user)
 			if (findIndex !== -1) {
-				state.recentChats[findIndex].lastSent = message.chatId
+				state.recentChats[findIndex].lastSent = lastSent
 			} else {
-				state.recentChats.unshift({
-					username: sentBy,
-					lastSent: message.chatId ,
-					online: true,
-				})
+				state.recentChats.unshift(action.payload)
 			}
 			state.recentChats.sort((a, b) => {
 				if (a.lastSent < b.lastSent) return 1
