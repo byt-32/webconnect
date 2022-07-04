@@ -31,6 +31,7 @@ import blue from '@material-ui/core/colors/blue';
 import { useDispatch,useSelector } from 'react-redux'
 import {  storeSentChat, handleReply } from '../../../Redux/features/chatSlice'
 import { setTypingStatus } from '../../../Redux/features/otherSlice'
+import {updateRecentChats} from '../../../Redux/features/recentChatsSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
@@ -161,7 +162,6 @@ const MessagesPane = ({friend}) => {
 			time: _date.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'})
 		}
 
-
 		if (input !== '') {
 			if (accountIsOnline) {
 				setNetworkError(false)
@@ -181,6 +181,12 @@ const MessagesPane = ({friend}) => {
 				}
 				socket.emit('sentChat', chatObj)
 
+				dispatch(updateRecentChats({
+					user: selectedUser.username, 
+					lastSent: chatObj.lastSent,
+					lastChat: chatObj.message.message,
+					online: selectedUser.online 
+				}))
 				dispatch(storeSentChat(chatObj))
 				setInput('')
 			} else {

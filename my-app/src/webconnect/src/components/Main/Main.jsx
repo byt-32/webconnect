@@ -61,7 +61,9 @@ const Main = () => {
 
 	socket.off('chatFromUser').on('chatFromUser', chat => {
 		dispatch(storeReceivedChat(chat))
-		dispatch(updateRecentChats({user: chat.sentBy, lastSent: chat.message.chatId, online: true}))
+		dispatch(updateRecentChats({
+			user: chat.sentBy, lastSent: chat.message.chatId, online: true, lastChat: chat.message.message
+		}))
 
 		if ((Object.keys(selectedUser).length !== 0 && selectedUser.username !== chat.sentBy) || Object.keys(selectedUser).length === 0) {
 			socket.emit('saveUnread', chat.sentBy, username, chat.message.chatId, () => {})
@@ -73,7 +75,6 @@ const Main = () => {
 	})
 
 	socket.off('chatHasBeenRead').on('chatHasBeenRead', (sender, receiver) => {
-		
 		dispatch(setChatRead(receiver))
 	})
 
