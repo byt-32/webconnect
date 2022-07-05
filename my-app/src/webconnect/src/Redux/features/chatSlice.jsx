@@ -79,6 +79,19 @@ const chatSlice = createSlice({
 
 				// const find = state.privateChats.findIndex(i => i.username === sentBy)
 			// const 
+		},
+		setHighlighted: (state, action) => {
+			const {friendsName, chatId, show} = action.payload
+			const find = state.privateChats.findIndex(i => i.username === friendsName)
+
+			if (show) {
+				if (find !== -1) {
+					state.privateChats[find].messages.find(i => i.chatId === chatId).highlightChat = true
+
+				}
+			} else {
+				state.privateChats[find].messages.find(i => i.chatId === chatId).highlightChat = false
+			}
 		}
 	},
 	extraReducers: builder => {
@@ -102,6 +115,7 @@ const chatSlice = createSlice({
 
 export const {
 	storeSentChat,
+	setHighlighted,
 	storeReceivedChat,
 	setChatRead,
 	setReply
