@@ -19,7 +19,7 @@ const port = process.env.PORT || 3001;
 let connectedClients = [], onlineUsers = []
 
 const db = mongoose.connection
-mongoose.connect('mongodb://localhost:27017/webconnect', {
+mongoose.connect( process.env.LOCALURI , {
 	useNewUrlParser: true,
 	useUnifiedTopology: true
 })
@@ -80,7 +80,9 @@ io.on('connection', socket => {
 		}
 	}
 
-	io.emit('getOnileUsers', onlineUsers)
+	socket.on('getOnileUsers', () => {
+		io.emit('onlineUsers', onlineUsers)
+	})
 
 	socket.on('disconnect', reason => {
 		onlineUsers = onlineUsers.filter(user => user.username !== socket.username)
@@ -98,7 +100,7 @@ io.on('connection', socket => {
 		if (find !== undefined) {
 			io.to(find.socketId).emit('chatHasBeenRead', sender, receiver)
 		}
-		
+
 		await Chat.findOneAndUpdate(
 			{username: sender, 'chats.username': receiver},
 			{'$set': {'chats.$.messages.$[message].read': true}}, 

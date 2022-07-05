@@ -216,14 +216,13 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 	const {id} = request.params
 	const recentChats = 
 		await Chat.findOne({_id: id}, 
-			{_id: 0, 'chats.username': 1, 'chats.lastSent': 1}) || []
+			{_id: 0, 'chats.username': 1, 'chats.lastSent': 1, 'chats.messages': {$slice: -1}}) || []
 
 	const unreadChatsArray = 
 		await UnreadCount.findOne({_id: id},
 			{_id: 0, 'users.username': 1, 'users.unreadArray': 1}
 		) || []
 
-	// console.log(recentChats, unreadChatsArray)
 	response.send({
 		recentChats: recentChats.chats || [],
 		unread: unreadChatsArray.users || []
