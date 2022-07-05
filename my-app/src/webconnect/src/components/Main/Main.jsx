@@ -62,7 +62,7 @@ const Main = () => {
 	socket.off('chatFromUser').on('chatFromUser', chat => {
 		dispatch(storeReceivedChat(chat))
 		dispatch(updateRecentChats({
-			user: chat.sentBy, lastSent: chat.message.chatId, online: true, lastChat: chat.message.message
+			user: chat.sentBy, lastSent: chat.message.chatId, online: true, messages: chat.message
 		}))
 
 		if ((Object.keys(selectedUser).length !== 0 && selectedUser.username !== chat.sentBy) || Object.keys(selectedUser).length === 0) {

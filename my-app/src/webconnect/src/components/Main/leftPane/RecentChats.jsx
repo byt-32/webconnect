@@ -56,11 +56,18 @@ const useStyles = makeStyles({
 	},
 	listItem: {
 		position: 'relative',
+		padding: '12px 15px',
 		'& .MuiAvatar-root': {
 			width: 45, height: 45
 		},
 		'& .MuiListItemText-root': {
-			marginLeft: '.3rem'
+			marginLeft: '.3rem',
+			'& .MuiListItemText-secondary': {
+				textOverflow: 'ellipsis',
+				whiteSpace: 'nowrap',
+				overflow: 'hidden',
+				paddingInlineEnd: 10
+			}
 		}
 	},
 	unread: {
@@ -78,17 +85,22 @@ const useStyles = makeStyles({
 	typingStatus: {
 		color: '#6495ed'
 	},
+	lastChat: {
+		color: 'initial',
+		'& span': {
+			color:' #9d9d9d'
+		}
+	}
 	
 })
 
 const UserList = ({user, style, secondaryItems}) => {
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
+	const {useState, useEffect} = React
 	const classses = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const selectedUsersArr = useSelector(state => state.other.fetched)
-	
-	const userInRecent = useSelector(state => state.recentChats.recentChats).find(i => i.username === user.username)
 
 	const handleClick = () => {
 
@@ -127,7 +139,15 @@ const UserList = ({user, style, secondaryItems}) => {
 	      	<ListItemText 
 	      		primary={user.username} 
 	      		secondary={
-	      			user.typing && <span className={classses.typingStatus}> {'typing...'} </span>
+	      			user.typing ?
+	      				<span className={classses.typingStatus}> {'typing...'} </span>
+	      			: <span className={classses.lastChat}
+	      				> 
+	      					{user.messages.sentBy === username && 
+	      						<span style={{fontWeight: 'bold'}}> {'You: '} </span> 
+	      					} 
+	      					 <span style={{fontStyle: 'italic'}}> {user.messages.message} </span>
+	      				</span>
 	      		}
 	      	/>
 		     { (user.unread !== 0 && user.unread) &&
