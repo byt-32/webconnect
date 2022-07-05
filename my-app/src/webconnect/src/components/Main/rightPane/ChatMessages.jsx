@@ -12,7 +12,7 @@ import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined'
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { handleReply, setHighlightedId, setReply } from '../../../Redux/features/chatSlice'
+import { handleReply, setHighlighted, setReply } from '../../../Redux/features/chatSlice'
 import common from '@material-ui/core/colors/common';
 import blue from '@material-ui/core/colors/blue';
 import deepOrange from '@material-ui/core/colors/deepOrange';
@@ -37,7 +37,8 @@ const useStyles = makeStyles({
 		display: 'flex',
 		position: 'relative',
 		alignItems: 'flex-end',
-		width: '100%'
+		width: '100%',
+		transition: '.7s ease background'
 	},
 	fromAccount: {
 		alignSelf: 'flex-end',
@@ -94,7 +95,7 @@ const useStyles = makeStyles({
 		}
 	}
 })
-
+///rgb(0 137 255 / 6%)
 const ChatSingle = ({chat}) => {
 	const classes = useStyles()
 	const dispatch = useDispatch()
@@ -102,6 +103,7 @@ const ChatSingle = ({chat}) => {
 	let me = (chat.me || chat.sentBy === username) ? true : (!chat.me || chat.sentBy !== username) ? 
 	false : ''
 	const [open, setOpen] = React.useState(false)
+	const [timer, setTimer] = React.useState(null)
 
 	const getFriendName = () => {
 	/** This basically gets the freinds username,
@@ -138,16 +140,27 @@ const ChatSingle = ({chat}) => {
 	const handleCopy = () => {
 
 	}
+	const handleChatHighlight = () => {
+		dispatch(setHighlighted({chatId: chat.reply.chatId, friendsName: getFriendName(), show: true}))
+		clearTimeout(timer)
+
+		const newTimer = setTimeout(() => {
+			dispatch(setHighlighted({chatId: chat.reply.chatId, friendsName: getFriendName(), show: false}))
+		}, 1000)
+
+		setTimer(newTimer)
+	}
 	return (
 		<ClickAwayListener onClickAway={handleClickAway}>
 		<div className={[classes.chatAndprop, me ? classes.fromAccount : classes.fromFriend].join(' ')} 
+			style={{background: chat.highlightChat ? 'rgb(0 137 255 / 8%)' : 'inherit'}}
 		>
 			<div className={classes.chatSingle} style={{
 				padding: chat.reply && '0 0 0 2px'
 			}}>
 				{ chat.reply ?
 					<> 
-						<div className={classes.reply}>
+						<div className={classes.reply} onClick={handleChatHighlight}>
 							<div style={{
 									color: deepOrange[500],
 									padding: '0 9px 3px 0',
