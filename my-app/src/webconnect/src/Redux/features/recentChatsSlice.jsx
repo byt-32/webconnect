@@ -70,12 +70,12 @@ const recentChatsSlice = createSlice({
 			}
 		},
 		updateRecentChats: (state, action) => {
-			const {lastSent, user, online, lastChat} = action.payload
+			const {lastSent, user, online, messages} = action.payload
 
 			const findIndex = state.recentChats.findIndex(i => i.username === user)
 			if (findIndex !== -1) {
 				state.recentChats[findIndex].lastSent = lastSent
-				state.recentChats[findIndex].lastChat = lastChat
+				state.recentChats[findIndex].messages = messages
 
 			} else {
 				state.recentChats.unshift(action.payload)
@@ -91,8 +91,8 @@ const recentChatsSlice = createSlice({
 			state.showRecentUsersLoader = true
 		})
 		.addCase(fetchRecentChats.fulfilled, (state, action) => {
+console.log(action.payload)
 			const {recentChats, unread} = action.payload
-
 			recentChats.forEach(i => {
 				const findInUnread = unread.find(user => user.username === i.username)
 				if (findInUnread !== undefined) {
@@ -100,7 +100,7 @@ const recentChatsSlice = createSlice({
 				}
 				i.typing = false
 				i.online = false
-				i.lastChat = {}
+				i.messages = i.messages[0]
 			})
 
 			state.recentChats = recentChats.sort((a, b) => {

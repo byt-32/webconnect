@@ -50,11 +50,35 @@ const chatSlice = createSlice({
 
 			if (find !== undefined) {
 				find.messages.forEach( i => {
-					i.read = true
+					if (!i.read && i.read !== undefined) {
+						i.read = true
+					}
 				})
 				state.privateChats[index].messages = find.messages
 			}
+		},
+		setReply: (state, action) => {
+			const {open, friendsName} = action.payload
+			const find = state.privateChats.findIndex(i => i.username === friendsName)
 
+			if (open) {
+				const {username, chatId, sentBy} = action.payload
+
+				if (find !== -1) {
+					const message = state.privateChats[find].messages.find(i => i.chatId === chatId).message
+					state.privateChats[find].reply = {
+						open: true,
+						sentBy: sentBy,
+						message: message,
+						chatId: chatId
+					}
+				}
+			} else {
+				state.privateChats[find].reply = {open: false}
+			}
+
+				// const find = state.privateChats.findIndex(i => i.username === sentBy)
+			// const 
 		}
 	},
 	extraReducers: builder => {
@@ -63,12 +87,13 @@ const chatSlice = createSlice({
 		})
 		.addCase(fetchMessages.fulfilled, (state, action) => {
 			const { username, messages } = action.payload
+			const reply = {open: false}
 
 			const idx = state.privateChats.findIndex( chat => chat.username === username)
 			
 			if (idx === -1) {
-				state.privateChats.push(action.payload)
-			} else {
+				state.privateChats.push({...action.payload, reply})
+			} else {// This will never execute, fetching messages is limited to once per user
 				state.privateChats[idx].messages = messages
 			}
 		})
@@ -78,7 +103,8 @@ const chatSlice = createSlice({
 export const {
 	storeSentChat,
 	storeReceivedChat,
-	setChatRead
+	setChatRead,
+	setReply
 } = chatSlice.actions
 
 export default chatSlice.reducer
