@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import DoneAllIcon from '@material-ui/icons/DoneAll'
 import ReplyIcon from '@material-ui/icons/Reply'
 import DoneIcon from '@material-ui/icons/Done';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import Fade from '@material-ui/core/Fade';
@@ -11,7 +12,7 @@ import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined'
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { handleReply, setHighlightedId } from '../../../Redux/features/chatSlice'
+import { handleReply, setHighlightedId, setReply } from '../../../Redux/features/chatSlice'
 import common from '@material-ui/core/colors/common';
 import blue from '@material-ui/core/colors/blue';
 import deepOrange from '@material-ui/core/colors/deepOrange';
@@ -34,27 +35,38 @@ const useStyles = makeStyles({
 	},
 	chatAndprop:{
 		display: 'flex',
-		alignItems: 'flex-end'
+		position: 'relative',
+		alignItems: 'flex-end',
+		width: '100%'
 	},
 	fromAccount: {
 		alignSelf: 'flex-end',
+		justifyContent: 'flex-end',
 		marginLeft: '1rem',
 		'& > div': {
 			background: blue[400],
 			color: common.white,
+		},
+		'& div:last-of-type': {
+			right: 0
 		}
 	},
 	fromFriend: {
+		justifyContent: 'flex-start',
 		alignSelf: 'flex-start',
 		marginRight: '1rem',
 		'& > div': {
 			background: common.white,
 			color: common.black
+		},
+		'& div:last-of-type': {
+			left: 0
 		}
 	},
 	chatSingle: {
 		width: 'auto',
-		borderRadius: 5,
+		font: 'message-box',
+		borderRadius: '5px 0' ,
 		marginTop: 8,
 		padding: '4px 8px',
 	},
@@ -63,7 +75,16 @@ const useStyles = makeStyles({
 		color: common.black,
 		fontSize: '.85rem',
 		padding: 5,
-		borderRadius: '0 5px 0 0'
+		borderBottom: '1px solid #efefef',
+		borderRadius: '5px 0'
+	},
+	chatProps: {
+		position: 'absolute',
+		top: '-42px',
+		borderRadius: '5px',
+		zIndex: 20,
+		display: 'flex',
+		background: '#fff !important'
 	},
 
 	chatRead: {
@@ -76,19 +97,55 @@ const useStyles = makeStyles({
 
 const ChatSingle = ({chat}) => {
 	const classes = useStyles()
+	const dispatch = useDispatch()
 	const username = useSelector(state => state.account.account.username)
 	let me = (chat.me || chat.sentBy === username) ? true : (!chat.me || chat.sentBy !== username) ? 
 	false : ''
+	const [open, setOpen] = React.useState(false)
+
+	const getFriendName = () => {
+	/** This basically gets the freinds username,
+	 alternative to this would be to pass the username down to this component, 
+	 leading to props drilling.
+
+	 if checks if sentBy or sentTo is not equals the account username, and returns it
+		
+	**/
+		if (chat.sentBy !== username) return chat.sentBy
+		if (chat.sentTo !== username) return chat.sentTo
+	}
 
 	function replace(text) {
 		return text.replaceAll('\n', '<br/>')
 	}
+	const handleChatProps = () => {
+		setOpen(!open)
+	}
+	const handleClickAway = () => {
+		setOpen(false)
+	}
+
+	const handleReply = () => {
+		dispatch(setReply({
+			username,
+			open: true,
+			chatId: chat.chatId,
+			sentBy: chat.sentBy,
+			friendsName: getFriendName()
+		}))
+	}
+
+	const handleCopy = () => {
+
+	}
 	return (
-		<div className={[classes.chatAndprop, me ? classes.fromAccount : classes.fromFriend].join(' ')} >
+		<ClickAwayListener onClickAway={handleClickAway}>
+		<div className={[classes.chatAndprop, me ? classes.fromAccount : classes.fromFriend].join(' ')} 
+		>
 			<div className={classes.chatSingle} style={{
-				padding: chat.reply.open && '0 0 0 2px'
+				padding: chat.reply && '0 0 0 2px'
 			}}>
-				{ chat.reply.open ?
+				{ chat.reply ?
 					<> 
 						<div className={classes.reply}>
 							<div style={{
@@ -96,20 +153,19 @@ const ChatSingle = ({chat}) => {
 									padding: '0 9px 3px 0',
 									fontSize: '.8rem', fontWeight: 'bold'}} >
 								{
-									chat.reply.person === username ? 'You' : chat.reply.person
+									chat.reply.sentBy === username ? 'You' : chat.reply.sentBy
 								}
 							</div>
-							{chat.reply.to}
-						</div>
-						<div style={{
-							padding: '4px 8px 4px 3px'
-						}} > 
-							{chat.message} 
+							{chat.reply.message}
 						</div>
 
+						<div style={{
+							padding: '4px 8px 4px 3px'
+						}} onClick={handleChatProps} > 
+							{chat.message} 
+						</div>
 					</>
-					
-					: <> {chat.message} </>
+					: <span onClick={handleChatProps}> {chat.message} </span>
 				}
 			</div>
 			{ me &&
@@ -117,7 +173,15 @@ const ChatSingle = ({chat}) => {
 					{chat.read ? <DoneAllIcon style={{color: '#00c759'}} /> : <DoneIcon />}
 				</span>
 			}
+			<Fade in={open}>
+				<div className={classes.chatProps}>
+					<IconButton onClick={handleReply} > <ReplyIcon /> </IconButton>
+					<IconButton onClick={handleCopy} > <FileCopyOutlinedIcon /> </IconButton>
+				</div>
+			</Fade>
 		</div>
+		
+		</ClickAwayListener>
 	)
 }
 

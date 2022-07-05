@@ -10,9 +10,9 @@ import InputBase from "@material-ui/core/InputBase";
 import Menu from '@material-ui/core/Menu'
 import Typography from '@material-ui/core/Typography';
 import MenuItem from '@material-ui/core/MenuItem'
-import Fade from '@material-ui/core/Fade';
 import MuiAlert from '@material-ui/lab/Alert';
 import Snackbar from '@material-ui/core/Snackbar'
+import Slide from '@material-ui/core/Slide';
 
 import SendIcon from '@material-ui/icons/Send';
 import TagFacesIcon from '@material-ui/icons/TagFaces';
@@ -29,7 +29,7 @@ import grey from '@material-ui/core/colors/grey';
 import blue from '@material-ui/core/colors/blue';
 
 import { useDispatch,useSelector } from 'react-redux'
-import {  storeSentChat, handleReply } from '../../../Redux/features/chatSlice'
+import {  storeSentChat, setReply } from '../../../Redux/features/chatSlice'
 import { setTypingStatus } from '../../../Redux/features/otherSlice'
 import {updateRecentChats} from '../../../Redux/features/recentChatsSlice'
 
@@ -77,6 +77,7 @@ const useStyles = makeStyles({
 		},
 		'& .MuiCardActions-root': {
 			background: common.white,
+			position: 'relative'
 		},
 		'& .MuiInputBase-root': {
 			flex: 1,
@@ -86,6 +87,30 @@ const useStyles = makeStyles({
 			overflowY: 'scroll !important'
 		}
 	},
+	contents: {
+		width: '80%',
+		margin: '0 auto'
+	},
+	replyHandel: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		position: 'absolute',
+		background: '#fdfdfd',
+		width: '100%',
+		top: '-61px',
+		left: 0,
+		borderRadius: '10px 0'
+	},
+	replyProps: {
+		display: 'flex',
+		flexDirection: 'column',
+		padding: 10,
+		borderLeft: '2px solid #d1803e',
+		borderRadius: 'inherit',
+		'& span:first-child': {
+			marginBottom: 2
+		}
+	}
 })
 function retrieveDate(date) {
 	const index = (/[0-9](?=[0-9]{3})/).exec(date)['index']
@@ -108,6 +133,8 @@ const MessagesPane = ({friend}) => {
 	const online = useSelector(state => state.activeUsers.activeUsers).find(i => i.username === friend.username).online
 	const friendInRecent = useSelector(state => state.recentChats.recentChats).find(i => i.username === friend.username)
 	let friendIsTyping = false
+
+	const reply = friend.reply || {}
 
 	if (friendInRecent !== undefined) {
 		friendIsTyping = friendInRecent.typing
@@ -150,6 +177,9 @@ const MessagesPane = ({friend}) => {
 	const hideNetworkError = () => {
 		setNetworkError(false)
 	}
+	const closeReplyHandle = () => {
+		dispatch(setReply({open: false, friendsName: friend.username}))
+	}
 
 	const sendMessage = async () => {
 		handleTypingStatus(false)
@@ -176,7 +206,7 @@ const MessagesPane = ({friend}) => {
 						read: false,
 						sentTo: friend.username,
 						timestamp: date,
-						reply: false
+						reply: reply.open ? reply : false
 					}
 				}
 				socket.emit('sentChat', chatObj)
@@ -184,11 +214,12 @@ const MessagesPane = ({friend}) => {
 				dispatch(updateRecentChats({
 					user: selectedUser.username, 
 					lastSent: chatObj.lastSent,
-					lastChat: chatObj.message.message,
+					messages: chatObj.message,
 					online: selectedUser.online 
 				}))
 				dispatch(storeSentChat(chatObj))
 				setInput('')
+				closeReplyHandle()
 			} else {
 				setNetworkError(true)
 			}
@@ -218,7 +249,7 @@ const MessagesPane = ({friend}) => {
         	: online ? 'online' : 'offline'
         }
       />
-      <CardContent style={{
+      <CardContent className={classes.contents} style={{
       	height: `${useWindowHeight()  - 110}px`
       }}>
         <ChatMessages chats={friend.messages} />
@@ -230,7 +261,20 @@ const MessagesPane = ({friend}) => {
 				</Snackbar>
       </CardContent>
       
-      <CardActions >
+      <CardActions className={classes.contents} >
+      	<Slide in={reply.open} direction='up' >
+	      	<div className={classes.replyHandel}>
+	      		<div className={classes.replyProps}>
+	      			<span style={{color: '#ad39ad', fontWeight: 'bold'}}>
+	      				{reply.sentBy === username ? 'You' : reply.sentBy} 
+	      			</span>
+	      			<span> {reply.message} </span>
+	      		</div>
+	      		<div >
+	      			<CloseIcon onClick={closeReplyHandle} style={{fontSize: '1.2rem', color: '#c55044', margin: 3,}} />
+	      		</div>
+	      	</div>
+	      </Slide>
       	<InputBase 
       		multiline
       		placeholder='Type your messages'
