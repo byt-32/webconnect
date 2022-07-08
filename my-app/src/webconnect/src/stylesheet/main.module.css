@@ -9,6 +9,10 @@ html, body, div, button, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p
 	font-family: Quicksand;
 	src: url('../../../../public/fonts/Quicksand/Quicksand-Regular.ttf');
 }
+@font-face {
+  font-family: MuseoSans_300;
+  src: url('../../../../public/fonts/Museo Sans 300/MuseoSans-300.otf');
+}
 body {
   font-family: Quicksand, "Open Sans", sans-serif !important;
   color: #272829;
@@ -224,7 +228,7 @@ a:hover {
   text-decoration: none;
 }
 h1, h2, h3, h4, h5, h6 {
-  font-weight: bold;
+  font-weight: bold !important;
 }
 :root {
  --animate-duration: .5s;
