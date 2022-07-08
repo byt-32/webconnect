@@ -17,6 +17,9 @@ import GroupIcon from '@material-ui/icons/Group'
 import MenuIcon from '@material-ui/icons/Menu'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
+import RecentActorsIcon from '@material-ui/icons/RecentActors';
+import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import AccountCircleRoundedIcon from '@material-ui/icons/AccountCircleRounded';
 
 import { setSelectedUser, assertFetch } from '../../../Redux/features/otherSlice'
 import { fetchMessages } from '../../../Redux/features/chatSlice'
@@ -32,6 +35,7 @@ import { Link } from 'react-router-dom'
 import Preloader from '../../Preloader'
 
 import { socket } from '../Main'
+import { useAssert } from '../../../customHooks/hooks'
 
 import Header from './Header'
 
@@ -41,7 +45,18 @@ const useStyles = makeStyles({
 	},
 	menu: {
 		'& div': {
-			top: '58px !important'
+			top: '58px !important',
+			// background: 'transparent'
+		},
+		'& .MuiMenuItem-root': {
+			paddingRight: 55
+			// background: '#ffffffde',
+			// backdropFilter: 'blur(7px)'
+		},
+		'& svg': {
+			marginRight: 15,
+			color: '#57565c',
+			fontSize: '1.5rem'
 		},
 		'& .MuiListItemIcon-root': {
 			minWidth: 40
@@ -56,7 +71,7 @@ const useStyles = makeStyles({
 	},
 	listItem: {
 		position: 'relative',
-		padding: '12px 15px',
+		padding: 12,
 		'& .MuiAvatar-root': {
 			width: 45, height: 45
 		},
@@ -87,6 +102,7 @@ const useStyles = makeStyles({
 	},
 	lastChat: {
 		color: 'initial',
+		fontSize: '.9rem',
 		'& span': {
 			color:' #9d9d9d'
 		}
@@ -106,11 +122,11 @@ const UserList = ({user, style, secondaryItems}) => {
 
 		if (selectedUser.username !== user.username) {
 				
-			if (user.unread > 0) {
+			if (useAssert(user.unread)) {
 				dispatch(resetUnread(user.username))
 				socket.emit('chatIsRead', user.username, username)
 			}
-			if (fetchedUsers.find(i => i === user.username) !== undefined) {
+			if (useAssert(fetchedUsers.find(i => i === user.username))) {
 				dispatch(setSelectedUser(user))
 			} else {
 				dispatch(assertFetch(user.username))
@@ -136,7 +152,7 @@ const UserList = ({user, style, secondaryItems}) => {
 				     />
 			    </ListItemIcon>
 	      	<ListItemText 
-	      		primary={user.username} 
+	      		primary={<Typography component='h6'> {user.username}</Typography>} 
 	      		secondary={
 	      			user.typing ?
 	      				<span className={classses.typingStatus}> {'typing...'} </span>
@@ -145,12 +161,12 @@ const UserList = ({user, style, secondaryItems}) => {
 	      					{user.messages.sentBy === username && 
 	      						<span style={{fontWeight: 'bold'}}> {'You: '} </span> 
 	      					} 
-	      					 <span style={{fontStyle: 'italic'}}> {user.messages.message} </span>
+	      					 <span> {user.messages.message} </span>
 	      				</span>
 	      		}
 	      	/>
-		     { (user.unread !== 0 && user.unread) &&
-		     	<div className={classses.unread} > {user.unread} </div>
+		     { (useAssert(user.unread)) &&
+		     	<div className={classses.unread} > {user.unread.length} </div>
 		     }
 	    </ListItem>
     </Link>
@@ -183,27 +199,34 @@ const RecentChats = () => {
 	return (
 		<>
 			<Header>
-				<IconButton onClick={toggleMenu} >
+				<IconButton onClick={toggleMenu} style={{background: open && '#0000000a'}} >
 					<MenuIcon />
 				</IconButton>
-				<Menu open={open} 
+				<Menu 
+					open={open} 
 				  transformOrigin={{
 				    vertical: 'top',
 				    horizontal: 'left',
 				  }}
-					onClose={handleClose} anchorEl={anchorEl} className={classes.menu} >
-						<MenuItem onClick={() => { 
-							handleClose()
-							setComp({component: 'activeUsers', value: true})
-						}} >
-							<Typography variant='inherit'> users </Typography>
-						</MenuItem>
-						<MenuItem onClick={() => { 
-							handleClose()
-							setComp({component: 'settings', value: true})
-						}} >
-							<Typography variant='inherit'> profile </Typography>
-						</MenuItem>
+					onClose={handleClose} 
+					anchorEl={anchorEl} 
+					className={classes.menu} 
+				>
+					<MenuItem onClick={() => { 
+						handleClose()
+						setComp({component: 'settings', value: true})
+					}} >
+						<AccountCircleRoundedIcon />
+						<Typography variant='inherit'> Profile </Typography>
+					</MenuItem>
+					<MenuItem onClick={() => { 
+						handleClose()
+						setComp({component: 'activeUsers', value: true})
+					}} >
+						<PeopleAltRoundedIcon />
+						<Typography variant='inherit'> Network </Typography>
+					</MenuItem>
+						
 				</Menu>
 				<InputBase
 					className={classes.searchbar}
