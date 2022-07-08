@@ -37,7 +37,7 @@ import blue from '@material-ui/core/colors/blue';
 import { useDispatch,useSelector } from 'react-redux'
 import {  storeSentChat, setReply, handleStarredChat, performChatDelete, handlePendingDelete } from '../../../Redux/features/chatSlice'
 import { setTypingStatus } from '../../../Redux/features/otherSlice'
-import {updateRecentChats, updateLastChat} from '../../../Redux/features/recentChatsSlice'
+import {updateRecentChats, syncRecentsWithDeleted} from '../../../Redux/features/recentChatsSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
@@ -175,7 +175,9 @@ const MessagesPane = ({friend}) => {
 
 	const dispatch = useDispatch()
 	const {username} = JSON.parse(localStorage.getItem('details'))
-	const online = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username).online)
+	const friendOnline = useSelector(state => state.other.onlineUsers.find(i => i.username === friend.username))
+	const online = friendOnline !== undefined ? friendOnline.online : false
+	// console.log(online)
 
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 
@@ -187,6 +189,17 @@ const MessagesPane = ({friend}) => {
 	const [timerToDelete, setDeleteTimer] = React.useState(null)
 
 	const {pendingDelete, starredChat, reply} = friend.actionValues
+	const [anchorEl, setAnchorEl] = React.useState(null)
+	// const [input, setInput] = React.useState('')
+	const [showPicker, setPicker] = React.useState(false)
+	const [networkError, setNetworkError] = React.useState(false)
+	const [timer, setTimer] = React.useState(null)
+
+	const starredChatRef = React.createRef(null)
+	const cardContentRef = React.createRef(null)
+
+	const [typing, setTyping] = React.useState(false)
+
 
 	React.useEffect(() => {
 		/*** READ THIS 
@@ -197,6 +210,9 @@ const MessagesPane = ({friend}) => {
 			TEST CASE 2: DELETING A SENT CHAT(YOUR CHAT) MODIFES BOTH THE USER'S DATABASE
 			ASS WELL AS THE SENDERS'
 		*/
+		if (!accountIsOnline) {
+			setNetworkError(true)
+		}
 		if (useAssert(pendingDelete)) {
 			clearTimeout(timerToDelete)
 
@@ -207,7 +223,7 @@ const MessagesPane = ({friend}) => {
 				dispatch(performChatDelete({friendsName: friend.username, chat: pendingDelete}))
 				dispatch(handlePendingDelete({friendsName: friend.username, chat: {}}))
 				dispatch(setReply({open: false, friendsName: friend.username}))
-				dispatch(updateLastChat({friendsName: friend.username, chat: pendingDelete}))
+				dispatch(syncRecentsWithDeleted({friendsName: friend.username, chat: pendingDelete}))
 			}, 10000)
 			setDeleteTimer(newTimerToDelete)
 		}	
@@ -236,17 +252,7 @@ const MessagesPane = ({friend}) => {
 		friendIsTyping = friendInRecent.typing
 	}
 	
-	const [anchorEl, setAnchorEl] = React.useState(null)
-	// const [input, setInput] = React.useState('')
-	const [showPicker, setPicker] = React.useState(false)
-	const [networkError, setNetworkError] = React.useState(false)
-	const [timer, setTimer] = React.useState(null)
-
-	const starredChatRef = React.createRef(null)
-	const cardContentRef = React.createRef(null)
-
-	const [typing, setTyping] = React.useState(false)
-
+	
 	const toggleMenu = (event) => {
 		setAnchorEl(event.target)
 	}
@@ -404,7 +410,6 @@ const MessagesPane = ({friend}) => {
 						horizontal: 'center',
 					}}
 					message={<ActionNotifier action={'Deleting...'} />}
-					autoHideDuration={10000} 
 					open={useAssert(pendingDelete)}
 					action={
 						<Button onClick={() => undoDelete()} style={{color: '#ffc4cf'}}> UNDO </Button>
