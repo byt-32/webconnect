@@ -13,6 +13,10 @@ import MenuItem from '@material-ui/core/MenuItem'
 import MuiAlert from '@material-ui/lab/Alert';
 import Snackbar from '@material-ui/core/Snackbar'
 import Slide from '@material-ui/core/Slide';
+import Fade from '@material-ui/core/Fade';
+import Box from '@material-ui/core/Box';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Button from '@material-ui/core/Button'
 
 import SendIcon from '@material-ui/icons/Send';
 import TagFacesIcon from '@material-ui/icons/TagFaces';
@@ -21,6 +25,8 @@ import VideoCallIcon from '@material-ui/icons/VideoCall';
 import AddIcCall from '@material-ui/icons/AddIcCall';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import CloseIcon from '@material-ui/icons/Close';
+import StarsIcon from '@material-ui/icons/Stars';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
 import common from '@material-ui/core/colors/common';
 
@@ -29,13 +35,13 @@ import grey from '@material-ui/core/colors/grey';
 import blue from '@material-ui/core/colors/blue';
 
 import { useDispatch,useSelector } from 'react-redux'
-import {  storeSentChat, setReply } from '../../../Redux/features/chatSlice'
+import {  storeSentChat, setReply, handleStarredChat, performChatDelete, handlePendingDelete } from '../../../Redux/features/chatSlice'
 import { setTypingStatus } from '../../../Redux/features/otherSlice'
 import {updateRecentChats} from '../../../Redux/features/recentChatsSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
-import { useWindowHeight } from '../../../customHooks/hooks'
+import { useWindowHeight, useAssert } from '../../../customHooks/hooks'
 
 import { socket } from '../Main'
 
@@ -72,8 +78,9 @@ const useStyles = makeStyles({
 		},
 		'& .MuiCardContent-root': {
 			background: grey[200],
-			padding: 8,
-			overflowY: 'scroll'
+			padding: 8 ,
+			overflowY: 'scroll',
+			position: 'relative'
 		},
 		'& .MuiCardActions-root': {
 			background: common.white,
@@ -110,6 +117,28 @@ const useStyles = makeStyles({
 		'& span:first-child': {
 			marginBottom: 2
 		}
+	},
+	starred: {
+		position: 'sticky',
+		width: '98%',
+		top: 0,
+		margin: '0 auto',
+		zIndex: 25,
+		transition: '.7s ease all',
+		'& .MuiCardHeader-title': {
+			color: '#edb664'
+		}
+	},
+	bottomSnackbar: {
+		width: '100%',
+		position: 'absolute',
+		'& .MuiSnackbarContent-message': {
+			'& .MuiTypography-body1': {
+				marginLeft: 10,
+			},
+			display: 'flex',
+			alignItems: 'center',
+		}
 	}
 })
 function retrieveDate(date) {
@@ -120,31 +149,86 @@ function retrieveDate(date) {
 
 	return {year: year, day: day, fullDate: fullDate}
 }
+function ActionNotifier(props) {
+	const classes = useStyles()
+  const [progress, setProgress] = React.useState(10);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((prevProgress) => (prevProgress + 10));
+    }, 1000);
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  return(
+  	<>
+  		<CircularProgress variant="determinate" value={progress} />
+  		<Typography component='span'> {props.action} </Typography>
+  	</>
+  )
+}
 
 const MessagesPane = ({friend}) => {
 	const classes = useStyles()
 
 	const dispatch = useDispatch()
 	const {username} = JSON.parse(localStorage.getItem('details'))
-	// const user = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username))
+	const online = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username).online)
+
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
+
 	const accountIsOnline = useSelector(state => state.account.account.online)
 
-	const online = useSelector(state => state.activeUsers.activeUsers).find(i => i.username === friend.username).online
 	const friendInRecent = useSelector(state => state.recentChats.recentChats).find(i => i.username === friend.username)
-	let friendIsTyping = false
 
-	const reply = friend.reply || {}
+	const inputRef = React.createRef(null)
+	const [timerToDelete, setDeleteTimer] = React.useState(null)
+
+	const {pendingDelete, starredChat, reply} = friend.actionValues
+
+	React.useEffect(() => {
+		if (useAssert(pendingDelete)) {
+			clearTimeout(timerToDelete)
+
+			let newTimerToDelete = setTimeout(() => {
+				if (username === pendingDelete.sentBy) {
+					socket.emit('deleteChat', {deletedBy: username, friendsName: friend.username, chat: pendingDelete})
+				}
+				dispatch(performChatDelete({friendsName: friend.username, chat: pendingDelete}))
+				dispatch(handlePendingDelete({friendsName: friend.username, chat: {}}))
+			}, 10000)
+			setDeleteTimer(newTimerToDelete)
+		}	
+	}, [pendingDelete])
+
+	React.useEffect(() => {
+		const textarea = inputRef.current.querySelector('textarea')
+		if (reply.open) {
+			textarea.focus()
+		}
+	}, [reply])
+
+	const undoDelete = () => {
+		dispatch(handlePendingDelete({friendsName: friend.username, chat: {}}))
+		clearTimeout(timerToDelete)
+	}
+
+	let friendIsTyping = false
 
 	if (friendInRecent !== undefined) {
 		friendIsTyping = friendInRecent.typing
 	}
 	
 	const [anchorEl, setAnchorEl] = React.useState(null)
-	const [input, setInput] = React.useState('')
+	// const [input, setInput] = React.useState('')
 	const [showPicker, setPicker] = React.useState(false)
 	const [networkError, setNetworkError] = React.useState(false)
 	const [timer, setTimer] = React.useState(null)
+
+	const starredChatRef = React.createRef(null)
+	const cardContentRef = React.createRef(null)
 
 	const [typing, setTyping] = React.useState(false)
 
@@ -159,21 +243,25 @@ const MessagesPane = ({friend}) => {
 		socket.emit('userIsTyping', {typing: bool, selectedUser: friend.username, user: username})
 		setTyping(bool)
 	}
-
-	const handleTextInput = (e) => {
-		setInput(e.target.value)
-
-		clearTimeout(timer)
-
-		const newTimer = setTimeout(() => {
-			handleTypingStatus(false)
-		}, 2000)
-		if (!typing) {/// This is vital to prevent multiple dispatches
-			handleTypingStatus(true)
-		}
-		setTimer(newTimer)
+	const handleUnstar = () => {
+		socket.emit('unstarChat', {starredBy: username, friendsName: friend.username, starred: {}})
+		dispatch(handleStarredChat({starredChat: {}, friendsName: friend.username}))
 	}
 
+	// const handleTextInput = (e) => {
+	// 	// setInput(e.target.value)
+
+	// 	clearTimeout(timer)
+
+	// 	const newTimer = setTimeout( async () => {
+	// 		// console.log(e.target.value)
+	// 		await handleTypingStatus(false)
+	// 	}, 2000)
+	// 	if (!typing) {/// This is vital to prevent multiple dispatches
+	// 		handleTypingStatus(true)
+	// 	}
+	// 	setTimer(newTimer)
+	// }
 	const hideNetworkError = () => {
 		setNetworkError(false)
 	}
@@ -182,7 +270,8 @@ const MessagesPane = ({friend}) => {
 	}
 
 	const sendMessage = async () => {
-		handleTypingStatus(false)
+		const textarea = inputRef.current.querySelector('textarea')
+		const input = textarea.value
 		const dateNow = () => Date.now()
 		const _date = new Date()
 		const thisDate = dateNow()
@@ -206,24 +295,29 @@ const MessagesPane = ({friend}) => {
 						read: false,
 						sentTo: friend.username,
 						timestamp: date,
-						reply: reply.open ? reply : false
+						reply: reply
 					}
 				}
 				socket.emit('sentChat', chatObj)
 
 				dispatch(updateRecentChats({
-					user: selectedUser.username, 
+					username: selectedUser.username, 
 					lastSent: chatObj.lastSent,
 					messages: chatObj.message,
-					online: selectedUser.online 
+					online: selectedUser.online,
+					unread: 0
 				}))
+
 				dispatch(storeSentChat(chatObj))
-				setInput('')
-				closeReplyHandle()
+				textarea.value = ''
+				// setInput('')
+				useAssert(reply) && closeReplyHandle()
 			} else {
 				setNetworkError(true)
 			}
 		}
+
+		handleTypingStatus(false)
 	}
 	
 	return (
@@ -249,19 +343,64 @@ const MessagesPane = ({friend}) => {
         	: online ? 'online' : 'offline'
         }
       />
-      <CardContent className={classes.contents} style={{
-      	height: `${useWindowHeight()  - 110}px`
-      }}>
-        <ChatMessages chats={friend.messages} />
-        <Snackbar open={networkError} 
-					autoHideDuration={6000} onClose={hideNetworkError}>
+      <CardContent 
+      	ref={cardContentRef}
+      	className={classes.contents} 
+	      style={{
+	      	height: `${useWindowHeight()  - 110}px`
+	      }}
+      >
+	    	{	useAssert(starredChat) &&
+	    		<Slide in={useAssert(starredChat)}>
+	    			<Card className={classes.starred} ref={starredChatRef}>
+	    				<CardHeader
+	    					avatar={
+	    						<StarsIcon style={{color: '#5f547a'}} />
+	    					}
+	    					action={
+	    						<IconButton onClick={handleUnstar}>
+	    							<HighlightOffIcon />
+	    						</IconButton>
+	    					}
+	    					title={starredChat.sentBy === username ? 'You' : starredChat.sentBy}
+	    					subheader={starredChat.message}
+	    				/>
+
+	    			</Card>
+	    		</Slide>
+	    	}
+
+        <ChatMessages chats={friend.messages} pendingDelete />
+
+        <Snackbar open={networkError}
+        	className={classes.bottomSnackbar}
+					autoHideDuration={6000} 
+					onClose={hideNetworkError}
+				>
 				  <MuiAlert variant='filled' elevation={6} onClose={hideNetworkError} severity="error">
 				    Your're currently offline
 				  </MuiAlert>
 				</Snackbar>
+
+				<Snackbar 
+					className={classes.bottomSnackbar}
+					anchorOrigin={{
+						vertical: 'bottom',
+						horizontal: 'center',
+					}}
+					message={<ActionNotifier action={'Deleting...'} />}
+					autoHideDuration={10000} 
+					open={useAssert(pendingDelete)}
+					action={
+						<Button onClick={() => undoDelete()} style={{color: '#ffc4cf'}}> UNDO </Button>
+				}
+			/>
+
+
       </CardContent>
       
       <CardActions className={classes.contents} >
+
       	<Slide in={reply.open} direction='up' >
 	      	<div className={classes.replyHandel}>
 	      		<div className={classes.replyProps}>
@@ -275,11 +414,13 @@ const MessagesPane = ({friend}) => {
 	      		</div>
 	      	</div>
 	      </Slide>
+
       	<InputBase 
       		multiline
       		placeholder='Type your messages'
-      		onChange={handleTextInput}
-      		value={input}
+      		ref={inputRef}
+      		// onChange={handleTextInput}
+      		// value={input}
       	/>
       	<IconButton onClick={sendMessage} >
       		<SendIcon style={{color: blue[500]}} />

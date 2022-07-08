@@ -1,5 +1,4 @@
 import React from 'react'
-import styles from '../stylesheet/main.module.css'
 
 const ImageBanner = ({ imgUrls }) => {
 	return (

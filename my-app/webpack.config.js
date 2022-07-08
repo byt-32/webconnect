@@ -22,6 +22,9 @@ module.exports = {
         "target": "http://localhost:3100",
         "router":  () => "http://localhost:3001"
       }
+    },
+    static: {
+      directory: path.join(__dirname, 'public')
     }
   },
   module: {

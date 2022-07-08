@@ -9,8 +9,9 @@ import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread,
 	handleUserTypingActivity, updateRecentChats} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
-import { storeReceivedChat, setChatRead } from '../../Redux/features/chatSlice'
+import { storeReceivedChat, setChatRead, handleStarredChat, performChatDelete } from '../../Redux/features/chatSlice'
 
+import { useAssert } from '../../customHooks/hooks'
 import LeftPane from './leftPane/LeftPane'
 
 export const socket = io('/', {autoConnect: false})
@@ -24,6 +25,10 @@ const useStyles = makeStyles({
 })
 
 const Main = () => {
+	// const myWorker = new Worker('../../workers/workers.js')
+
+	// myWorker.postMessage('hi')
+
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
@@ -58,18 +63,30 @@ const Main = () => {
 		dispatch(setRecentDisconnect(user))
 	})
 
+	socket.off('starredChat').on('starredChat', (starredBy, starredChat) => {
+		// console.log(friendsName,starredChat)
+		dispatch(handleStarredChat({friendsName: starredBy, starredChat}))
+	})
+	socket.off('deleteChat').on('deleteChat', obj => {
+		// console.log(friendsName,starredChat)
+		dispatch(performChatDelete(obj))
+	})
 
 	socket.off('chatFromUser').on('chatFromUser', chat => {
 		dispatch(storeReceivedChat(chat))
 		dispatch(updateRecentChats({
-			user: chat.sentBy, lastSent: chat.message.chatId, online: true, messages: chat.message
+			username: chat.sentBy,
+			lastSent: chat.message.chatId,
+			online: true,
+			messages: chat.message,
+			unread: 0
 		}))
 
-		if ((Object.keys(selectedUser).length !== 0 && selectedUser.username !== chat.sentBy) || Object.keys(selectedUser).length === 0) {
+		if (!useAssert(selectedUser) || selectedUser.username !== chat.sentBy) {
 			socket.emit('saveUnread', chat.sentBy, username, chat.message.chatId, () => {})
 			dispatch(setUnread(chat.sentBy))
 		}
-		if (Object.keys(selectedUser).length !== 0 && selectedUser.username === chat.sentBy) {
+		if (useAssert(selectedUser) && selectedUser.username === chat.sentBy) {
 			socket.emit('chatIsRead', selectedUser.username, username)
 		}
 	})

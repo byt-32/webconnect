@@ -100,7 +100,7 @@ const UserList = ({user, style, secondaryItems}) => {
 	const classses = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
-	const selectedUsersArr = useSelector(state => state.other.fetched)
+	const fetchedUsers = useSelector(state => state.other.fetched)
 
 	const handleClick = () => {
 
@@ -110,9 +110,8 @@ const UserList = ({user, style, secondaryItems}) => {
 				dispatch(resetUnread(user.username))
 				socket.emit('chatIsRead', user.username, username)
 			}
-			if (selectedUsersArr.find(i => i === user.username) !== undefined) {
+			if (fetchedUsers.find(i => i === user.username) !== undefined) {
 				dispatch(setSelectedUser(user))
-				
 			} else {
 				dispatch(assertFetch(user.username))
 				dispatch(
@@ -216,9 +215,9 @@ const RecentChats = () => {
 			<div className={classes.userslist}>
 				{
 					showLoader ? <Preloader /> : 
-					recentChats.map(user => {
+					recentChats.map((user, i) => {
 						return (
-							<UserList user={user} key={user.username} />
+							<UserList user={user} key={i} />
 						)
 					})
 				}
