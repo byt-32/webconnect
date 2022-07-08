@@ -230,9 +230,8 @@ const MessagesPane = ({friend}) => {
 			clearTimeout(timerToDelete)
 
 			let newTimerToDelete = setTimeout(() => {
-				if (username === pendingDelete.sentBy) {
-					socket.emit('deleteChat', {deletedBy: username, friendsName: friend.username, chat: pendingDelete})
-				}
+				socket.emit('deleteChat', {deletedBy: username, friendsName: friend.username, chat: pendingDelete})
+				
 				dispatch(performChatDelete({friendsName: friend.username, chat: pendingDelete}))
 				dispatch(handlePendingDelete({friendsName: friend.username, chat: {}}))
 				dispatch(setReply({open: false, friendsName: friend.username}))
