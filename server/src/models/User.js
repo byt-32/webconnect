@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema({
 	password: { type: String, required: true },
 	remember: {type: Boolean},
 	bio: {type: String},
-	updateNameTimestamp: {type:  Date} ,
+	updateNameTimestamp: {type: Date},
+	lastSeen: {type: Date},
 	socials: {type: Array},
 	joined: {type: Date, default: Date.now},
 })

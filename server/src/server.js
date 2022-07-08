@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'
 import apiRoute from './routes/apiRoute.js'
 import userRoute from './routes/userRoute.js'
 import chatRoute from './routes/chatRoute.js'
-import {saveChats, saveUnread, handleStarredChat, unstarChat, deleteChat} from './utils/script.js'
+import {saveChats, saveUnread, handleStarredChat, unstarChat, deleteChat, updateLastSeen} from './utils/script.js'
 
 import UnreadCount from './models/UnreadCount.js'
 import Chat from './models/Chat.js'
@@ -86,11 +86,13 @@ io.on('connection', socket => {
 
 	
 
-	socket.on('disconnect', reason => {
+	socket.on('disconnect', async reason => {
 		onlineUsers = onlineUsers.filter(user => user.username !== socket.username)
 		connectedClients = connectedClients.filter(user => user.token !== socket.token)
 
 		socket.broadcast.emit('userDisconnect', {username: socket.username, socketId: socket.id})
+
+		updateLastSeen(socket.token)
 	})
 
 	socket.on('saveUnread', (sentBy, sentTo, chatId) => {

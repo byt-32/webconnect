@@ -75,8 +75,9 @@ userRoute.post('/login', async (request, response) => {
 	}
 })
 
-userRoute.post('/updateSettings', async (request, response) => {
-	const {id, obj} = request.body
+userRoute.post('/updateSettings/:id', async (request, response) => {
+	const {id} = request.params
+	const {obj} = request.body
 	if (id !== '' && id) {
 		const user = await UserSettings.findOne({_id: id})
 		if (user === null) {
@@ -96,8 +97,9 @@ userRoute.post('/updateSettings', async (request, response) => {
 	}
 })
 
-userRoute.post('/editProfile', async (request, response) => {
-	const {id, bio} = request.body
+userRoute.post('/editBio/:id', async (request, response) => {
+	const {bio} = request.body
+	const {id} = request.params
 	if (id !== '' || id) {
 		try {
 			const update = await User.findByIdAndUpdate(id, {bio: bio}, {upsert: true, new: true})
