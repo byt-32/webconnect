@@ -15,6 +15,8 @@ import { Link } from 'react-router-dom'
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import { makeStyles } from '@material-ui/core/styles';
 
+import { useAssert } from '../../../customHooks/hooks'
+
 const useStyles = makeStyles({
 	rightPane: {
 		flex: 9,
@@ -51,9 +53,10 @@ const RightPane = ({user}) => {
 		<section className={classes.rightPane} >
 			<div className={classes.messagesPane}>
 				{
-					privateChats.map( friend => {
+					useAssert(privateChats) &&
+					privateChats.map( (friend, i) => {
 						return (
-							<MessagePane friend={friend} key={friend.username} />
+							<MessagePane friend={friend} key={i} />
 						)
 					})
 				}
