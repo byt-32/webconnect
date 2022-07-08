@@ -10,8 +10,15 @@ export const fetchMessages = createAsyncThunk('fetchMessages',
 	}
 )
 
+const actionValues = {
+	pendingDelete: {},
+	reply: {open: false},
+	starredChat: {}
+}
+
 const initialState = {
 	privateChats: [],
+	
 }
 
 const chatSlice = createSlice({
@@ -39,7 +46,11 @@ const chatSlice = createSlice({
 			if (find !== -1) {
 				state.privateChats[find].messages.push(message)
 			} else {
-				state.privateChats.push({username: sentBy, messages: [message]})
+				state.privateChats.push({
+					username: sentBy,
+					messages: [message],
+					actionValues
+				})
 			}
 
 		},
@@ -57,6 +68,7 @@ const chatSlice = createSlice({
 				state.privateChats[index].messages = find.messages
 			}
 		},
+
 		setReply: (state, action) => {
 			const {open, friendsName} = action.payload
 			const find = state.privateChats.findIndex(i => i.username === friendsName)
@@ -66,20 +78,19 @@ const chatSlice = createSlice({
 
 				if (find !== -1) {
 					const message = state.privateChats[find].messages.find(i => i.chatId === chatId).message
-					state.privateChats[find].reply = {
-						open: true,
+					state.privateChats[find].actionValues.reply = {
+						open,
 						sentBy: sentBy,
 						message: message,
 						chatId: chatId
 					}
 				}
 			} else {
-				state.privateChats[find].reply = {open: false}
+				state.privateChats[find].actionValues.reply = {open: false}
 			}
 
-				// const find = state.privateChats.findIndex(i => i.username === sentBy)
-			// const 
 		},
+
 		setHighlighted: (state, action) => {
 			const {friendsName, chatId, show} = action.payload
 			const find = state.privateChats.findIndex(i => i.username === friendsName)
@@ -87,27 +98,89 @@ const chatSlice = createSlice({
 			if (show) {
 				if (find !== -1) {
 					state.privateChats[find].messages.find(i => i.chatId === chatId).highlightChat = true
-
 				}
 			} else {
 				state.privateChats[find].messages.find(i => i.chatId === chatId).highlightChat = false
 			}
-		}
+		},
+
+		setReaction: (state, action) => {
+			const {reaction, chatId, friendsName} = action.payload
+			const find = state.privateChats.findIndex(i => i.username === friendsName)
+
+			if (find !== -1) {
+				state.privateChats[find].messages.find(i => i.chatId === chatId).reaction = reaction
+			}
+		},
+
+		handleStarredChat: (state, action) => {
+			const {friendsName, starredChat} = action.payload
+			const find = state.privateChats.findIndex(i => i.username === friendsName)
+			if (find !== -1) {
+				state.privateChats[find].actionValues.starredChat = starredChat
+			}
+			
+		},
+
+		handlePendingDelete: (state, action) => {
+			const {friendsName, chat} = action.payload
+			const find = state.privateChats.findIndex(i => i.username === friendsName)
+
+			if (find > -1) {
+				state.privateChats[find].actionValues.pendingDelete = chat
+			}
+
+		},
+		performChatDelete: (state, action) => {
+			const {friendsName, chat} = action.payload
+
+			const find = state.privateChats.findIndex(i => i.username === friendsName)
+
+			if (find !== -1) {
+				if (state.privateChats[find].actionValues.starredChat.chatId === chat.chatId) {
+					state.privateChats[find].actionValues.starredChat = {}
+				}
+
+				function redoDelete() {
+					/** we use forEach because chatId could match 1 or more replied chats,
+						so if it finds a match:
+							* splice it from messages array
+							* re-run the function to refresh the index (i)
+					 */
+					state.privateChats[find].messages.forEach((message, i) => {
+						if (message.reply.chatId === chat.chatId) {
+							state.privateChats[find].messages[i].reply.message = ''
+						}
+						if (message.chatId === chat.chatId) {
+							state.privateChats[find].messages.splice(i, 1)
+							redoDelete()
+						}
+					})
+				}
+				redoDelete()
+				
+			}
+		},
+
 	},
 	extraReducers: builder => {
 		builder.addCase(fetchMessages.pending, (state, action) => {
 
 		})
 		.addCase(fetchMessages.fulfilled, (state, action) => {
-			const { username, messages } = action.payload
-			const reply = {open: false}
+			const { username, messages, starredChat } = action.payload
 
 			const idx = state.privateChats.findIndex( chat => chat.username === username)
 			
 			if (idx === -1) {
-				state.privateChats.push({...action.payload, reply})
-			} else {// This will never execute, fetching messages is limited to once per user
-				state.privateChats[idx].messages = messages
+				state.privateChats.push({
+					username,
+					messages,
+					actionValues: {...actionValues, starredChat}
+				})
+			} else {
+				// This will never execute, as fetching messages is limited to once-per-user
+				state.privateChats[idx] = {messages, actionValues}
 			}
 		})
 	}
@@ -118,6 +191,10 @@ export const {
 	setHighlighted,
 	storeReceivedChat,
 	setChatRead,
+	setReaction,
+	handleStarredChat,
+	performChatDelete,
+	handlePendingDelete,
 	setReply
 } = chatSlice.actions
 

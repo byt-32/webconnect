@@ -50,15 +50,12 @@ const recentChatsSlice = createSlice({
 		},
 		setUnread: (state, action) => {
 			const sentBy = action.payload
+
 			const find = state.recentChats.findIndex(i => i.username === sentBy)
 
 			if (find !== -1) {
 				const value = state.recentChats[find].unread
-				if (typeof value === 'number') {
-					state.recentChats[find].unread = value + 1
-				} else {
-					state.recentChats[find].unread = 0
-				}
+				state.recentChats[find].unread = value + 1
 			}
 			
 		},
@@ -70,12 +67,13 @@ const recentChatsSlice = createSlice({
 			}
 		},
 		updateRecentChats: (state, action) => {
-			const {lastSent, user, online, messages} = action.payload
+			const {lastSent, username, online, messages} = action.payload
 
-			const findIndex = state.recentChats.findIndex(i => i.username === user)
+			const findIndex = state.recentChats.findIndex(i => i.username === username)
 			if (findIndex !== -1) {
 				state.recentChats[findIndex].lastSent = lastSent
 				state.recentChats[findIndex].messages = messages
+				state.recentChats[findIndex].unread = 0
 
 			} else {
 				state.recentChats.unshift(action.payload)
@@ -91,16 +89,18 @@ const recentChatsSlice = createSlice({
 			state.showRecentUsersLoader = true
 		})
 		.addCase(fetchRecentChats.fulfilled, (state, action) => {
-console.log(action.payload)
+			// console.log(action.payload)
 			const {recentChats, unread} = action.payload
 			recentChats.forEach(i => {
-				const findInUnread = unread.find(user => user.username === i.username)
-				if (findInUnread !== undefined) {
-					i.unread = findInUnread.unreadArray.length
-				}
-				i.typing = false
-				i.online = false
-				i.messages = i.messages[0]
+				if (i.messages.length > 0) {
+					const findInUnread = unread.find(user => user.username === i.username)
+					if (findInUnread !== undefined) {
+						i.unread = findInUnread.unreadArray.length
+					}
+					i.typing = false
+					i.online = false
+					i.messages = i.messages[0]
+				}	
 			})
 
 			state.recentChats = recentChats.sort((a, b) => {
