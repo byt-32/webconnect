@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt'
 import apiRoute from './routes/apiRoute.js'
 import userRoute from './routes/userRoute.js'
 import chatRoute from './routes/chatRoute.js'
-import {saveChats, saveUnread} from './utils/script.js'
+import {saveChats, saveUnread, handleStarredChat, unstarChat, deleteChat} from './utils/script.js'
 
 import UnreadCount from './models/UnreadCount.js'
 import Chat from './models/Chat.js'
@@ -84,6 +84,8 @@ io.on('connection', socket => {
 		io.emit('onlineUsers', onlineUsers)
 	})
 
+	
+
 	socket.on('disconnect', reason => {
 		onlineUsers = onlineUsers.filter(user => user.username !== socket.username)
 		connectedClients = connectedClients.filter(user => user.token !== socket.token)
@@ -108,6 +110,27 @@ io.on('connection', socket => {
 		)
 
 		await UnreadCount.findOneAndUpdate({username: receiver, 'users.username': sender}, {'users.$.unreadArray': []})
+	})
+	socket.on('starredChat', (obj) => {
+		const {starredBy, friendsName, starredChat} = obj
+		const find = onlineUsers.find(i => i.username === friendsName)
+		if (find !== undefined) {
+			io.to(find.socketId).emit('starredChat', starredBy, starredChat)
+		}
+		handleStarredChat(obj)
+	})
+
+	socket.on('unstarChat', obj => unstarChat(obj))
+
+	socket.on('deleteChat', obj => {
+		const {deletedBy, friendsName, chat} = obj
+		const find = onlineUsers.find(i => i.username === friendsName)
+
+		if (find !== undefined) {
+			io.to(find.socketId).emit('deleteChat', {friendsName: deletedBy, chat})
+		}
+
+		deleteChat(obj)
 	})
 
 	socket.on('userIsTyping', obj => {
