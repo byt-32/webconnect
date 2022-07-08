@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
 	remember: {type: Boolean},
 	bio: {type: String},
 	updateNameTimestamp: {type: Date},
-	lastSeen: {type: Date},
+	lastSeen: {type: Number},
 	socials: {type: Array},
 	joined: {type: Date, default: Date.now},
 })

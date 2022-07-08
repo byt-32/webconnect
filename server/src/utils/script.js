@@ -154,5 +154,5 @@ export async function deleteChat(obj) {
 }
 
 export async function updateLastSeen(id) {
-	await User.findByIdAndUpdate(id, {lastSeen: new Date()})
+	await User.findByIdAndUpdate(id, {lastSeen: Date.now()})
 }

@@ -129,7 +129,9 @@ io.on('connection', socket => {
 		const find = onlineUsers.find(i => i.username === friendsName)
 
 		if (find !== undefined) {
-			io.to(find.socketId).emit('deleteChat', {friendsName: deletedBy, chat})
+			if (deletedBy === chat.sentBy ){
+				io.to(find.socketId).emit('deleteChat', {friendsName: deletedBy, chat})
+			}
 		}
 
 		deleteChat(obj)
