@@ -7,6 +7,7 @@ import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import Tooltip from '@material-ui/core/Tooltip';
 import Fade from '@material-ui/core/Fade';
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Menu from '@material-ui/core/Menu'
@@ -36,7 +37,10 @@ import NotificationsOffIcon from '@material-ui/icons/NotificationsOff';
 import VolumeUpIcon from '@material-ui/icons/VolumeUp';
 import VolumeOffIcon from '@material-ui/icons/VolumeOff';
 import CancelIcon from '@material-ui/icons/Cancel';
+import AccountBoxIcon from '@material-ui/icons/AccountBox';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 
+import OutlinedInput from '@material-ui/core/OutlinedInput';
 import Divider from '@material-ui/core/Divider';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -49,6 +53,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import ListSubheader from '@material-ui/core/ListSubheader';
 import List from '@material-ui/core/List';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -57,7 +62,7 @@ import Collapse from '@material-ui/core/Collapse';
 import { Link } from 'react-router-dom'
 
 import { setComponents} from '../../../../Redux/features/componentSlice'
-import { updateSettings} from '../../../../Redux/features/accountSlice'
+import { updateSettings, editAccountInfo} from '../../../../Redux/features/accountSlice'
 
 import UserAvatar from '../../UserAvatar'
 import Header from '../Header'
@@ -68,6 +73,26 @@ const useStyles = makeStyles((theme) => ({
 	inputs: {
 		display: 'flex',
 	},
+	editButton: {
+		textTransform: 'none',
+		color: '#486eb3',
+		background: '#f3f3f3',
+		padding: 0,
+		fontSize: '1rem'
+	},
+	headerActions: {
+		position: 'absolute',
+		right: 0,
+		
+	},
+	logout: {
+		'& svg': {
+			marginRight: 5
+		},
+		'& svg, p': {
+			color: '#b30f2e'
+		}
+	},
 	banner: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -75,15 +100,51 @@ const useStyles = makeStyles((theme) => ({
 		paddingTop: '1rem'
 	},
 	profileInfo: {
-		padding: '1rem 0',
+		padding: '1rem 0 .5rem 0',
 		width: '100%'
 	},
+	profileImage: {
+		position: 'relative'
+	},
+	avatarPlaceholder: {
+		position: 'absolute',
+		top: 0,
+		width: '100%',
+		cursor: 'pointer',
+		height: '100%',
+		zIndex: 20,
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'flex-end',
+		justifyContent: 'flex-end',
+		background: '#ffffffb5',
+		borderRadius: '100%',
+		'& .MuiSvgIcon-root': {
+			fontSize: '3rem',
+			color: '#494f5af2'
+		},
+		'& .MuiTypography-body1': {
+			fontSize: '1.2rem',
+			color: '#13171e',
+			textShadow: '1px 1px 0px #e9e9e9'
+		}
+	},
 	info: {
-		width: '90%',
 		margin: '0 auto',
-		justifyContent: 'center',
+		// justifyContent: 'center',
 		alignItems: 'center',
 		display: 'flex',
+		marginBottom: 12,
+		'& .MuiListItem-root': {
+			padding: '0 16px'
+		},
+		'& .MuiListItemIcon-root': {
+			minWidth: 0,
+			marginRight: 6
+		},
+		'& .MuiTypography-body1': {
+			fontSize: '1.07rem'
+		},
 		'& .MuiTypography-h2':{
 			fontSize: '1.3rem'
 		},
@@ -97,7 +158,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper,
     '& .MuiListItemIcon-root': {
     	'& .MuiSvgIcon-root': {
-    		color: '#7a5d4f'
+    		color: '#484848'
     	}
     },
     '& > .MuiListItem-root': {
@@ -107,7 +168,7 @@ const useStyles = makeStyles((theme) => ({
     },
     '& .MuiCollapse-root': {
     	'& .MuiTypography-body1, .MuiSvgIcon-root': {
-    		color: '#856260'
+    		color: '#5c5b5b'
     	}, 
     }
 	},
@@ -138,32 +199,45 @@ const Settings = () => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const [showProgress, setProgress] = React.useState(false)
-	const [showInput, setInputs] = React.useState({name: false, bio: false})
 	const { username, bio, status, email, settings} = useSelector(state => state.account.account)
+	const [showProgress, setProgress] = React.useState(false)
+
+	const [showInput, setInputs] = React.useState({name: false, bio: false})
+
+	const [nameInput, setNameValue] = React.useState('')
+
+	const [bioInput, setBioValue] = React.useState('')
+
 	const [timerToValidateName, setTimer] = React.useState(null)
 	const [isUpdatingName, updateNameStatus] = React.useState(false)
-	const [inputValue, setInputValue] = React.useState({name: '', bio: ''})
 	const [helperText, setHelperText] = React.useState({name: ''})
 	const [inputError, setInputError] = React.useState({name: false})
 	const [showInputCloseIcon, setInputCloseIcon] = React.useState({name: true})
 	const [openDialog, setDialog] = React.useState(false);
+	const [daysUntil, setDaysUntil] = React.useState('')
+
+	const [showPhotoIcon, setIcon] = React.useState(false)
+
+	const [anchorEl, setAnchorEl] = React.useState(null)
+	const open = Boolean(anchorEl)
 
   const handleClickOpen = () => {
     setDialog(true);
   };
+  const handleMenu = (e) => {
+  	setAnchorEl(e.currentTarget)
+  }
+  const handleClose = () => setAnchorEl(null)
 
-  const handleClose = () => {
-    setDialog(false);
-  };
-
-	const [daysUntil, setDaysUntil] = React.useState('')
+  const handleBioInput = (value) => {
+  	setBioValue(value)
+  }
 
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
 	}
-	const handleProfileUpdate = which => {
-		setInputs({...showInput, ...which})
+	const handleInputVisibility = input => {
+		setInputs({...showInput, ...input})
 	}
 
 	const updateProfileName = ({target}) => {
@@ -177,11 +251,11 @@ const Settings = () => {
 			setHelperText({name: `name cannot contain ${value[value.length-1]}`})
 
 		} else if (value.length < 3) {
-			setInputValue({name: value})
+			setNameValue({name: value})
 			setInputError({name: true})
 			setHelperText({name: `name is too short`})
 		} else {
-			setInputValue({name: value})
+			setNameValue({name: value})
 			setInputError({name: false})
 			setHelperText({name: ''})
 		}
@@ -198,7 +272,6 @@ const Settings = () => {
 		function callTimer() {
 			const newTimer = setTimeout(() => {
 				updateNameStatus(true)
-				// console.log(inputValue.name)
 				fetch(`/user/updateName/${id}`, {
 					method: 'PUT',
 					headers: {
@@ -237,12 +310,12 @@ const Settings = () => {
 
 	const handleSettings = (obj) => {
 		setProgress(true)
-		fetch('/user/updateSettings', {
+		fetch(`/user/updateSettings/${id}`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({id: id, obj: obj})
+			body: JSON.stringify({obj: obj})
 		})
 		.then(res => res.json())
 		.then(settings => {
@@ -254,13 +327,62 @@ const Settings = () => {
 			// setProgress(false)
 		})
 	}
+	const changeBio = () => {
+		setInputs({bio: false})
+		if (bioInput !== '') {
+			setProgress(true)
+
+			fetch(`/user/editBio/${id}`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({bio: bioInput})
+			})
+			.then(res => res.json())
+			.then(res => {
+				setProgress(false)
+				dispatch(editAccountInfo(res))
+			})
+			.catch(err => {
+				setProgress(false)
+			})
+		}
+	}
+
+	const showAvatarPlaceholder = (bool) => {
+		setIcon(bool)
+	}
 	return (
 		<>
 			<Header>
 				<IconButton onClick={() => setComp({component: 'recentChats', value: true})}>
 					<KeyboardBackspaceIcon />
 				</IconButton>
-				<Typography > Profile </Typography>
+				<Typography component='h6'> Profile </Typography>
+				<div className={classes.headerActions}>
+					<IconButton onClick={(e) => handleMenu(e)}> <MoreVertIcon /> </IconButton>
+					<Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'left',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={open}
+            onClose={handleClose}
+          >
+            <MenuItem onClick={handleClose} className={classes.logout}>
+            	<ExitToAppIcon />
+            	<Typography style={{color:''}} > Log out </Typography>
+            </MenuItem>
+          </Menu>
+				</div>
 				{ showProgress &&
 					<NetworkProgress />
 				}
@@ -280,42 +402,61 @@ const Settings = () => {
       </Dialog>
 			<div className={classes.profileBody}>
 				<div className={classes.banner}>
-					<div className={classes.profileImage}>
+					<div className={classes.profileImage} 
+						onMouseEnter={() => showAvatarPlaceholder(true)} 
+						onMouseLeave={() => showAvatarPlaceholder(false)} 
+					>
+						<Fade in={showPhotoIcon}>
+							<div className={classes.avatarPlaceholder}>
+								<AddAPhotoIcon />
+								{/*<Typography > Upload photo </Typography>*/}
+							</div>
+						</Fade>
 		        <UserAvatar username={username} style={{
 		        	width: 200, height: 200, fontSize: '4rem'
 		        }} badge={false} />
 					</div>
 					<div className={classes.profileInfo}>
 						<div className={classes.info}>
-
-							{/*I WILL VISIT THIS LATER, FOCUSING ON WHAT MATTERS*/}
-							{/*{showInput.name ? <Fade in={showInput.name}>
-								<div className={classes.inputs}>
-									<TextField 
-										placeholder='Update user name' 
-										value={inputValue.name}
-										onChange={updateProfileName} 
-										error={inputError.name}
-					    			helperText={helperText.name}
-									/>
-									{isUpdatingName && 
-										<CircularProgress style={{width: 22, height: 22}} /> 
-									}
-									{showInputCloseIcon.name &&
-										<CancelIcon style={{fontSize: '1rem', color: '#818181'}}
-											onClick={() => handleProfileUpdate({name: false})} />
-									}
-								</div>
-								</Fade> :*/}
-								{/*<Tooltip title="Double click to update user name" arrow>*/}
-									<Typography variant='h2' onDoubleClick={() => handleProfileUpdate({name: true})} > {username} </Typography>
-						    {/*</Tooltip>*/}
+							<ListItem>
+				        <ListItemIcon>
+						 			<AccountBoxIcon style={{marginRight: 10, fontSize: '1.2rem', color: '#95898b'}} />
+				        </ListItemIcon>
+				        <ListItemText onDoubleClick={() => handleInputVisibility({name: true})} primary={username} />
+				      </ListItem>
 						</div>
 
-						{bio !== '' &&
 						 <div className={classes.info}>
-							<Typography > {bio} </Typography>
-						</div> }
+							 <ListItem>
+					        <ListItemIcon>
+							 			<InfoOutlinedIcon style={{marginRight: 10, fontSize: '1.2rem'}} />
+					        </ListItemIcon>
+
+									{showInput.bio ?	
+										<OutlinedInput
+											onChange={({target}) => handleBioInput(target.value)} 
+											placeholder='Give a short description about yourself'
+											style={{width: '100%'}}
+											multiline
+											endAdornment={
+												<InputAdornment position="end" style={{height: '100%'}}>
+													<IconButton onClick={changeBio} >
+														<CheckIcon />
+													</IconButton>
+												</InputAdornment>
+											}
+
+										/>
+										:
+						        <ListItemText 
+						        	primary={bio} 
+						        	secondary={
+						        		<Button className={classes.editButton} onClick={() => handleInputVisibility({bio: true})}> edit </Button>
+						        	}
+						        /> 
+					      	}
+					      </ListItem>
+							</div> 
 					</div>
 				</div>
 				<Divider />
@@ -325,7 +466,7 @@ const Settings = () => {
 			      aria-labelledby="nested-list-subheader"
 			      subheader={
 			        <ListSubheader component="div" id="nested-list-subheader">
-			          settings
+			          Account Settings
 			        </ListSubheader>
 			      }
 			      className={classes.list}
