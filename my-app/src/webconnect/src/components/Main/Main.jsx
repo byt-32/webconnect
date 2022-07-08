@@ -6,7 +6,7 @@ import { Outlet } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
 import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, 
-	handleUserTypingActivity, updateRecentChats} from '../../Redux/features/recentChatsSlice'
+	handleUserTypingActivity, updateRecentChats, updateLastChat} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
 import { storeReceivedChat, setChatRead, handleStarredChat, performChatDelete } from '../../Redux/features/chatSlice'
@@ -64,12 +64,11 @@ const Main = () => {
 	})
 
 	socket.off('starredChat').on('starredChat', (starredBy, starredChat) => {
-		// console.log(friendsName,starredChat)
 		dispatch(handleStarredChat({friendsName: starredBy, starredChat}))
 	})
 	socket.off('deleteChat').on('deleteChat', obj => {
-		// console.log(friendsName,starredChat)
 		dispatch(performChatDelete(obj))
+		dispatch(updateLastChat(obj))
 	})
 
 	socket.off('chatFromUser').on('chatFromUser', chat => {

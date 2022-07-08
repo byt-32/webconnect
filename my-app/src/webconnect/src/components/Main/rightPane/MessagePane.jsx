@@ -37,7 +37,7 @@ import blue from '@material-ui/core/colors/blue';
 import { useDispatch,useSelector } from 'react-redux'
 import {  storeSentChat, setReply, handleStarredChat, performChatDelete, handlePendingDelete } from '../../../Redux/features/chatSlice'
 import { setTypingStatus } from '../../../Redux/features/otherSlice'
-import {updateRecentChats} from '../../../Redux/features/recentChatsSlice'
+import {updateRecentChats, updateLastChat} from '../../../Redux/features/recentChatsSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
@@ -189,6 +189,14 @@ const MessagesPane = ({friend}) => {
 	const {pendingDelete, starredChat, reply} = friend.actionValues
 
 	React.useEffect(() => {
+		/*** READ THIS 
+			YOU CANT DELETE A FRIENDS CHAT FROM THEIR DATABASE, 
+			TEST CASE 1: DELETING A FREINDS RECEIVED CHAT MODIFIES 
+			YOUR DATABASE NOT THE SENDER'S, 
+
+			TEST CASE 2: DELETING A SENT CHAT(YOUR CHAT) MODIFES BOTH THE USER'S DATABASE
+			ASS WELL AS THE SENDERS'
+		*/
 		if (useAssert(pendingDelete)) {
 			clearTimeout(timerToDelete)
 
@@ -198,6 +206,8 @@ const MessagesPane = ({friend}) => {
 				}
 				dispatch(performChatDelete({friendsName: friend.username, chat: pendingDelete}))
 				dispatch(handlePendingDelete({friendsName: friend.username, chat: {}}))
+				dispatch(setReply({open: false, friendsName: friend.username}))
+				dispatch(updateLastChat({friendsName: friend.username, chat: pendingDelete}))
 			}, 10000)
 			setDeleteTimer(newTimerToDelete)
 		}	
@@ -209,6 +219,11 @@ const MessagesPane = ({friend}) => {
 			textarea.focus()
 		}
 	}, [reply])
+
+	React.useEffect(() => {
+		const textarea = inputRef.current.querySelector('textarea')
+		textarea.focus()
+	}, [])
 
 	const undoDelete = () => {
 		dispatch(handlePendingDelete({friendsName: friend.username, chat: {}}))

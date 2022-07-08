@@ -13,6 +13,11 @@ export const fetchRecentChats = createAsyncThunk(
 
 const initialState = {
 	recentChats: [],
+	defaultActions: {
+		online: false,
+		unread: 0,
+		typing: false,
+	},
 	showRecentUsersLoader: false
 }
 
@@ -82,6 +87,17 @@ const recentChatsSlice = createSlice({
 				if (a.lastSent < b.lastSent) return 1
 				if (a.lastSent > b.lastSent) return -1
 			})
+		},
+		updateLastChat: (state, action) => {
+			const {friendsName, chat} = action.payload
+			console.log(action.payload)
+			const find = state.recentChats.findIndex(i => i.username === friendsName)
+
+			if (find > -1) {
+				if (state.recentChats[find].messages.chatId === chat.chatId) {
+					state.recentChats[find].messages = {}
+				}
+			}
 		}
 	},
 	extraReducers: builder => {
@@ -118,6 +134,7 @@ export const {
 	setRecentOnline,
 	resetUnread,
 	setUnread,
+	updateLastChat,
 	updateRecentChats,
 	handleUserTypingActivity,
 	setRecentDisconnect
