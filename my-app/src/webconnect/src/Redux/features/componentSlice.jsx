@@ -6,8 +6,8 @@ const initialState = {
 	profile: false,
 	stack: {
 		recentChats: false,
-		activeUsers: false,
-		settings: true,
+		activeUsers: true,
+		settings: false,
 		resetPassword: false,
 		contactInfo: false,
 		privacy: false,

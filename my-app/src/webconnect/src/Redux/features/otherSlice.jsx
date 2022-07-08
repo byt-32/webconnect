@@ -25,7 +25,6 @@ const otherSlice = createSlice({
 				user.online = true
 				if (index > -1) {
 					state.onlineUsers[index].online = true
-					state.onlineUsers[index].lastSeen = new Date().toJSON()
 				} else {
 					state.onlineUsers.push(user)
 				}
@@ -37,7 +36,7 @@ const otherSlice = createSlice({
 			const index = state.onlineUsers.findIndex(i => i.username === username)
 			if (index > -1) {
 				state.onlineUsers[index].online = false
-				state.onlineUsers[index].lastSeen = new Date().toJSON()
+				state.onlineUsers[index].lastSeen = Date.now()
 			}
 		}
 	},

@@ -43,6 +43,7 @@ const recentChatsSlice = createSlice({
 			const index = state.recentChats.findIndex(i => i.username === username)
 			if (index !== -1) {
 				state.recentChats[index].online = false
+				state.recentChats[index].lastSeen = Date.now()
 			}
 		},
 		resetUnread: (state, action) => {

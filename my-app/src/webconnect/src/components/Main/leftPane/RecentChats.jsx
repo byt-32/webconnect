@@ -152,7 +152,7 @@ const UserList = ({user, style, secondaryItems}) => {
 				     />
 			    </ListItemIcon>
 	      	<ListItemText 
-	      		primary={<Typography component='h6'> {user.username}</Typography>} 
+	      		primary={<Typography component='p' style={{fontFamily: 'Roboto'}}> {user.username}</Typography>} 
 	      		secondary={
 	      			user.typing ?
 	      				<span className={classses.typingStatus}> {'typing...'} </span>

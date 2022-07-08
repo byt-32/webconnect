@@ -41,7 +41,7 @@ import {updateRecentChats, syncRecentsWithDeleted} from '../../../Redux/features
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
-import { useWindowHeight, useAssert } from '../../../customHooks/hooks'
+import { useWindowHeight, useAssert, useDate } from '../../../customHooks/hooks'
 
 import { socket } from '../Main'
 
@@ -175,8 +175,9 @@ const MessagesPane = ({friend}) => {
 
 	const dispatch = useDispatch()
 	const {username} = JSON.parse(localStorage.getItem('details'))
-	const friendOnline = useSelector(state => state.other.onlineUsers.find(i => i.username === friend.username))
-	const online = friendOnline !== undefined ? friendOnline.online : false
+	const friendInUsers = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username))
+
+	const online = friendInUsers !== undefined ? friendInUsers.online : false
 	// console.log(online)
 
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
@@ -200,6 +201,18 @@ const MessagesPane = ({friend}) => {
 
 	const [typing, setTyping] = React.useState(false)
 
+	const [secondaryText, setText] = React.useState('')
+
+	React.useEffect(() => {
+		if (friendInUsers.online) {
+			setText('online')
+		} else {
+			setText('offline')
+			if (typeof friendInUsers.lastSeen === 'number') {
+				setText(useDate( friendInUsers.lastSeen))
+			}
+		}
+	}, [friendInUsers.online])
 
 	React.useEffect(() => {
 		/*** READ THIS 
@@ -361,7 +374,7 @@ const MessagesPane = ({friend}) => {
         title={friend.username}
         subheader={
         	friendIsTyping ? <span style={{color: '#6495ed'}} > {'typing...'} </span>
-        	: online ? 'online' : 'offline'
+        	: secondaryText
         }
       />
       <CardContent 

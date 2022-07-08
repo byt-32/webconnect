@@ -41,6 +41,7 @@ const activeUsersSlice = createSlice({
 			const index = state.activeUsers.findIndex(i => i.username === username)
 			if (index !== -1) {
 				state.activeUsers[index].online = false
+				state.activeUsers[index].lastSeen = Date.now()
 			}
 		}
 	},

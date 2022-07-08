@@ -1,4 +1,5 @@
 import React from 'react'
+import shado from 'shado'
 
 export const useWindowHeight = () => {
 	const [height, setHeight] = React.useState(`${window.innerHeight}`)
@@ -8,11 +9,35 @@ export const useWindowHeight = () => {
 	return height
 }
 
+function convertTime(argument) {
+	
+}
+
+export function useDate(timestamp) {
+	let newDate = new Date()
+	let oldDate = new Date(timestamp)
+	let mins = oldDate.toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit'})
+
+	if (type(timestamp) === 'number') {
+		if (oldDate.toDateString() === newDate.toDateString()) {
+			return `last seen ${mins}`
+		} else {
+			let dateStr = oldDate.toDateString()
+			let idx = (/[0-9](?=[0-9]{3})/).exec(dateStr)['index']
+			let day = dateStr.split('').splice(0, idx-1).join('')
+
+			return `last seen ${day}`
+		}
+	}
+}
+
+function type(val) {
+	return typeof val
+}
+
 export function useAssert(obj) {
 
-	function type(val) {
-		return typeof val
-	}
+	
 	try {
 		
 		if (type(obj) === 'string') return true

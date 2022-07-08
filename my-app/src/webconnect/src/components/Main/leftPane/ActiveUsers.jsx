@@ -1,4 +1,6 @@
 import React from 'react'
+import shado from 'shado'
+
 import { useSelector, useDispatch } from 'react-redux'
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton'
@@ -22,6 +24,7 @@ import { Link } from 'react-router-dom'
 import Header from './Header'
 import UserAvatar from '../UserAvatar'
 import { socket } from '../Main'
+import { useDate, useAssert } from '../../../customHooks/hooks'
 
 
 const useStyles = makeStyles({
@@ -56,8 +59,35 @@ const UserList = ({user, style, secondaryItems}) => {
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const selectedUsersArr = useSelector(state => state.other.fetched)
-	
 	const find = useSelector(state => state.recentChats.recentChats).find(i => i.username === user.username)
+	const [timer, setTimer] = React.useState(null)
+	const [secondaryText, setText] = React.useState('')
+
+	React.useEffect(() => {
+		if (user.online) {
+			setText('')
+		} else {
+			setText(useDate( user.lastSeen))
+		}
+		// if(!user.online) {
+		// 	setDate(useDate( user.lastSeen))
+		// 	const newTimer = setInterval(() => {
+		// 		setDate(useDate( user.lastSeen))
+		// 	}, 50000)
+
+		// 	setTimer(newTimer)
+		// }
+
+		return () => clearInterval(timer)
+	}, [])
+
+	React.useEffect(() => {
+		if (user.online) {
+			setText('')
+		} else {
+			setText(useDate( user.lastSeen))
+		}
+	}, [user.online])
 
 	const handleClick = () => {
 
@@ -97,7 +127,8 @@ const UserList = ({user, style, secondaryItems}) => {
 				     />
 			    </ListItemIcon>
 	      	<ListItemText 
-	      		primary={<Typography component='h6'> {user.username}</Typography>} 
+	      		primary={<Typography component='p' style={{fontFamily: 'Roboto'}}> {user.username}</Typography>} 
+	      		secondary={secondaryText}
 	      	/>
 	    </ListItem>
     </Link>
