@@ -25,10 +25,7 @@ const activeUsersSlice = createSlice({
 		},
 		setActiveOnline: (state, action) => {
 			const users = action.payload
-			state.activeUsers.sort((a, b) => {
-				if (a.username.toUpperCase() < b.username.toUpperCase()) return -1
-				if (a.username.toUpperCase() > b.username.toUpperCase()) return 1
-			})
+			
 			users.forEach(user => {
 				const index = state.activeUsers.findIndex(i => i.username === user.username)
 				if (index !== -1) {
@@ -37,7 +34,6 @@ const activeUsersSlice = createSlice({
 					state.activeUsers.unshift(...spliced)
 				}
 			})
-
 			
 		},
 		setActiveDisconnect: (state, action) => {
@@ -54,7 +50,10 @@ const activeUsersSlice = createSlice({
 		})
 		.addCase(fetchActiveUsers.fulfilled, (state, action) => {
 			action.payload.users.forEach(i => i.online = false)
-			state.activeUsers = action.payload.users
+			state.activeUsers = action.payload.users.sort((a, b) => {
+				if (a.username.toUpperCase() < b.username.toUpperCase()) return -1
+				if (a.username.toUpperCase() > b.username.toUpperCase()) return 1
+			})
 			state.showActiveUsersLoader = false
 		})
 	}

@@ -179,8 +179,7 @@ const chatSlice = createSlice({
 					actionValues: {...actionValues, starredChat}
 				})
 			} else {
-				// This will never execute, as fetching messages is limited to once-per-user
-				state.privateChats[idx] = {messages, actionValues}
+				state.privateChats[idx] = {messages, actionValues, username, starredChat}
 			}
 		})
 	}

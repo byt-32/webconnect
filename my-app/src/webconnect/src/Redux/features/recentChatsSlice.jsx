@@ -15,7 +15,7 @@ const initialState = {
 	recentChats: [],
 	defaultActions: {
 		online: false,
-		unread: 0,
+		unread: [],
 		typing: false,
 	},
 	showRecentUsersLoader: false
@@ -50,17 +50,16 @@ const recentChatsSlice = createSlice({
 			const find = state.recentChats.findIndex(i => i.username === username)
 
 			if (find !== -1) {
-				state.recentChats[find].unread = 0
+				state.recentChats[find].unread = []
 			}
 		},
 		setUnread: (state, action) => {
-			const sentBy = action.payload
+			const {friendsName, chatId} = action.payload
 
-			const find = state.recentChats.findIndex(i => i.username === sentBy)
+			const find = state.recentChats.findIndex(i => i.username === friendsName)
 
 			if (find !== -1) {
-				const value = state.recentChats[find].unread
-				state.recentChats[find].unread = value + 1
+				state.recentChats[find].unread.push(chatId)
 			}
 			
 		},
@@ -78,7 +77,7 @@ const recentChatsSlice = createSlice({
 			if (findIndex !== -1) {
 				state.recentChats[findIndex].lastSent = lastSent
 				state.recentChats[findIndex].messages = messages
-				state.recentChats[findIndex].unread = 0
+				state.recentChats[findIndex].unread = []
 
 			} else {
 				state.recentChats.unshift(action.payload)
@@ -88,12 +87,15 @@ const recentChatsSlice = createSlice({
 				if (a.lastSent > b.lastSent) return -1
 			})
 		},
-		updateLastChat: (state, action) => {
+		syncRecentsWithDeleted: (state, action) => {
 			const {friendsName, chat} = action.payload
-			console.log(action.payload)
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
 
 			if (find > -1) {
+				const findInUnread = state.recentChats[find].unread.findIndex(i => i === chat.chatId)
+				if (findInUnread > -1) {
+					state.recentChats[find].unread.splice(findInUnread, 1)
+				}
 				if (state.recentChats[find].messages.chatId === chat.chatId) {
 					state.recentChats[find].messages = {}
 				}
@@ -111,7 +113,7 @@ const recentChatsSlice = createSlice({
 				if (i.messages.length > 0) {
 					const findInUnread = unread.find(user => user.username === i.username)
 					if (findInUnread !== undefined) {
-						i.unread = findInUnread.unreadArray.length
+						i.unread = findInUnread.unreadArray
 					}
 					i.typing = false
 					i.online = false
@@ -134,7 +136,7 @@ export const {
 	setRecentOnline,
 	resetUnread,
 	setUnread,
-	updateLastChat,
+	syncRecentsWithDeleted,
 	updateRecentChats,
 	handleUserTypingActivity,
 	setRecentDisconnect

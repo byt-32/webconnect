@@ -3,7 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 export const fetchAccountData = createAsyncThunk(
 	'fetchAccountData',
 	async (id) => {
-		const response = await fetch(`user/accountData/${id}`)
+		const response = await fetch(`/user/accountData/${id}`)
 		return response.json()
 	}
 )
@@ -46,6 +46,9 @@ const accountSlice = createSlice({
 		updatePrivacy: (state, action) => {
 			localStorage.setItem('privacy', JSON.stringify({ ...state.account.privacy, ...action.payload}))
 			state.account.privacy = {...state.account.privacy, ...action.payload}
+		},
+		editAccountInfo: (state, action) => {
+			state.account = {...state.account, ...action.payload}
 		}
 	},
 	extraReducers: builder => {
@@ -60,6 +63,7 @@ export const {
 	updateSettings,
 	updateSocial,
 	setOnline,
+	editAccountInfo,
 	updatePrivacy
 } = accountSlice.actions
 
