@@ -116,6 +116,15 @@ export async function deleteChat(obj) {
 		{arrayFilters: [{'starredChat.chatId': chat.chatId}]}
 	)
 
+	await UnreadCount.findOneAndUpdate(
+		{username: chat.sentTo, 'users.username': chat.sentBy}, 
+		{
+			$pull: {
+				'users.$.unreadArray': chat.chatId,
+			}
+		}
+	)
+
 	async function performDelete(user1, user2) {
 		await Chat.findOneAndUpdate(
 			{username: user1, 'chats.username': user2},
@@ -142,4 +151,8 @@ export async function deleteChat(obj) {
 		performDelete(deletedBy, friendsName) // Delete for only deletedBy
 	}
 	
+}
+
+export async function updateLastSeen(id) {
+	await User.findByIdAndUpdate(id, {lastSeen: new Date()})
 }
