@@ -11,15 +11,17 @@ chatRoute.get('/fetchMessages/:friendsName/:requesterId', async (request, respon
 
 	if (requesterId !== '' && friendsName !== '') {
 		try {
-			const user = await Chat.findOne({_id: requesterId}, {chats: 1, _id: 0})
-
 			const chats = await Chat.findOne({_id: requesterId, 'chats.username': friendsName},
-				{username: 1, 'chats.$': 1}
+				{username: 1, 'chats.$': 1, starredChat: 1}
 			)
 			if (chats !== null) {
-				response.send({username: chats.chats[0].username, messages: chats.chats[0].messages})
+				response.send({
+					username: chats.chats[0].username,
+					messages: chats.chats[0].messages || [] ,
+					starredChat: chats.chats[0].starredChat || {}
+				})
 			} else {
-				response.send({username: friendsName, messages: []})
+				response.send({username: friendsName, messages: [], starredChat: {}})
 			}
 		} catch(e) {
 			e && console.log('Err' + e)
