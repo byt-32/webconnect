@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
     backdropFilter: 'blur(5px)',
     boxShadow: '-3px 1px 1px 0px #f1f1f1',
     '& .MuiToolbar-root': {
-      padding: '0 5px',
+      padding: 0,
       height: '100%'
     }
   },
