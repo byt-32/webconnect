@@ -77,3 +77,69 @@ export async function saveChats(chat) {
 	save(sentTo, receiver.id, sentBy, sender.id)
 
 }
+
+export async function handleStarredChat(obj) {
+	const {starredBy, friendsName, starredChat} = obj
+	await Chat.findOneAndUpdate(
+		{username: starredBy, 'chats.username': friendsName},
+		{'$set': {'chats.$.starredChat': starredChat}}, 
+	)
+	await Chat.findOneAndUpdate(
+		{username: friendsName, 'chats.username': starredBy},
+		{'$set': {'chats.$.starredChat': starredChat}}, 
+	)
+}
+
+export async function unstarChat(obj) {
+	const {starredBy, friendsName, starredChat} = obj
+	await Chat.findOneAndUpdate(
+		{username: starredBy, 'chats.username': friendsName},
+		{'$set': {'chats.$.starredChat': starredChat}}, 
+	)
+}
+
+export async function deleteChat(obj) {
+	/*** READ THIS 
+		YOU CANT DELETE A FRIENDS CHAT FROM THEIR DATABASE, 
+		TEST CASE 1: DELETING A RECEIVED CHAT MODIFIES 
+		THE RECEIVER DATABASE NOT THE SENDER'S, 
+
+		TEST CASE 2: DELETING A SENT CHAT() MODIFES BOTH THE USER'S DATABASE
+		AND THE SENDERS'
+	*/
+	const {deletedBy, friendsName, chat} = obj
+
+	/** DELETE A STARRED CHAT TOO **/
+	await Chat.findOneAndUpdate(
+		{username: deletedBy, 'chats.username': friendsName},
+		{'$set': {'chats.$.starredChat': {}}}, 
+		{arrayFilters: [{'starredChat.chatId': chat.chatId}]}
+	)
+
+	async function performDelete(user1, user2) {
+		await Chat.findOneAndUpdate(
+			{username: user1, 'chats.username': user2},
+			{
+				$pull: {
+					'chats.$.messages': {chatId: chat.chatId},
+				}
+			}
+		)
+		await Chat.findOneAndUpdate(
+			{username: user1, 'chats.username': user2},
+			{'$set': {'chats.$.messages.$[message].reply.message': ''}}, 
+			{arrayFilters: [{'message.reply.chatId': chat.chatId}]}
+		)
+	}
+
+	if (deletedBy === chat.sentBy) {
+		/** 
+			
+		**/
+		performDelete(friendsName, deletedBy)
+		performDelete(deletedBy, friendsName)
+	} else {
+		performDelete(deletedBy, friendsName) // Delete for only deletedBy
+	}
+	
+}
