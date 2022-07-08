@@ -9,9 +9,20 @@ export const useWindowHeight = () => {
 }
 
 export function useAssert(obj) {
+
+	function type(val) {
+		return typeof val
+	}
 	try {
-		if (typeof obj === 'boolean') return obj
-		if (typeof obj === null || typeof obj === 'undefined') return false
+		
+		if (type(obj) === 'string') return true
+		if (type(obj) === 'number') {
+			if (obj > -1) return true
+				else return false
+		}
+		if (type(obj) === 'boolean') return obj
+		if (type(obj) === null || typeof obj === 'undefined') return false
+
 		if (Array.isArray(obj)) {
 			if ( obj.length > 0) {
 				return true
