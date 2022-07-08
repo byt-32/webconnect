@@ -97,7 +97,7 @@ const UserList = ({user, style, secondaryItems}) => {
 				     />
 			    </ListItemIcon>
 	      	<ListItemText 
-	      		primary={user.username}
+	      		primary={<Typography component='h6'> {user.username}</Typography>} 
 	      	/>
 	    </ListItem>
     </Link>
