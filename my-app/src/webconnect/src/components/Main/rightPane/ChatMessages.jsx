@@ -55,7 +55,7 @@ const useStyles = makeStyles({
 		alignItems: 'flex-end',
 		width: '100%',
 		padding: '5px 0',
-		transition: '.7s ease background'
+		transition: '.4s ease background'
 	},
 	flexStart: {
 		justifyContent: 'flex-start',
@@ -242,7 +242,7 @@ const ChatSingle = ({chat}) => {
 
 		let newTimer = setTimeout(() => {
 			dispatch(setHighlighted({chatId: chat.reply.chatId, friendsName: getFriendName(), show: false}))
-		}, 1500)
+		}, 800)
 
 		setTimer(newTimer)
 	}
