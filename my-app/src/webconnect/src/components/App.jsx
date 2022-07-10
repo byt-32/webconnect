@@ -8,7 +8,7 @@ import { createTheme, ThemeProvider } from '@material-ui/core/styles'
 
 import RightPane from './main/rightPane/RightPane'
 
-import {useWindowHeight} from '../customHooks/hooks'
+import {getWindowHeight} from '../lib/script'
 
 const theme = createTheme({
 	palette: {
@@ -37,7 +37,7 @@ const App = () => {
 	
 	return (
 		<ThemeProvider theme={theme}>
-			<section style={{height: useWindowHeight() + 'px'}} >
+			<section style={{height: getWindowHeight() + 'px'}} >
 				<Routes>
 					{JSON.parse(localStorage.getItem('details')) && 
 						<Route path='/' element={<Main /> } >
