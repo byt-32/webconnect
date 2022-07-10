@@ -281,7 +281,7 @@ const ContactInfo = () => {
 			      		{/*const socialLink = social.link.replace('https://', '')*/}
 			      		if (find !== undefined) {
 			      			return (
-			      				<><ListItem key={social.name} button > 
+			      				<><ListItem key={i} button > 
 											<ListItemAvatar>
 								        <IconButton>
 								          {find.icon}
