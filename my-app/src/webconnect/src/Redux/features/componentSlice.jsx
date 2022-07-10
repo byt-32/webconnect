@@ -5,8 +5,8 @@ const initialState = {
 	leftPane: true,
 	profile: false,
 	stack: {
-		recentChats: false,
-		activeUsers: true,
+		recentChats: true,
+		activeUsers: false,
 		settings: false,
 		resetPassword: false,
 		contactInfo: false,

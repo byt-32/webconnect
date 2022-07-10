@@ -56,16 +56,14 @@ const chatSlice = createSlice({
 		},
 		setChatRead: (state, action) => {
 			const receiver = action.payload
-			const find = state.privateChats.find(i => i.username === receiver)
-			const index = state.privateChats.findIndex(i => i.username === receiver)
+			const find = state.privateChats.findIndex(i => i.username === receiver)
 
-			if (find !== undefined) {
-				find.messages.forEach( i => {
+			if (find > -1) {
+				state.privateChats[find].messages.forEach( i => {
 					if (!i.read && i.read !== undefined) {
 						i.read = true
 					}
 				})
-				state.privateChats[index].messages = find.messages
 			}
 		},
 
@@ -122,12 +120,23 @@ const chatSlice = createSlice({
 			
 		},
 
-		handlePendingDelete: (state, action) => {
+		setPendingDelete: (state, action) => {
 			const {friendsName, chat} = action.payload
 			const find = state.privateChats.findIndex(i => i.username === friendsName)
 
 			if (find > -1) {
-				state.privateChats[find].actionValues.pendingDelete = chat
+				if (Object.keys(state.privateChats[find].actionValues.pendingDelete).length === 0) {
+					state.privateChats[find].actionValues.pendingDelete = chat
+				}
+			}
+
+		},
+		undoPendingDelete: (state, action) => {
+			const {friendsName} = action.payload
+			const find = state.privateChats.findIndex(i => i.username === friendsName)
+
+			if (find > -1) {
+				state.privateChats[find].actionValues.pendingDelete = {}
 			}
 
 		},
@@ -140,6 +149,7 @@ const chatSlice = createSlice({
 				if (state.privateChats[find].actionValues.starredChat.chatId === chat.chatId) {
 					state.privateChats[find].actionValues.starredChat = {}
 				}
+				state.privateChats[find].actionValues.pendingDelete = {}
 
 				function redoDelete() {
 					/** we use forEach because chatId could match 1 or more replied chats,
@@ -193,7 +203,8 @@ export const {
 	setReaction,
 	handleStarredChat,
 	performChatDelete,
-	handlePendingDelete,
+	setPendingDelete,
+	undoPendingDelete,
 	setReply
 } = chatSlice.actions
 

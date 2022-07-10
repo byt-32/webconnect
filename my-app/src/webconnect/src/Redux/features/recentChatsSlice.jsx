@@ -13,11 +13,11 @@ export const fetchRecentChats = createAsyncThunk(
 
 const initialState = {
 	recentChats: [],
-	defaultActions: {
-		online: false,
-		unread: [],
-		typing: false,
-	},
+	// defaultActions: {
+	// 	online: false,
+	// 	unread: [],
+	// 	typing: false,
+	// },
 	showRecentUsersLoader: false
 }
 
@@ -33,7 +33,7 @@ const recentChatsSlice = createSlice({
 			
 			users.forEach(user => {
 				const index = state.recentChats.findIndex(i => i.username === user.username)
-				if (index !== -1) {
+				if (index > -1) {
 					state.recentChats[index].online = true
 				}
 			})
@@ -41,7 +41,7 @@ const recentChatsSlice = createSlice({
 		setRecentDisconnect: (state, action) => {
 			const {username} = action.payload
 			const index = state.recentChats.findIndex(i => i.username === username)
-			if (index !== -1) {
+			if (index > -1) {
 				state.recentChats[index].online = false
 				state.recentChats[index].lastSeen = Date.now()
 			}
@@ -50,7 +50,7 @@ const recentChatsSlice = createSlice({
 			const username = action.payload
 			const find = state.recentChats.findIndex(i => i.username === username)
 
-			if (find !== -1) {
+			if (find > -1) {
 				state.recentChats[find].unread = []
 			}
 		},
@@ -59,7 +59,9 @@ const recentChatsSlice = createSlice({
 
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
 
-			if (find !== -1) {
+			if (find > -1) {
+			// console.log(state.recentChats[find].unread)
+
 				state.recentChats[find].unread.push(chatId)
 			}
 			
@@ -67,7 +69,7 @@ const recentChatsSlice = createSlice({
 		handleUserTypingActivity: (state, action) => {
 			const {user, typing} = action.payload
 			const find = state.recentChats.findIndex(i => i.username === user)
-			if (find !== -1) {
+			if (find > -1) {
 				state.recentChats[find].typing = typing
 			}
 		},
@@ -75,11 +77,9 @@ const recentChatsSlice = createSlice({
 			const {lastSent, username, online, messages} = action.payload
 
 			const findIndex = state.recentChats.findIndex(i => i.username === username)
-			if (findIndex !== -1) {
+			if (findIndex > -1) {
 				state.recentChats[findIndex].lastSent = lastSent
 				state.recentChats[findIndex].messages = messages
-				state.recentChats[findIndex].unread = []
-
 			} else {
 				state.recentChats.unshift(action.payload)
 			}
@@ -101,7 +101,16 @@ const recentChatsSlice = createSlice({
 					state.recentChats[find].messages = {}
 				}
 			}
+		},
+		syncRecentsWithRead: (state, action) => {
+			const friendsName = action.payload
+			const find = state.recentChats.findIndex(i => i.username === friendsName)
+
+			if (find > -1) {
+				state.recentChats[find].messages.read = true
+			}
 		}
+
 	},
 	extraReducers: builder => {
 		builder.addCase(fetchRecentChats.pending, (state, action) => {
@@ -116,7 +125,7 @@ const recentChatsSlice = createSlice({
 					if (findInUnread !== undefined) {
 						i.unread = findInUnread.unreadArray
 					}
-					i.typing = false
+					i.typing = false 
 					i.online = false
 					i.messages = i.messages[0]
 				}	
@@ -139,6 +148,7 @@ export const {
 	setUnread,
 	syncRecentsWithDeleted,
 	updateRecentChats,
+	syncRecentsWithRead,
 	handleUserTypingActivity,
 	setRecentDisconnect
 } = recentChatsSlice.actions
