@@ -12,6 +12,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField'
 import MenuItem from '@material-ui/core/MenuItem';
 import InputBase from '@material-ui/core/InputBase'
+import Badge from '@material-ui/core/Badge';
 
 import GroupIcon from '@material-ui/icons/Group'
 import MenuIcon from '@material-ui/icons/Menu'
@@ -20,6 +21,9 @@ import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
 import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
 import AccountCircleRoundedIcon from '@material-ui/icons/AccountCircleRounded';
+import FiberManualRecordRoundedIcon from '@material-ui/icons/FiberManualRecordRounded';
+import DoneAllIcon from '@material-ui/icons/DoneAll'
+import DoneIcon from '@material-ui/icons/Done';
 
 import { setSelectedUser, assertFetch } from '../../../Redux/features/otherSlice'
 import { fetchMessages } from '../../../Redux/features/chatSlice'
@@ -35,7 +39,7 @@ import { Link } from 'react-router-dom'
 import Preloader from '../../Preloader'
 
 import { socket } from '../Main'
-import { useAssert } from '../../../customHooks/hooks'
+import { assert, getLastSeen } from '../../../lib/script'
 
 import Header from './Header'
 
@@ -81,21 +85,31 @@ const useStyles = makeStyles({
 				textOverflow: 'ellipsis',
 				whiteSpace: 'nowrap',
 				overflow: 'hidden',
-				paddingInlineEnd: 10
+				paddingInlineEnd: 10,
+				marginTop: 2
 			}
 		}
 	},
-	unread: {
-		borderRadius: '100%',
-		minWidth: 20,
-		minHeight: 20,
-		background: '#6495ed',
+	chatMisc: {
 		display: 'flex',
+		alignItems: 'flex-end',
+		flexDirection: 'column',
+		justifyContent: 'center',
+		fontSize: '.8rem',
+	},
+	lastSent: {
+		marginBottom: 6,
+		color: '#53555e'
+	},
+	unread: {
+		minWidth: 17,
+		minHeight: 17,
+		background: '#6495ed',
+		borderRadius: '100%',
 		alignItems: 'center',
+		display: 'flex',
 		justifyContent: 'center',
 		color: '#fff',
-		fontsize: '.8rem',
-		// padding: 3
 	},
 	typingStatus: {
 		color: '#6495ed'
@@ -106,14 +120,21 @@ const useStyles = makeStyles({
 		'& span': {
 			color:' #9d9d9d'
 		}
-	}
+	},
+	chatRead: {
+		'& svg': {
+			fontSize: '.8rem',
+			position: 'relative',
+			top: 2
+		}
+	},
 	
 })
 
 const UserList = ({user, style, secondaryItems}) => {
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const {useState, useEffect} = React
-	const classses = useStyles()
+	const classes = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const fetchedUsers = useSelector(state => state.other.fetched)
@@ -122,11 +143,11 @@ const UserList = ({user, style, secondaryItems}) => {
 
 		if (selectedUser.username !== user.username) {
 				
-			if (useAssert(user.unread)) {
+			if (assert(user.unread)) {
 				dispatch(resetUnread(user.username))
 				socket.emit('chatIsRead', user.username, username)
 			}
-			if (useAssert(fetchedUsers.find(i => i === user.username))) {
+			if (assert(fetchedUsers.find(i => i === user.username))) {
 				dispatch(setSelectedUser(user))
 			} else {
 				dispatch(assertFetch(user.username))
@@ -142,7 +163,7 @@ const UserList = ({user, style, secondaryItems}) => {
 	return (
 		<Link to='chat'>
 			<ListItem	button 
-				className={classses.listItem}
+				className={classes.listItem}
 				selected={user.username === selectedUser.username}
 	  		onClick={handleClick}>
 	    		<ListItemIcon>
@@ -152,22 +173,35 @@ const UserList = ({user, style, secondaryItems}) => {
 				     />
 			    </ListItemIcon>
 	      	<ListItemText 
-	      		primary={<Typography component='p' style={{fontFamily: 'Roboto'}}> {user.username}</Typography>} 
+	      		primary={
+	      			<Typography component='p'> {user.username}</Typography>
+	      		} 
 	      		secondary={
 	      			user.typing ?
-	      				<span className={classses.typingStatus}> {'typing...'} </span>
-	      			: <span className={classses.lastChat}
-	      				> 
+	      				<span className={classes.typingStatus}> {'typing...'} </span>
+	      			: 
+	      				<span className={classes.lastChat}> 
 	      					{user.messages.sentBy === username && 
-	      						<span style={{fontWeight: 'bold'}}> {'You: '} </span> 
+	      						<span className={classes.chatRead}> 
+											{user.messages.read ? <DoneAllIcon style={{color: '#00c759'}} /> : <DoneIcon />}
+	      						</span> 
 	      					} 
 	      					 <span> {user.messages.message} </span>
 	      				</span>
 	      		}
 	      	/>
-		     { (useAssert(user.unread)) &&
-		     	<div className={classses.unread} > {user.unread.length} </div>
-		     }
+		     	<div className={classes.chatMisc} > 
+		     		<span 
+		     			className={classes.lastSent} 
+		     			style={{color: assert(user.unread) ? '#6495ed' : 'initial'}}
+		     		> 
+		     			{getLastSeen(user.lastSent)} 
+		     		</span>
+
+		     		{ assert(user.unread) &&
+		     			<span className={classes.unread}> {user.unread.length} </span>
+		     		}
+		     	</div>
 	    </ListItem>
     </Link>
 	)

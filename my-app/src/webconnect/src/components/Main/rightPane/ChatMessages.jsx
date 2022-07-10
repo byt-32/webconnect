@@ -20,12 +20,14 @@ import StarsIcon from '@material-ui/icons/Stars';
 import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 
 import { handleReply, setHighlighted, setReply,
- setReaction, handleStarredChat,
- handlePendingDelete} from '../../../Redux/features/chatSlice'
+ setReaction, 
+ handleStarredChat,
+ setPendingDelete
+} from '../../../Redux/features/chatSlice'
 import common from '@material-ui/core/colors/common';
 import blue from '@material-ui/core/colors/blue';
 import deepOrange from '@material-ui/core/colors/deepOrange';
-import { useAssert } from '../../../customHooks/hooks'
+import { assert } from '../../../lib/script'
 import { socket } from '../Main'
 
 const useStyles = makeStyles({
@@ -35,6 +37,7 @@ const useStyles = makeStyles({
 	},
 	dateNotice: {
 		textAlign: 'center',
+		margin: '10px 0',
 		position: 'sticky',
 		zIndex: 20,
 		top: 0,
@@ -80,7 +83,9 @@ const useStyles = makeStyles({
 		position: 'relative',
 		'& > span': {
 			padding: '4px 8px',
-			display: 'block'
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'space-between'
 		}
 	},
 	reply: {
@@ -88,6 +93,7 @@ const useStyles = makeStyles({
 		fontSize: '.85rem',
 		padding: '5px 0' ,
 		borderBottom: '1px solid #efefef',
+		borderLeft: '2px solid #ffb55c',
 		borderRadius: '5px 0',
 		'& > span': {
 			padding: '0 10px',
@@ -107,6 +113,12 @@ const useStyles = makeStyles({
 		zIndex: 25,
 		display: 'flex',
 		background: '#fff !important'
+	},
+	chatTime: {
+		fontSize: '.65rem',
+		marginLeft: 9,
+		opacity: .7,
+		alignSelf: 'flex-end'
 	},
 	deleted: {
 		fontStyle: 'italic',
@@ -134,7 +146,6 @@ const useStyles = makeStyles({
 // ]
 // ///rgb(0 137 255 / 6%)
 
-
 const ChatSingle = ({chat}) => {
 	// console.log(props)
 	const classes = useStyles()
@@ -153,6 +164,7 @@ const ChatSingle = ({chat}) => {
 	const deleted = chat.message === '' ? true : false
 
 	const getFriendName = () => {
+		
 	/** This basically gets the freinds username,
 	 alternative to this would be to pass the username down to this component, 
 	 leading to props drilling.
@@ -221,7 +233,7 @@ const ChatSingle = ({chat}) => {
 			TEST CASE 2: DELETING A SENT CHAT(YOUR CHAT) MODIFES BOTH THE USER'S DATABASE
 			ASS WELL AS THE SENDERS'
 		*/
-		dispatch(handlePendingDelete({friendsName: getFriendName(), chat: chat}))
+		dispatch(setPendingDelete({friendsName: getFriendName(), chat: chat}))
 	}
 
 	const handleChatHighlight = () => {
@@ -254,14 +266,17 @@ const ChatSingle = ({chat}) => {
 							<div className={classes.reply} onClick={() => { chat.reply.message !== '' && handleChatHighlight()}}>
 								<span> {chat.reply.sentBy === username ? 'You' : chat.reply.sentBy} </span>
 								{ chat.reply.message !== '' ?
-									<span> {chat.reply.message} </span>
+										<span> {chat.reply.message} </span>
 									: 
-									<div className={[className, classes.deleted].join(' ')}>
-										<span className={classes.deleted}> Deleted </span> 
-									</div> 
+										<div className={[className, classes.deleted].join(' ')}>
+											<span className={classes.deleted}> Deleted </span> 
+										</div> 
 								}
 							</div>
-							<span className={classes.chat} onClick={handleChatActions} > {chat.message}</span>
+							<span className={classes.chat} onClick={handleChatActions} > 
+								{chat.message}
+								<span className={classes.chatTime}> {chat.timestamp.time} </span>
+							</span>
 						</div>
 						{ me &&
 							<span className={classes.chatRead}>
@@ -272,7 +287,10 @@ const ChatSingle = ({chat}) => {
 					:
 					<>
 						<div className={[className, classes.chatSingle].join(' ')}>
-							<span className={classes.chat} onClick={handleChatActions} > {chat.message}</span>
+							<span className={classes.chat} onClick={handleChatActions} >
+								{chat.message}
+								<span className={classes.chatTime}> {chat.timestamp.time} </span>
+							</span>
 						</div>
 						{ me &&
 							<span className={classes.chatRead}>

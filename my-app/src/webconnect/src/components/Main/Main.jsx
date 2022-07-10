@@ -6,13 +6,13 @@ import { Outlet } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
 import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, 
-	handleUserTypingActivity, updateRecentChats, syncRecentsWithDeleted} from '../../Redux/features/recentChatsSlice'
+	handleUserTypingActivity, updateRecentChats, syncRecentsWithDeleted, syncRecentsWithRead} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
 import { storeReceivedChat, setChatRead, handleStarredChat, performChatDelete } from '../../Redux/features/chatSlice'
 import { setDisconnectedUsers, setOnlineUsers } from '../../Redux/features/otherSlice'
 
-import { useAssert } from '../../customHooks/hooks'
+import { assert } from '../../lib/script'
 import LeftPane from './leftPane/LeftPane'
 
 export const socket = io('/', {autoConnect: false})
@@ -26,9 +26,9 @@ const useStyles = makeStyles({
 })
 
 const Main = () => {
-	// const myWorker = new Worker('../../workers/workers.js')
+	const myWorker = new Worker('./workers/worker.js')
 
-	// myWorker.postMessage('hi')
+	myWorker.postMessage('hi')
 
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
@@ -83,17 +83,18 @@ const Main = () => {
 			messages: chat.message,
 		}))
 
-		if (!useAssert(selectedUser) || selectedUser.username !== chat.sentBy) {
+		if (!assert(selectedUser) || selectedUser.username !== chat.sentBy) {
 			socket.emit('saveUnread', chat.sentBy, username, chat.message.chatId, () => {})
 			dispatch(setUnread({friendsName: chat.sentBy, chatId: chat.message.chatId}))
 		}
-		if (useAssert(selectedUser) && selectedUser.username === chat.sentBy) {
+		if (assert(selectedUser) && selectedUser.username === chat.sentBy) {
 			socket.emit('chatIsRead', selectedUser.username, username)
 		}
 	})
 
 	socket.off('chatHasBeenRead').on('chatHasBeenRead', (sender, receiver) => {
 		dispatch(setChatRead(receiver))
+		dispatch(syncRecentsWithRead(receiver))
 	})
 
 	socket.off('userIsTyping').on('userIsTyping', obj => {

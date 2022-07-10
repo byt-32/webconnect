@@ -24,7 +24,7 @@ import { Link } from 'react-router-dom'
 import Header from './Header'
 import UserAvatar from '../UserAvatar'
 import { socket } from '../Main'
-import { useDate, useAssert } from '../../../customHooks/hooks'
+import { getLastSeen, assert } from '../../../lib/script'
 
 
 const useStyles = makeStyles({
@@ -67,12 +67,12 @@ const UserList = ({user, style, secondaryItems}) => {
 		if (user.online) {
 			setText('')
 		} else {
-			setText(useDate( user.lastSeen))
+			setText('last seen ' + getLastSeen(user.lastSeen))
 		}
 		// if(!user.online) {
-		// 	setDate(useDate( user.lastSeen))
+		// 	setDate(getLastSeen( user.lastSeen))
 		// 	const newTimer = setInterval(() => {
-		// 		setDate(useDate( user.lastSeen))
+		// 		setDate(getLastSeen( user.lastSeen))
 		// 	}, 50000)
 
 		// 	setTimer(newTimer)
@@ -85,7 +85,7 @@ const UserList = ({user, style, secondaryItems}) => {
 		if (user.online) {
 			setText('')
 		} else {
-			setText(useDate( user.lastSeen))
+			setText('last seen ' + getLastSeen(user.lastSeen))
 		}
 	}, [user.online])
 
@@ -128,7 +128,7 @@ const UserList = ({user, style, secondaryItems}) => {
 			    </ListItemIcon>
 	      	<ListItemText 
 	      		primary={<Typography component='p' style={{fontFamily: 'Roboto'}}> {user.username}</Typography>} 
-	      		secondary={secondaryText}
+	      		secondary={user.lastSeen && secondaryText}
 	      	/>
 	    </ListItem>
     </Link>

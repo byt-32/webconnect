@@ -17,6 +17,7 @@ import Fade from '@material-ui/core/Fade';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button'
+import InputAdornment from '@material-ui/core/InputAdornment';
 
 import SendIcon from '@material-ui/icons/Send';
 import TagFacesIcon from '@material-ui/icons/TagFaces';
@@ -35,15 +36,23 @@ import grey from '@material-ui/core/colors/grey';
 import blue from '@material-ui/core/colors/blue';
 
 import { useDispatch,useSelector } from 'react-redux'
-import {  storeSentChat, setReply, handleStarredChat, performChatDelete, handlePendingDelete } from '../../../Redux/features/chatSlice'
+import {  storeSentChat, 
+	setReply,
+	handleStarredChat, 
+	performChatDelete, 
+	setPendingDelete,
+	undoPendingDelete,
+	setHighlighted
+} from '../../../Redux/features/chatSlice'
 import { setTypingStatus } from '../../../Redux/features/otherSlice'
 import {updateRecentChats, syncRecentsWithDeleted} from '../../../Redux/features/recentChatsSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
-import { useWindowHeight, useAssert, useDate } from '../../../customHooks/hooks'
+import { getWindowHeight, assert, getLastSeen } from '../../../lib/script'
 
 import { socket } from '../Main'
+
 
 const useStyles = makeStyles({
 	emoji: {
@@ -88,6 +97,8 @@ const useStyles = makeStyles({
 		},
 		'& .MuiInputBase-root': {
 			flex: 1,
+			background: common.white,
+			padding: '11px 10px'
 		},
 		'& .MuiInputBase-inputMultiline': {
 			maxHeight: 70,
@@ -102,16 +113,18 @@ const useStyles = makeStyles({
 		display: 'flex',
 		justifyContent: 'space-between',
 		position: 'absolute',
+		bottom: '100%',
+		boxShadow: '0px 3px 6px 0px #00000012',
 		background: '#fdfdfd',
 		width: '100%',
-		top: '-61px',
 		left: 0,
-		borderRadius: '10px 0'
+		borderRadius: '10px 10px 0 0'
 	},
 	replyProps: {
 		display: 'flex',
 		flexDirection: 'column',
 		padding: 10,
+		width: 'inherit',
 		borderLeft: '2px solid #d1803e',
 		borderRadius: 'inherit',
 		'& span:first-child': {
@@ -139,7 +152,7 @@ const useStyles = makeStyles({
 			display: 'flex',
 			alignItems: 'center',
 		}
-	}
+	},
 })
 function retrieveDate(date) {
 	const index = (/[0-9](?=[0-9]{3})/).exec(date)['index']
@@ -156,7 +169,7 @@ function ActionNotifier(props) {
   React.useEffect(() => {
     const timer = setInterval(() => {
       setProgress((prevProgress) => (prevProgress + 10));
-    }, 1000);
+    }, 200);
     return () => {
       clearInterval(timer);
     };
@@ -195,6 +208,7 @@ const MessagesPane = ({friend}) => {
 	const [showPicker, setPicker] = React.useState(false)
 	const [networkError, setNetworkError] = React.useState(false)
 	const [timer, setTimer] = React.useState(null)
+	const [hightlightTimer, setHighlightTimer] = React.useState(null)
 
 	const starredChatRef = React.createRef(null)
 	const cardContentRef = React.createRef(null)
@@ -207,9 +221,10 @@ const MessagesPane = ({friend}) => {
 		if (friendInUsers.online) {
 			setText('online')
 		} else {
-			setText('offline')
 			if (typeof friendInUsers.lastSeen === 'number') {
-				setText(useDate( friendInUsers.lastSeen))
+				setText('last seen ' + getLastSeen(friendInUsers.lastSeen))
+			} else {
+				setText('offline')
 			}
 		}
 	}, [friendInUsers.online])
@@ -226,17 +241,17 @@ const MessagesPane = ({friend}) => {
 		if (!accountIsOnline) {
 			setNetworkError(true)
 		}
-		if (useAssert(pendingDelete)) {
+		if (assert(pendingDelete) && accountIsOnline) {
 			clearTimeout(timerToDelete)
 
 			let newTimerToDelete = setTimeout(() => {
 				socket.emit('deleteChat', {deletedBy: username, friendsName: friend.username, chat: pendingDelete})
 				
 				dispatch(performChatDelete({friendsName: friend.username, chat: pendingDelete}))
-				dispatch(handlePendingDelete({friendsName: friend.username, chat: {}}))
+				dispatch(undoPendingDelete({friendsName: friend.username}))
 				dispatch(setReply({open: false, friendsName: friend.username}))
 				dispatch(syncRecentsWithDeleted({friendsName: friend.username, chat: pendingDelete}))
-			}, 10000)
+			}, 2000)
 			setDeleteTimer(newTimerToDelete)
 		}	
 	}, [pendingDelete])
@@ -254,7 +269,7 @@ const MessagesPane = ({friend}) => {
 	}, [])
 
 	const undoDelete = () => {
-		dispatch(handlePendingDelete({friendsName: friend.username, chat: {}}))
+		dispatch(undoPendingDelete({friendsName: friend.username}))
 		clearTimeout(timerToDelete)
 	}
 
@@ -281,20 +296,19 @@ const MessagesPane = ({friend}) => {
 		dispatch(handleStarredChat({starredChat: {}, friendsName: friend.username}))
 	}
 
-	// const handleTextInput = (e) => {
-	// 	// setInput(e.target.value)
+	const handleTextInput = (e) => {
+		// setInput(e.target.value)
 
-	// 	clearTimeout(timer)
+		clearTimeout(timer)
 
-	// 	const newTimer = setTimeout( async () => {
-	// 		// console.log(e.target.value)
-	// 		await handleTypingStatus(false)
-	// 	}, 2000)
-	// 	if (!typing) {/// This is vital to prevent multiple dispatches
-	// 		handleTypingStatus(true)
-	// 	}
-	// 	setTimer(newTimer)
-	// }
+		const newTimer = setTimeout( async () => {
+			handleTypingStatus(false)
+		}, 2000)
+		if (!typing) {// This is vital to prevent multiple dispatches
+			handleTypingStatus(true)
+		}
+		setTimer(newTimer)
+	}
 	const hideNetworkError = () => {
 		setNetworkError(false)
 	}
@@ -344,7 +358,7 @@ const MessagesPane = ({friend}) => {
 				dispatch(storeSentChat(chatObj))
 				textarea.value = ''
 				// setInput('')
-				useAssert(reply) && closeReplyHandle()
+				assert(reply) && closeReplyHandle()
 			} else {
 				setNetworkError(true)
 			}
@@ -352,7 +366,18 @@ const MessagesPane = ({friend}) => {
 
 		handleTypingStatus(false)
 	}
-	
+
+	const handleChatHighlight = () => {
+		dispatch(setHighlighted({chatId: reply.chatId, friendsName: friend.username, show: true}))
+		clearTimeout(hightlightTimer)
+
+		let newTimer = setTimeout(() => {
+			dispatch(setHighlighted({chatId: reply.chatId, friendsName: friend.username, show: false}))
+		}, 1500)
+
+		setHighlightTimer(newTimer)
+	}
+
 	return (
 		<Card className={classes.card} style={{
 			display: selectedUser.username === friend.username ? 'flex' : 'none'
@@ -380,11 +405,11 @@ const MessagesPane = ({friend}) => {
       	ref={cardContentRef}
       	className={classes.contents} 
 	      style={{
-	      	height: `${useWindowHeight()  - 110}px`
+	      	height: `${getWindowHeight()  - 110}px`
 	      }}
       >
-	    	{	useAssert(starredChat) &&
-	    		<Slide in={useAssert(starredChat)}>
+	    	{	assert(starredChat) && accountIsOnline &&
+	    		<Slide in={assert(starredChat)}>
 	    			<Card className={classes.starred} ref={starredChatRef}>
 	    				<CardHeader
 	    					avatar={
@@ -422,7 +447,7 @@ const MessagesPane = ({friend}) => {
 						horizontal: 'center',
 					}}
 					message={<ActionNotifier action={'Deleting...'} />}
-					open={useAssert(pendingDelete)}
+					open={assert(pendingDelete)}
 					action={
 						<Button onClick={() => undoDelete()} style={{color: '#ffc4cf'}}> UNDO </Button>
 				}
@@ -434,8 +459,11 @@ const MessagesPane = ({friend}) => {
       <CardActions className={classes.contents} >
 
       	<Slide in={reply.open} direction='up' >
-	      	<div className={classes.replyHandel}>
-	      		<div className={classes.replyProps}>
+	      	<div className={classes.replyHandel}
+	      	 >
+	      		<div className={classes.replyProps}
+	      			onClick={handleChatHighlight}
+	      		>
 	      			<span style={{color: '#ad39ad', fontWeight: 'bold'}}>
 	      				{reply.sentBy === username ? 'You' : reply.sentBy} 
 	      			</span>
@@ -451,12 +479,18 @@ const MessagesPane = ({friend}) => {
       		multiline
       		placeholder='Type your messages'
       		ref={inputRef}
-      		// onChange={handleTextInput}
+      		className={classes.inputBase}
+      		onChange={() => online && handleTextInput()}
+      		endAdornment={
+						<InputAdornment position="end" style={{height: '100%'}}>
+							<IconButton onClick={sendMessage} >
+			      		<SendIcon style={{color: blue[500]}} />
+			      	</IconButton>
+						</InputAdornment>
+					}
       		// value={input}
       	/>
-      	<IconButton onClick={sendMessage} >
-      		<SendIcon style={{color: blue[500]}} />
-      	</IconButton>
+	      	
     	</CardActions>
 
 		</Card>
