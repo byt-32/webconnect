@@ -17,13 +17,14 @@ import Collapse from '@material-ui/core/Collapse';
 import Fade from '@material-ui/core/Fade';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import CheckIcon from '@material-ui/icons/Check'
 
 import Divider from '@material-ui/core/Divider';
 import SpeedDial from '@material-ui/lab/SpeedDial';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
 
-import CheckIcon from '@material-ui/icons/Check'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import EditAttributesIcon from '@material-ui/icons/EditAttributes';
 import PublicIcon from '@material-ui/icons/Public';
@@ -48,6 +49,7 @@ import { updateSocial, updatePrivacy } from '../../../../Redux/features/accountS
 
 import Header from '../Header'
 import NetworkProgress from './NetworkProgress'
+import { assert } from '../../../../lib/script'
 
 const useStyles = makeStyles({
 	contactInfo: {
@@ -118,77 +120,154 @@ const useStyles = makeStyles({
 	}
 })
 
+function handleFetch(url, method, body, callback) {
+
+	if (method.toLowerCase('') === 'get') {
+
+		const res = fetch(url)
+		return res.json()
+
+	} else {
+
+		fetch(url, {
+			method: method,
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(body)
+		})
+		.then(res => res.json())
+		.then(res => {
+			callback(res)
+		})
+	}
+}
+
 const actions = [
-	{icon: <TwitterIcon style={{color: '#1DA1F2'}} /> , name: 'Twitter'},
-	{icon: <FacebookIcon style={{color: '#4267B2'}} /> , name: 'Facebook'},
-	{icon: <InstagramIcon style={{color: '#C13584'}} /> , name: 'Instagram'},
+	{icon: <TwitterIcon style={{color: '#1DA1F2'}} /> , name: 'twitter'},
+	{icon: <FacebookIcon style={{color: '#4267B2'}} /> , name: 'facebook'},
+	{icon: <InstagramIcon style={{color: '#C13584'}} /> , name: 'instagram'},
 ]
+
+const Social = ({social, divider, callback}) => {
+	const find = actions.find(i => i.name === social.name)
+	const classes = useStyles()
+
+ 	// const handleDelete = (which) => {
+ 	// 	setProgress(true)
+ 	// 	fetch(`/user/deleteSocial/${id}`, {
+ 	// 		method: 'delete',
+ 	// 		headers: {
+  // 			'Content-Type': 'application/json'
+  // 		},
+  // 		body: JSON.stringify(which)
+ 	// 	}).then(res => res.json())
+ 	// 	.then(res => {
+ 	// 		dispatch(updateSocial(res))
+ 	// 		setProgress(false)
+ 	// 	})
+ 	// }
+
+  // const updateSocialVisibility = (social) => {
+  // 	setProgress(true)
+  // 	fetch(`/user/updateSocial/${id}`, {
+  // 		method: 'put',
+  // 		headers: {
+  // 			'Content-Type': 'application/json'
+  // 		},
+  // 		body: JSON.stringify(social)
+  // 	})
+  // 	.then(res => res.json())
+  // 	.then(res => {
+  // 		setProgress(false)
+  // 		dispatch(updatePrivacy(social))
+  // 	})
+  // }
+
+	return (
+	<><ListItem button > 
+			<ListItemAvatar>
+	      <IconButton>
+	        {find.icon}
+	      </IconButton>
+	    </ListItemAvatar>
+	    <ListItemText 
+	    	primary={
+	    		<a style={{textDecoration: 'underline'}} 
+	    			target='_blank' href={social.link}> {social.link.replace('https://', '')} </a>
+	    	}
+	    	secondary={
+	      	<Button className={classes.privacy} onClick={() => {
+	      		// updateSocialVisibility({...social, hidden: !social.hidden})
+	      	}} >
+	      		{social.hidden ? 
+	      		<> <LockIcon />
+	      			<Typography variant='subtitle2' component='span'> Only me </Typography>
+	      		</> 
+	      		:
+	      		<><PublicIcon />
+	      			<Typography variant='subtitle2' component='span' > Public </Typography>
+	      		</>}
+	      		
+	      	</Button>
+	    	} 
+
+	    />
+	    <ListItemSecondaryAction>
+	    	<IconButton onClick={() => {}}>
+	    		<EditIcon />
+	    	</IconButton>
+	  		<IconButton onClick={() => {}} >
+	    		<DeleteIcon />
+	    	</IconButton>
+	    </ListItemSecondaryAction>
+	  </ListItem>
+	  {divider !== null && divider}
+	  </>
+	)
+}
 
 const ContactInfo = () => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const dispatch = useDispatch()
 	const classes = useStyles()
 	const [showDial, setDial] = React.useState(false)
-	const {username, email, privacy, socials} = useSelector(state => state.account.account)
+	const {username, socials, online} = useSelector(state => state.account.account)
+	const showLoader = useSelector(state => state.account.account.showLoader)
 	const [showProgress, setProgress] = React.useState(false)
 	const [open, setOpen] = React.useState(false);
 	const [expand, setExpand] = React.useState(false)
-	const [value, setValue] = React.useState('');
 
-	const [error, setError] = React.useState(false)
-	const [help, setHelp] = React.useState('')
+	const [error, setError] = React.useState({
+		error: false, helperText: ''
+	})
+	const email = socials.find(i => i.name === 'email')
 
-	const [openNewInput, setNewInput] = React.useState({
+	const [newSocial, setInput] = React.useState({
 		open: false,
+		icon: '',
+		social: {
+			name: '',
+			link: '',
+			hidden: true
+		}
 	})
 	const [isValidatingLink, setValidating] = React.useState(false)
-	const [input, setInput] = React.useState('')
 
-	const handleInput = ({target}) => setInput(target.value.trim())
-	const listenForEnter = (e) => {
-		setError(false)
-		setHelp('')
-		if (e.key === "Escape") {
-			setNewInput({open: false})
+	const validateInput = (text) => {
+		if (!text.includes('https://')) {
+			return {error: true, helperText: 'Link must contain https://'}
+		} else if (text === 'https://') {
+			return {error: true, helperText: 'Complete the link with your username'}
 		}
-		if (e.key === 'Enter') {
-			if (input !== '') {
-				if (!input.includes('https://')) {
-					setError(true)
-					setHelp('Link must contain https://')
-				} else if (input === 'https://') {
-					setError(true)
-					setHelp('Complete the link with your username')
-				} else {
-					setProgress(true)
-					fetch(`/user/updateSocials/${id}`, {
-						method: 'put',
-			  		headers: {
-			  			'Content-Type': 'application/json'
-			  		},
-			  		body: JSON.stringify({
-			  			name: openNewInput.name, 
-			  			link: input
-			  		})
-			  	})
-			  	.then(res => res.json())
-			  	.then(res => {
-			  		setProgress(false)
-			  		dispatch(updateSocial(res))
-			  	})
-				}
-			} else {
-				setNewInput({open: false})
-			}
-		}
+		return {error: false, helperText: ''}
 	}
-	// React.useEffect(() => {
 
-	// }, [])
-
+	
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
 	}
+
 	const handleOpen = () => {
     setOpen(true);
   };
@@ -196,44 +275,43 @@ const ContactInfo = () => {
   const handleClose = () => {
     setOpen(false);
   };
+
   const showCollapse = () => {
   	setExpand(!expand)
   }
 
- 	const addNewInfo = (which) => {
- 		setNewInput({open: true, ...which})
- 	}
-
- 	const handleDelete = (which) => {
- 		setProgress(true)
- 		fetch(`/user/deleteSocial/${id}`, {
- 			method: 'delete',
- 			headers: {
-  			'Content-Type': 'application/json'
-  		},
-  		body: JSON.stringify(which)
- 		}).then(res => res.json())
- 		.then(res => {
- 			dispatch(updateSocial(res))
- 			setProgress(false)
- 		})
- 	}
-
-  const handlePrivacySettings = (which) => {
-  	setProgress(true)
-  	fetch(`/user/updatePrivacy/${id}`, {
-  		method: 'put',
-  		headers: {
-  			'Content-Type': 'application/json'
-  		},
-  		body: JSON.stringify(which)
-  	})
-  	.then(res => res.json())
-  	.then(res => {
-  		setProgress(false)
-  		dispatch(updatePrivacy(which))
-  	})
+  const addSocial = ({icon, name}) => {
+  	setInput({open: true, icon: icon, social: {
+  		name,
+  		link: '',
+  		hidden: true
+  	}})
   }
+
+	const handleInput = ({target}) => {
+		setInput({
+			...newSocial,
+			social: {
+				...newSocial.social,
+				link: target.value.trim()
+			}
+		})
+		if (error.error) setError({error: false, helperText: ''})
+	}
+
+  const updateSocial = () => {
+  	const value = validateInput(newSocial.social.link)
+  	console.log(value)
+  	setError({...value})
+  	if (!value.error && online) {
+  		handleFetch( `/user/updateSocials/${id}`, 'put', newSocial.social,
+  		 (res) => {
+  		 	console.log(res)
+  		 }
+  		)
+  	}
+  }
+
 	return (
 		<section className={classes.contactInfo} >
 			
@@ -247,6 +325,9 @@ const ContactInfo = () => {
 				}
 			</Header>
 
+			{showLoader ? 
+				<> </>
+			:
 			<div className={classes.contactBody}>
 				<List className={classes.list} >
 					<ListItem button>
@@ -255,17 +336,19 @@ const ContactInfo = () => {
 			          <DraftsIcon />
 			        </Avatar>
 			      </ListItemAvatar>
-			      <ListItemText primary={email} secondary={
+			      <ListItemText primary={email.link} secondary={
 			      	<Button className={classes.privacy} onClick={() => {
-				      		handlePrivacySettings({email: !privacy.email})
+	      				updateSocialVisibility({...email, hidden: !email.hidden})
 				      	}} >
-				      		{privacy.email ? 
-				      		<><LockIcon />
-				      			<Typography variant='subtitle2' component='span' > Only me </Typography>
-				      		</> : 
-				      		<> <PublicIcon />
-				      			<Typography variant='subtitle2' component='span'> Public </Typography>
-				      		</>}
+				      		{email.hidden ? 
+				      		<> <LockIcon />
+				      			<Typography variant='subtitle2' component='span'> Only me </Typography>
+				      		</>
+				      		:
+				      		<><PublicIcon />
+				      			<Typography variant='subtitle2' component='span' > Public </Typography>
+				      		</> }
+				      		
 				      	</Button>
 			      } />
 			     </ListItem>
@@ -276,70 +359,35 @@ const ContactInfo = () => {
 			          Other social handles
 			        </ListSubheader>
 			      }>
-			      	{socials.map((social, i) => {
-			      		const find = actions.find(i => i.name === social.name)
-			      		{/*const socialLink = social.link.replace('https://', '')*/}
-			      		if (find !== undefined) {
+			      	{
+			      		socials.filter(i => i.name !== 'email').map((social, i) => {
 			      			return (
-			      				<><ListItem key={i} button > 
-											<ListItemAvatar>
-								        <IconButton>
-								          {find.icon}
-								        </IconButton>
-								      </ListItemAvatar>
-								      <ListItemText primary={
-								      	<a style={{textDecoration: 'underline'}} target='_blank' href={social.link}> {social.link.replace('https://', '')} </a>}
-								      	secondary={
-								      	<Button className={classes.privacy} onClick={() => {
-								      		handlePrivacySettings({[`${social.name}`]: !privacy[`${find.name}`]})
-								      	}} >
-								      		{privacy[`${social.name}`] ? 
-								      		<><LockIcon />
-								      			<Typography variant='subtitle2' component='span' > Only me </Typography>
-								      		</> : 
-								      		<> <PublicIcon />
-								      			<Typography variant='subtitle2' component='span'> Public </Typography>
-								      		</>}
-								      	</Button>
-								      	
-								      } />
-								      <ListItemSecondaryAction>
-								      	<IconButton onClick={() => {
-	            						addNewInfo(find)
-								      	}}>
-								      		<EditIcon />
-								      	</IconButton>
-							      		<IconButton onClick={() => {
-							      			handleDelete(social)
-							      		}} >
-								      		<DeleteIcon />
-								      	</IconButton>
-								      </ListItemSecondaryAction>
-								    </ListItem>
-								    {i !== socials.length -1 && <Divider key={social.name} />}
-								    </>
-			      			)
-			      		}
-			      	})}
+					      		<Social key={i} social={social} />
+		 							)
+			      		})
+			      	}
 			     	</List>
 			     }
 
-			     {
-			     	openNewInput.open &&
-			     	<Fade in={openNewInput.open}>
+			     {newSocial.open &&
+			     	<Fade in={newSocial.open}>
 				     	<ListItem>
 					      <ListItemAvatar>
-					        {openNewInput.icon}
+					        {newSocial.icon}
 					      </ListItemAvatar>
 					      <TextField
 					      	className={classes.addLinkInput}
 							  	placeholder={`Enter a link`}
-							  	onKeyUp={listenForEnter}
 							  	onChange={handleInput}
-									error={error}
-									helperText={help}
-							  	value={input}
+									error={error.error}
+									helperText={error.helperText}
+							  	value={newSocial.social.link}
 							  />
+							  <InputAdornment position="end" style={{height: '100%'}}>
+									<IconButton onClick={updateSocial} >
+					      		<CheckIcon style={{color: '#645faf'}} />
+					      	</IconButton>
+								</InputAdornment>
 					    </ListItem>
 					   </Fade>
 			     }
@@ -354,20 +402,21 @@ const ContactInfo = () => {
 	        onOpen={handleOpen}
 	        open={open}
 	      >
-	        {actions.map((action) => (
+	        {actions.map((action, i) => (
 	          <SpeedDialAction
+	          	key={i}
 	          	style={{...action.style, color: '#000'}}
 	            key={action.name}
 	            icon={action.icon}
 	            tooltipTitle={action.name}
 	            onClick={() => {
 	            	handleClose()
-	            	addNewInfo(action)
+	            	addSocial(action)
 	            }}
 	          />
 	        ))}
 	      </SpeedDial>
-			</div>
+			</div>}
 		</section>
 	)
 }
