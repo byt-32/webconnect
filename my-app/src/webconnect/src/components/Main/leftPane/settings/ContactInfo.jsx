@@ -10,6 +10,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItemText from '@material-ui/core/ListItemText';
+import Snackbar from '@material-ui/core/Snackbar'
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Switch from '@material-ui/core/Switch';
@@ -25,6 +26,7 @@ import SpeedDial from '@material-ui/lab/SpeedDial';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
 
+import MuiAlert from '@material-ui/lab/Alert';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import EditAttributesIcon from '@material-ui/icons/EditAttributes';
 import PublicIcon from '@material-ui/icons/Public';
@@ -116,6 +118,11 @@ const useStyles = makeStyles({
 			},
 			
 		}
+	},
+	bottomSnackbar: {
+		position: 'absolute',
+		width: '100%',
+		bottom: '5rem'
 	}
 })
 
@@ -157,6 +164,9 @@ const ContactInfo = () => {
 	const [showProgress, setProgress] = React.useState(false)
 	const [open, setOpen] = React.useState(false);
 	const [expand, setExpand] = React.useState(false)
+	const [openAlert, setAlert] = React.useState({
+		show: false, message: ''
+	})
 
 	const [error, setError] = React.useState({
 		error: false, helperText: ''
@@ -234,11 +244,16 @@ const ContactInfo = () => {
   const changePrivacy = (social) => {
   	handleFetch(`/user/updateSocials/${id}`, 'put', social)
   	dispatch(setNewSocial(social))
+  	setAlert({show: true, message: 'Privacy updated'})
   }
 
   const deleteSocial = (social) => {
   	handleFetch(`/user/deleteSocial/${id}`, 'delete', social, () => {})
   	dispatch(handleDeleteSocial(social))
+  	setAlert({show: true, message: 'Contact deleted successfully'})
+  }
+  const closeAlert = () => {
+  	setAlert({show: false, message: ''})
   }
 
 	return (
@@ -359,6 +374,22 @@ const ContactInfo = () => {
 			     }
 
 				</List>
+
+				<Snackbar 
+					className={classes.bottomSnackbar}
+					anchorOrigin={{
+						vertical: 'bottom',
+						horizontal: 'center',
+					}}
+					autoHideDuration={2000} 
+					message={openAlert.message}
+					open={openAlert.show}
+					onClose={closeAlert}
+				>
+				<MuiAlert variant='filled' elevation={6} onClose={closeAlert} severity="success">
+			    {openAlert.message}
+			  </MuiAlert>
+			</Snackbar>
 
 				<SpeedDial
 	        ariaLabel="SpeedDial openIcon"
