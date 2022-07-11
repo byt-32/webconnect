@@ -45,7 +45,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles } from '@material-ui/core/styles'
 
 import { setComponents } from '../../../../Redux/features/componentSlice'
-import { updateSocial, updatePrivacy } from '../../../../Redux/features/accountSlice'
+import { setNewSocial, handleDeleteSocial } from '../../../../Redux/features/accountSlice'
 
 import Header from '../Header'
 import NetworkProgress from './NetworkProgress'
@@ -74,7 +74,7 @@ const useStyles = makeStyles({
 				'& .MuiSvgIcon-root': {
 					fontSize: '1.1rem',
 					marginRight: 5,
-					color: '#858587'
+					color: '#4c4c6c'
 				}
 			},
 		}
@@ -82,7 +82,7 @@ const useStyles = makeStyles({
 	speedDial: {
 		alignItems: 'flex-end',
 		position: 'absolute',
-		bottom: '8rem',
+		bottom: '1rem',
 		right: '1rem',
 		'& .MuiFab-primary': {
 			background: 'cornflowerblue',
@@ -103,10 +103,9 @@ const useStyles = makeStyles({
 		'& .MuiListItemSecondaryAction-root': {
 			right: 5,
 			display: 'flex',
-			flexDirection: 'column',
 			'& .MuiIconButton-root': {
 				'& svg': {
-					fontSize: '1.3rem',
+					fontSize: '1.2rem',
 					color: '#e98181'
 				}
 			},
@@ -121,8 +120,7 @@ const useStyles = makeStyles({
 })
 
 function handleFetch(url, method, body, callback) {
-
-	if (method.toLowerCase('') === 'get') {
+	if (method.toLowerCase() === 'get') {
 
 		const res = fetch(url)
 		return res.json()
@@ -148,84 +146,6 @@ const actions = [
 	{icon: <FacebookIcon style={{color: '#4267B2'}} /> , name: 'facebook'},
 	{icon: <InstagramIcon style={{color: '#C13584'}} /> , name: 'instagram'},
 ]
-
-const Social = ({social, divider, callback}) => {
-	const find = actions.find(i => i.name === social.name)
-	const classes = useStyles()
-
- 	// const handleDelete = (which) => {
- 	// 	setProgress(true)
- 	// 	fetch(`/user/deleteSocial/${id}`, {
- 	// 		method: 'delete',
- 	// 		headers: {
-  // 			'Content-Type': 'application/json'
-  // 		},
-  // 		body: JSON.stringify(which)
- 	// 	}).then(res => res.json())
- 	// 	.then(res => {
- 	// 		dispatch(updateSocial(res))
- 	// 		setProgress(false)
- 	// 	})
- 	// }
-
-  // const updateSocialVisibility = (social) => {
-  // 	setProgress(true)
-  // 	fetch(`/user/updateSocial/${id}`, {
-  // 		method: 'put',
-  // 		headers: {
-  // 			'Content-Type': 'application/json'
-  // 		},
-  // 		body: JSON.stringify(social)
-  // 	})
-  // 	.then(res => res.json())
-  // 	.then(res => {
-  // 		setProgress(false)
-  // 		dispatch(updatePrivacy(social))
-  // 	})
-  // }
-
-	return (
-	<><ListItem button > 
-			<ListItemAvatar>
-	      <IconButton>
-	        {find.icon}
-	      </IconButton>
-	    </ListItemAvatar>
-	    <ListItemText 
-	    	primary={
-	    		<a style={{textDecoration: 'underline'}} 
-	    			target='_blank' href={social.link}> {social.link.replace('https://', '')} </a>
-	    	}
-	    	secondary={
-	      	<Button className={classes.privacy} onClick={() => {
-	      		// updateSocialVisibility({...social, hidden: !social.hidden})
-	      	}} >
-	      		{social.hidden ? 
-	      		<> <LockIcon />
-	      			<Typography variant='subtitle2' component='span'> Only me </Typography>
-	      		</> 
-	      		:
-	      		<><PublicIcon />
-	      			<Typography variant='subtitle2' component='span' > Public </Typography>
-	      		</>}
-	      		
-	      	</Button>
-	    	} 
-
-	    />
-	    <ListItemSecondaryAction>
-	    	<IconButton onClick={() => {}}>
-	    		<EditIcon />
-	    	</IconButton>
-	  		<IconButton onClick={() => {}} >
-	    		<DeleteIcon />
-	    	</IconButton>
-	    </ListItemSecondaryAction>
-	  </ListItem>
-	  {divider !== null && divider}
-	  </>
-	)
-}
 
 const ContactInfo = () => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
@@ -301,15 +221,24 @@ const ContactInfo = () => {
 
   const updateSocial = () => {
   	const value = validateInput(newSocial.social.link)
-  	console.log(value)
+
   	setError({...value})
+
   	if (!value.error && online) {
-  		handleFetch( `/user/updateSocials/${id}`, 'put', newSocial.social,
-  		 (res) => {
-  		 	console.log(res)
-  		 }
-  		)
+  		handleFetch( `/user/updateSocials/${id}`, 'put', newSocial.social, () => {})
+
+  		dispatch(setNewSocial(newSocial.social))
   	}
+  }
+
+  const changePrivacy = (social) => {
+  	handleFetch(`/user/updateSocials/${id}`, 'put', social)
+  	dispatch(setNewSocial(social))
+  }
+
+  const deleteSocial = (social) => {
+  	handleFetch(`/user/deleteSocial/${id}`, 'delete', social, () => {})
+  	dispatch(handleDeleteSocial(social))
   }
 
 	return (
@@ -338,7 +267,7 @@ const ContactInfo = () => {
 			      </ListItemAvatar>
 			      <ListItemText primary={email.link} secondary={
 			      	<Button className={classes.privacy} onClick={() => {
-	      				updateSocialVisibility({...email, hidden: !email.hidden})
+	      				changePrivacy({...email, hidden: !email.hidden})
 				      	}} >
 				      		{email.hidden ? 
 				      		<> <LockIcon />
@@ -361,8 +290,45 @@ const ContactInfo = () => {
 			      }>
 			      	{
 			      		socials.filter(i => i.name !== 'email').map((social, i) => {
+									const {icon} = actions.find(i => i.name === social.name)
 			      			return (
-					      		<Social key={i} social={social} />
+			      				<ListItem button key={i} > 
+											<ListItemAvatar>
+									      <IconButton>
+									        {icon}
+									      </IconButton>
+									    </ListItemAvatar>
+									    <ListItemText 
+									    	primary={
+									    		<a style={{textDecoration: 'underline'}} 
+									    			target='_blank' rel='noreferrer' href={social.link}> {social.link.replace('https://', '')} </a>
+									    	}
+									    	secondary={
+									      	<Button className={classes.privacy} onClick={() => {
+									      		changePrivacy({...social, hidden: !social.hidden})
+									      	}} >
+									      		{social.hidden ? 
+									      		<> <LockIcon />
+									      			<Typography variant='subtitle2' component='span'> Only me </Typography>
+									      		</> 
+									      		:
+									      		<><PublicIcon />
+									      			<Typography variant='subtitle2' component='span' > Public </Typography>
+									      		</>}
+									      		
+									      	</Button>
+									    	} 
+
+									    />
+									    	<ListItemSecondaryAction>
+									    	<IconButton onClick={() => addSocial({name: social.name, icon})}>
+									    		<EditIcon />
+									    	</IconButton>
+									  		<IconButton onClick={() => deleteSocial(social)} >
+									    		<DeleteIcon />
+									    	</IconButton>
+										  </ListItemSecondaryAction>
+									  </ListItem>
 		 							)
 			      		})
 			      	}
