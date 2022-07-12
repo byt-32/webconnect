@@ -44,14 +44,15 @@ import TwitterIcon from '@material-ui/icons/Twitter';
 import WhatsAppIcon from '@material-ui/icons/WhatsApp';
 import DeleteIcon from '@material-ui/icons/Delete';
 
+import {CSSTransition } from 'react-transition-group'
 import { makeStyles } from '@material-ui/core/styles'
 
 import { setComponents } from '../../../../Redux/features/componentSlice'
 import { setNewSocial, handleDeleteSocial } from '../../../../Redux/features/accountSlice'
 
-import Header from '../Header'
+import Header from '../../Header'
 import NetworkProgress from './NetworkProgress'
-import { assert } from '../../../../lib/script'
+import { assert, handleFetch } from '../../../../lib/script'
 
 const useStyles = makeStyles({
 	contactInfo: {
@@ -126,27 +127,6 @@ const useStyles = makeStyles({
 	}
 })
 
-function handleFetch(url, method, body, callback) {
-	if (method.toLowerCase() === 'get') {
-
-		const res = fetch(url)
-		return res.json()
-
-	} else {
-
-		fetch(url, {
-			method: method,
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(body)
-		})
-		.then(res => res.json())
-		.then(res => {
-			callback(res)
-		})
-	}
-}
 
 const actions = [
 	{icon: <TwitterIcon style={{color: '#1DA1F2'}} /> , name: 'twitter'},
@@ -154,7 +134,7 @@ const actions = [
 	{icon: <InstagramIcon style={{color: '#C13584'}} /> , name: 'instagram'},
 ]
 
-const ContactInfo = () => {
+const ContactInfo = ({className}) => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const dispatch = useDispatch()
 	const classes = useStyles()
@@ -257,164 +237,164 @@ const ContactInfo = () => {
   }
 
 	return (
-		<section className={classes.contactInfo} >
-			
-			<Header>
-				<IconButton onClick={() => setComp({component: 'settings', value: true})}>
-					<KeyboardBackspaceIcon />
-				</IconButton>
-				<Typography > Contact info </Typography>
-				{ showProgress &&
-					<NetworkProgress />
-				}
-			</Header>
+			<section className={[classes.contactInfo, className].join(' ')} >
+				
+				<Header>
+					<IconButton onClick={() => setComp({component: 'settings', value: true})}>
+						<KeyboardBackspaceIcon />
+					</IconButton>
+					<Typography component='h6'> Contact info </Typography>
+					{ showProgress &&
+						<NetworkProgress />
+					}
+				</Header>
 
-			{showLoader ? 
-				<> </>
-			:
-			<div className={classes.contactBody}>
-				<List className={classes.list} >
-					<ListItem button>
-						<ListItemAvatar>
-			        <Avatar>
-			          <DraftsIcon />
-			        </Avatar>
-			      </ListItemAvatar>
-			      <ListItemText primary={email.link} secondary={
-			      	<Button className={classes.privacy} onClick={() => {
-	      				changePrivacy({...email, hidden: !email.hidden})
-				      	}} >
-				      		{email.hidden ? 
-				      		<> <LockIcon />
-				      			<Typography variant='subtitle2' component='span'> Only me </Typography>
-				      		</>
-				      		:
-				      		<><PublicIcon />
-				      			<Typography variant='subtitle2' component='span' > Public </Typography>
-				      		</> }
-				      		
-				      	</Button>
-			      } />
-			     </ListItem>
+				{showLoader ? 
+					<> </>
+				:
+				<div className={classes.contactBody}>
+					<List className={classes.list} >
+						<ListItem button>
+							<ListItemAvatar>
+				        <Avatar>
+				          <DraftsIcon />
+				        </Avatar>
+				      </ListItemAvatar>
+				      <ListItemText primary={email.link} secondary={
+				      	<Button className={classes.privacy} onClick={() => {
+		      				changePrivacy({...email, hidden: !email.hidden})
+					      	}} >
+					      		{email.hidden ? 
+					      		<> <LockIcon />
+					      			<Typography variant='subtitle2' component='span'> Only me </Typography>
+					      		</>
+					      		:
+					      		<><PublicIcon />
+					      			<Typography variant='subtitle2' component='span' > Public </Typography>
+					      		</> }
+					      		
+					      	</Button>
+				      } />
+				     </ListItem>
 
-			     {
-			     	<List className={classes.socialList} subheader={
-			        <ListSubheader component="div" id="nested-list-subheader">
-			          Other social handles
-			        </ListSubheader>
-			      }>
-			      	{
-			      		socials.filter(i => i.name !== 'email').map((social, i) => {
-									const {icon} = actions.find(i => i.name === social.name)
-			      			return (
-			      				<ListItem button key={i} > 
-											<ListItemAvatar>
-									      <IconButton>
-									        {icon}
-									      </IconButton>
-									    </ListItemAvatar>
-									    <ListItemText 
-									    	primary={
-									    		<a style={{textDecoration: 'underline'}} 
-									    			target='_blank' rel='noreferrer' href={social.link}> {social.link.replace('https://', '')} </a>
-									    	}
-									    	secondary={
-									      	<Button className={classes.privacy} onClick={() => {
-									      		changePrivacy({...social, hidden: !social.hidden})
-									      	}} >
-									      		{social.hidden ? 
-									      		<> <LockIcon />
-									      			<Typography variant='subtitle2' component='span'> Only me </Typography>
-									      		</> 
-									      		:
-									      		<><PublicIcon />
-									      			<Typography variant='subtitle2' component='span' > Public </Typography>
-									      		</>}
-									      		
-									      	</Button>
-									    	} 
+				     {
+				     	<List className={classes.socialList} subheader={
+				        <ListSubheader component="div" id="nested-list-subheader">
+				          Other social handles
+				        </ListSubheader>
+				      }>
+				      	{
+				      		socials.filter(i => i.name !== 'email').map((social, i) => {
+										const {icon} = actions.find(i => i.name === social.name)
+				      			return (
+				      				<ListItem button key={i} > 
+												<ListItemAvatar>
+										      <IconButton>
+										        {icon}
+										      </IconButton>
+										    </ListItemAvatar>
+										    <ListItemText 
+										    	primary={
+										    		<a style={{textDecoration: 'underline'}} 
+										    			target='_blank' rel='noreferrer' href={social.link}> {social.link.replace('https://', '')} </a>
+										    	}
+										    	secondary={
+										      	<Button className={classes.privacy} onClick={() => {
+										      		changePrivacy({...social, hidden: !social.hidden})
+										      	}} >
+										      		{social.hidden ? 
+										      		<> <LockIcon />
+										      			<Typography variant='subtitle2' component='span'> Only me </Typography>
+										      		</> 
+										      		:
+										      		<><PublicIcon />
+										      			<Typography variant='subtitle2' component='span' > Public </Typography>
+										      		</>}
+										      		
+										      	</Button>
+										    	} 
 
-									    />
-									    	<ListItemSecondaryAction>
-									    	<IconButton onClick={() => addSocial({name: social.name, icon})}>
-									    		<EditIcon />
-									    	</IconButton>
-									  		<IconButton onClick={() => deleteSocial(social)} >
-									    		<DeleteIcon />
-									    	</IconButton>
-										  </ListItemSecondaryAction>
-									  </ListItem>
-		 							)
-			      		})
-			      	}
-			     	</List>
-			     }
+										    />
+										    	<ListItemSecondaryAction>
+										    	<IconButton onClick={() => addSocial({name: social.name, icon})}>
+										    		<EditIcon />
+										    	</IconButton>
+										  		<IconButton onClick={() => deleteSocial(social)} >
+										    		<DeleteIcon />
+										    	</IconButton>
+											  </ListItemSecondaryAction>
+										  </ListItem>
+			 							)
+				      		})
+				      	}
+				     	</List>
+				     }
 
-			     {newSocial.open &&
-			     	<Fade in={newSocial.open}>
-				     	<ListItem>
-					      <ListItemAvatar>
-					        {newSocial.icon}
-					      </ListItemAvatar>
-					      <TextField
-					      	className={classes.addLinkInput}
-							  	placeholder={`Enter a link`}
-							  	onChange={handleInput}
-									error={error.error}
-									helperText={error.helperText}
-							  	value={newSocial.social.link}
-							  />
-							  <InputAdornment position="end" style={{height: '100%'}}>
-									<IconButton onClick={updateSocial} >
-					      		<CheckIcon style={{color: '#645faf'}} />
-					      	</IconButton>
-								</InputAdornment>
-					    </ListItem>
-					   </Fade>
-			     }
+				     {newSocial.open &&
+				     	<Fade in={newSocial.open}>
+					     	<ListItem>
+						      <ListItemAvatar>
+						        {newSocial.icon}
+						      </ListItemAvatar>
+						      <TextField
+						      	className={classes.addLinkInput}
+								  	placeholder={`Enter a link`}
+								  	onChange={handleInput}
+										error={error.error}
+										helperText={error.helperText}
+								  	value={newSocial.social.link}
+								  />
+								  <InputAdornment position="end" style={{height: '100%'}}>
+										<IconButton onClick={updateSocial} >
+						      		<CheckIcon style={{color: '#645faf'}} />
+						      	</IconButton>
+									</InputAdornment>
+						    </ListItem>
+						   </Fade>
+				     }
 
-				</List>
+					</List>
 
-				<Snackbar 
-					className={classes.bottomSnackbar}
-					anchorOrigin={{
-						vertical: 'bottom',
-						horizontal: 'center',
-					}}
-					autoHideDuration={2000} 
-					message={openAlert.message}
-					open={openAlert.show}
-					onClose={closeAlert}
-				>
-				<MuiAlert variant='filled' elevation={6} onClose={closeAlert} severity="success">
-			    {openAlert.message}
-			  </MuiAlert>
-			</Snackbar>
+					<Snackbar 
+						className={classes.bottomSnackbar}
+						anchorOrigin={{
+							vertical: 'bottom',
+							horizontal: 'center',
+						}}
+						autoHideDuration={2000} 
+						message={openAlert.message}
+						open={openAlert.show}
+						onClose={closeAlert}
+					>
+					<MuiAlert variant='filled' elevation={6} onClose={closeAlert} severity="success">
+				    {openAlert.message}
+				  </MuiAlert>
+				</Snackbar>
 
-				<SpeedDial
-	        ariaLabel="SpeedDial openIcon"
-	        className={classes.speedDial}
-	        icon={<SpeedDialIcon openIcon={<EditIcon />} />}
-	        onClose={handleClose}
-	        onOpen={handleOpen}
-	        open={open}
-	      >
-	        {actions.map((action, i) => (
-	          <SpeedDialAction
-	          	key={i}
-	          	style={{...action.style, color: '#000'}}
-	            key={action.name}
-	            icon={action.icon}
-	            tooltipTitle={action.name}
-	            onClick={() => {
-	            	handleClose()
-	            	addSocial(action)
-	            }}
-	          />
-	        ))}
-	      </SpeedDial>
-			</div>}
-		</section>
+					<SpeedDial
+		        ariaLabel="SpeedDial openIcon"
+		        className={classes.speedDial}
+		        icon={<SpeedDialIcon openIcon={<EditIcon />} />}
+		        onClose={handleClose}
+		        onOpen={handleOpen}
+		        open={open}
+		      >
+		        {actions.map((action, i) => (
+		          <SpeedDialAction
+		          	key={i}
+		          	style={{...action.style, color: '#000'}}
+		            key={action.name}
+		            icon={action.icon}
+		            tooltipTitle={action.name}
+		            onClick={() => {
+		            	handleClose()
+		            	addSocial(action)
+		            }}
+		          />
+		        ))}
+		      </SpeedDial>
+				</div>}
+			</section>
 	)
 }
 

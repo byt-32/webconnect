@@ -1,5 +1,4 @@
 import React from 'react'
-import styles from '../../../stylesheet/main.module.css'
 import IconButton from '@material-ui/core/IconButton'
 import { useSelector, useDispatch } from 'react-redux'
 
@@ -41,7 +40,8 @@ import Preloader from '../../Preloader'
 import { socket } from '../Main'
 import { assert, getLastSeen } from '../../../lib/script'
 
-import Header from './Header'
+import { TransitionGroup, CSSTransition } from 'react-transition-group'
+import Header from '../Header'
 
 const useStyles = makeStyles({
 	add: {
@@ -140,21 +140,23 @@ const UserList = ({user, style, secondaryItems}) => {
 	const fetchedUsers = useSelector(state => state.other.fetched)
 
 	const handleClick = () => {
-
+		if (window.innerWidth < 660 ) {
+			dispatch(setComponents({component: 'leftPane', value: false}))
+		}
 		if (selectedUser.username !== user.username) {
-				
+			
 			if (assert(user.unread)) {
 				dispatch(resetUnread(user.username))
 				socket.emit('chatIsRead', user.username, username)
 			}
 			if (assert(fetchedUsers.find(i => i === user.username))) {
-				dispatch(setSelectedUser(user))
+				dispatch(setSelectedUser({username: user.username}))
 			} else {
 				dispatch(assertFetch(user.username))
 				dispatch(
 					fetchMessages({friendsName: user.username, token: id})
 				).then(() => {
-					dispatch(setSelectedUser(user))
+					dispatch(setSelectedUser({username: user.username}))
 				})
 			}
 			
@@ -174,7 +176,7 @@ const UserList = ({user, style, secondaryItems}) => {
 			    </ListItemIcon>
 	      	<ListItemText 
 	      		primary={
-	      			<Typography component='p'> {user.username}</Typography>
+	      			<Typography component='h6'> {user.username}</Typography>
 	      		} 
 	      		secondary={
 	      			user.typing ?
@@ -207,7 +209,9 @@ const UserList = ({user, style, secondaryItems}) => {
 	)
 }
 
-const RecentChats = () => {
+const RecentChats = ({className}) => {
+	const showRecentChats = useSelector(state => state.components.stack.recentChats)
+
 	const { useEffect } = React
 	const classes = useStyles()
 	const dispatch = useDispatch()
@@ -231,56 +235,55 @@ const RecentChats = () => {
 		dispatch(handleSearch({input: searchVal, component: 'recentChats'}))
 	}
 	return (
-		<>
-			<Header>
-				<IconButton onClick={toggleMenu} style={{background: open && '#0000000a'}} >
-					<MenuIcon />
-				</IconButton>
-				<Menu 
-					open={open} 
-				  transformOrigin={{
-				    vertical: 'top',
-				    horizontal: 'left',
-				  }}
-					onClose={handleClose} 
-					anchorEl={anchorEl} 
-					className={classes.menu} 
-				>
-					<MenuItem onClick={() => { 
-						handleClose()
-						setComp({component: 'settings', value: true})
-					}} >
-						<AccountCircleRoundedIcon />
-						<Typography variant='inherit'> Profile </Typography>
-					</MenuItem>
-					<MenuItem onClick={() => { 
-						handleClose()
-						setComp({component: 'activeUsers', value: true})
-					}} >
-						<PeopleAltRoundedIcon />
-						<Typography variant='inherit'> Network </Typography>
-					</MenuItem>
-						
-				</Menu>
-				<InputBase
-					className={classes.searchbar}
-		      placeholder='@user'
-		      type="text"
-		    />
+			<section className={[classes.recentChats, className].join(' ')}>
+				<Header>
+					<IconButton onClick={toggleMenu} style={{background: open && '#0000000a'}} >
+						<MenuIcon />
+					</IconButton>
+					<Menu 
+						open={open} 
+					  transformOrigin={{
+					    vertical: 'top',
+					    horizontal: 'left',
+					  }}
+						onClose={handleClose} 
+						anchorEl={anchorEl} 
+						className={classes.menu} 
+					>
+						<MenuItem onClick={() => { 
+							handleClose()
+							setComp({component: 'settings', value: true})
+						}} >
+							<AccountCircleRoundedIcon />
+							<Typography variant='inherit'> Profile </Typography>
+						</MenuItem>
+						<MenuItem onClick={() => { 
+							handleClose()
+							setComp({component: 'activeUsers', value: true})
+						}} >
+							<PeopleAltRoundedIcon />
+							<Typography variant='inherit'> Network </Typography>
+						</MenuItem>
+							
+					</Menu>
+					<InputBase
+						className={classes.searchbar}
+			      placeholder='@user'
+			      type="text"
+			    />
 
-			</Header>
-			<div className={classes.userslist}>
-				{
-					showLoader ? <Preloader /> : 
-					recentChats.map((user, i) => {
-						return (
-							<UserList user={user} key={i} />
-						)
-					})
-				}
-			</div>
-			
-		</>
+				</Header>
+				<div className={classes.userslist}>
+					{
+						showLoader ? <Preloader /> : 
+						recentChats.map((user, i) => {
+							return (
+								<UserList user={user} key={i} />
+							)
+						})
+					}
+				</div>
+			</section>
 
 	)
 }

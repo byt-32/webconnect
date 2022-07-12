@@ -5,6 +5,15 @@ html, body, div, button, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p
 	vertical-align: baseline;
 	background: transparent;
 }
+:root {
+ --animate_duration: .5s;
+  --animate_delay: 1s;
+  --animate_repeat: 1;
+  --mainpane_width: 100%;
+  --basic_color: cornflowerblue;
+  --default_fontsize: 99.5% !important;
+}
+
 @font-face {
 	font-family: Quicksand;
 	src: url('../../../../public/fonts/Quicksand/Quicksand-Regular.ttf');
@@ -41,35 +50,16 @@ body {
 	/*background: #d5d5d5;*/
 }
 
-@-webkit-keyframes slideGradient {
-	0% {
-		left: 0;
-	}
-	
-	100% {
-		left: 100%;
-	}
+
+.animate__animated {
+  -webkit-animation-duration: .5s;
+  animation-duration: .5s;
+  -webkit-animation-duration: var(--animate_duration);
+  animation-duration: var(--animate_duration);
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both
 }
 
-@-webkit-keyframes fadeIn {
-    0% {
-        opacity: 0
-    }
-
-    to {
-        opacity: 1
-    }
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0
-    }
-
-    to {
-        opacity: 1
-    }
-}
 @-webkit-keyframes headShake {
     0% {
         -webkit-transform: translateX(0);
@@ -143,14 +133,6 @@ body {
     animation-duration: 1s !important;
 }
 
-.animate__animated {
-  -webkit-animation-duration: .5s;
-  animation-duration: .5s;
-  -webkit-animation-duration: var(--animate-duration);
-  animation-duration: var(--animate-duration);
-  -webkit-animation-fill-mode: both;
-  animation-fill-mode: both
-}
 @-webkit-keyframes fadeInRight {
   from {
     opacity: 0;
@@ -229,12 +211,4 @@ a:hover {
 }
 h1, h2, h3, h4, h5, h6 {
   font-weight: bold !important;
-}
-:root {
- --animate-duration: .5s;
-  --animate-delay: 1s;
-  --animate-repeat: 1;
-	--mainpane_width: 100%;
-	--basic_color: cornflowerblue;
-	--default_fontsize: 99.5% !important;
 }

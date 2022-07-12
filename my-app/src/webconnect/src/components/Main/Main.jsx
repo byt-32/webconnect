@@ -8,8 +8,11 @@ import grey from '@material-ui/core/colors/grey';
 import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, 
 	handleUserTypingActivity, updateRecentChats, syncRecentsWithDeleted, syncRecentsWithRead} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
+
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
+
 import { storeReceivedChat, setChatRead, handleStarredChat, performChatDelete } from '../../Redux/features/chatSlice'
+
 import { setDisconnectedUsers, setOnlineUsers } from '../../Redux/features/otherSlice'
 
 import { assert } from '../../lib/script'
@@ -34,6 +37,7 @@ const Main = () => {
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
+	const {leftPane} = useSelector(state => state.components)
 	const { useEffect } = React
 
 	useEffect(() => {
@@ -103,7 +107,7 @@ const Main = () => {
 
 	return (
 		<section className={classes.main} >
-			<LeftPane />
+			{leftPane && <LeftPane />}
 			<Outlet />
 		</section>
 	)

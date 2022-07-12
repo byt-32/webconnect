@@ -9,6 +9,29 @@ export const getWindowHeight = () => {
 	return height
 }
 
+export async function handleFetch(url, method, body, callback) {
+	if (method.toLowerCase() === 'get') {
+
+		const res = fetch(url)
+		return res.json()
+
+	} else {
+
+		fetch(url, {
+			method: method,
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(body)
+		})
+		.then(res => res.json())
+		.then(res => {
+			callback(res)
+		})
+	}
+}
+
+
 function type(val) {
 	return typeof val
 }

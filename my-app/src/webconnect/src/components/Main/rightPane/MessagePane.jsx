@@ -23,10 +23,11 @@ import SendIcon from '@material-ui/icons/Send';
 import TagFacesIcon from '@material-ui/icons/TagFaces';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import VideoCallIcon from '@material-ui/icons/VideoCall';
-import AddIcCall from '@material-ui/icons/AddIcCall';
+import PhoneIcon from '@material-ui/icons/Phone';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
 import CloseIcon from '@material-ui/icons/Close';
 import StarsIcon from '@material-ui/icons/Stars';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 
 import common from '@material-ui/core/colors/common';
@@ -34,6 +35,7 @@ import common from '@material-ui/core/colors/common';
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
 import blue from '@material-ui/core/colors/blue';
+import { Link } from 'react-router-dom'
 
 import { useDispatch,useSelector } from 'react-redux'
 import {  storeSentChat, 
@@ -42,15 +44,21 @@ import {  storeSentChat,
 	performChatDelete, 
 	setPendingDelete,
 	undoPendingDelete,
-	setHighlighted
+	setHighlighted,
+	fetchUserProfile,
+	setProfile
 } from '../../../Redux/features/chatSlice'
-import { setTypingStatus } from '../../../Redux/features/otherSlice'
+
+import { setTypingStatus, setSelectedUser } from '../../../Redux/features/otherSlice'
 import {updateRecentChats, syncRecentsWithDeleted} from '../../../Redux/features/recentChatsSlice'
+
+import { setComponents} from '../../../Redux/features/componentSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
-import { getWindowHeight, assert, getLastSeen } from '../../../lib/script'
+import { getWindowHeight, assert, getLastSeen, handleFetch } from '../../../lib/script'
 
+import Profile from './Profile'
 import { socket } from '../Main'
 
 
@@ -65,29 +73,42 @@ const useStyles = makeStyles({
 		right: '10px',
 		bottom: '50px'
 	},
-	messagesChats: {
-
+	messagesPane: {
+		width: '100%',
+		position: 'relative'
 	},
 	card: {
 		boxShadow: 'none',
 		height: '100%',
+		width: '100%',
 		background: 'transparent',
 		flexDirection: 'column',
 		'& .MuiCardHeader-root': {
 			background: common.white,
-    	boxShadow: '-3px 1px 1px 0px #cbcbcb',
+    	boxShadow: '-1px 1px 1px 0px #cbcbcb',
+			marginLeft: 5,
 			height: '3.7rem',
 			padding: '0 16px',
+			position: 'relative',
 			'& .MuiCardHeader-title': {
 				fontWeight: 'bold'
-			}
+			},
+			['@media (max-width: 660px)']: {
+				// width: '100%'
+				padding: '0 16px 0 39px'
+			},
 		},
 		'& .MuiCardHeader-action': {
-			alignSelf: 'center'
+			alignSelf: 'center',
+			marginTop: 0,
+			['@media (max-width: 687px)']: {
+				marginLeft: 0,
+				display: 'none'
+			},
 		},
 		'& .MuiCardContent-root': {
 			background: grey[200],
-			padding: 8 ,
+			padding: 0,
 			overflowY: 'scroll',
 			position: 'relative'
 		},
@@ -103,20 +124,34 @@ const useStyles = makeStyles({
 		'& .MuiInputBase-inputMultiline': {
 			maxHeight: 70,
 			overflowY: 'scroll !important'
-		}
+		},
+
+	},
+	backBtn: {
+		position: 'absolute',
+		top: '0.25rem',
+		left: '-.5rem',
+		display: 'none',
+		['@media (max-width: 660px)']: {
+			display: 'block'
+		},
 	},
 	contents: {
 		width: '80%',
-		margin: '0 auto'
+		margin: '0 auto',
+		['@media (max-width: 900px)']: {
+			width: '97%'
+		},
 	},
 	replyHandel: {
 		display: 'flex',
 		justifyContent: 'space-between',
-		position: 'absolute',
-		bottom: '100%',
+		position: 'sticky',
+		bottom: 0,
 		boxShadow: '0px 3px 6px 0px #00000012',
 		background: '#fdfdfd',
 		width: '100%',
+		zIndex: 40,
 		left: 0,
 		borderRadius: '10px 10px 0 0'
 	},
@@ -187,10 +222,11 @@ const MessagesPane = ({friend}) => {
 	const classes = useStyles()
 
 	const dispatch = useDispatch()
-	const {username} = JSON.parse(localStorage.getItem('details'))
+	const {username, id} = JSON.parse(localStorage.getItem('details'))
 	const friendInUsers = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username))
 
 	const online = friendInUsers !== undefined ? friendInUsers.online : false
+	const profile = useSelector(state => state.components.profile)
 	// console.log(online)
 
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
@@ -202,7 +238,7 @@ const MessagesPane = ({friend}) => {
 	const inputRef = React.createRef(null)
 	const [timerToDelete, setDeleteTimer] = React.useState(null)
 
-	const {pendingDelete, starredChat, reply} = friend.actionValues
+	const {pendingDelete, starredChat, reply, showProfile} = friend.actionValues
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	// const [input, setInput] = React.useState('')
 	const [showPicker, setPicker] = React.useState(false)
@@ -263,10 +299,6 @@ const MessagesPane = ({friend}) => {
 		}
 	}, [reply])
 
-	React.useEffect(() => {
-		const textarea = inputRef.current.querySelector('textarea')
-		textarea.focus()
-	}, [])
 
 	const undoDelete = () => {
 		dispatch(undoPendingDelete({friendsName: friend.username}))
@@ -378,24 +410,58 @@ const MessagesPane = ({friend}) => {
 		setHighlightTimer(newTimer)
 	}
 
+	const handleComponent = (componentObj) => {
+		dispatch(setSelectedUser({}))
+		if (window.innerWidth < 660) {
+			dispatch(setComponents({component: 'leftPane', value: true}))
+		}
+	}
+	const showMoreOptions = () => {
+
+	}
+	const showProfilePage = () => {
+		if (!assert(friend.profile)) {
+			dispatch(fetchUserProfile({id, username: friend.username})).then(() => {
+				dispatch(setProfile({friendsName: friend.username, open: true}))
+			})
+		} else if (!showProfile) {
+			dispatch(setProfile({friendsName: friend.username, open: true}))
+		}
+	}
+
 	return (
-		<Card className={classes.card} style={{
+		<div className={classes.messagesPane} style={{
 			display: selectedUser.username === friend.username ? 'flex' : 'none'
 		}} >
+		<Card className={classes.card} >
+			
 			<CardHeader
         avatar={
-          <UserAvatar 
-			      username={friend.username} 
-			      badge={false}
-			      style={{fontSize: '1.1rem'}}
-			    />
+          <div onClick={showProfilePage}>
+          	<Link to='/'>
+					    <IconButton className={classes.backBtn} onClick={() => handleComponent()} >
+								<ArrowBackIcon style={{color: '#959494'}} />
+							</IconButton>
+						</Link>
+	          <UserAvatar 
+				      username={friend.username} 
+				      badge={false}
+				      style={{fontSize: '1.1rem'}}
+				    />
+				   </div>
         }
+        title={<span onClick={showProfilePage}> {friend.username} </span>}
         action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
-          </IconButton>
+        	<>
+
+	          <IconButton aria-label="settings" onClick={showMoreOptions}>
+	            <PhoneIcon style={{color: '#676d78'}} />
+	          </IconButton>
+	          <IconButton aria-label="settings" onClick={showMoreOptions}>
+	            <VideoCallIcon style={{color: '#676d78'}} />
+	          </IconButton>
+	        </>
         }
-        title={friend.username}
         subheader={
         	friendIsTyping ? <span style={{color: '#6495ed'}} > {'typing...'} </span>
         	: secondaryText
@@ -405,10 +471,10 @@ const MessagesPane = ({friend}) => {
       	ref={cardContentRef}
       	className={classes.contents} 
 	      style={{
-	      	height: `${getWindowHeight()  - 110}px`
+	      	height: `${getWindowHeight()  - 135}px`
 	      }}
       >
-	    	{	assert(starredChat) && accountIsOnline &&
+	    	{	assert(starredChat) &&
 	    		<Slide in={assert(starredChat)}>
 	    			<Card className={classes.starred} ref={starredChatRef}>
 	    				<CardHeader
@@ -429,6 +495,8 @@ const MessagesPane = ({friend}) => {
 	    	}
 
         <ChatMessages chats={friend.messages} pendingDelete />
+
+        
 
         <Snackbar open={networkError}
         	className={classes.bottomSnackbar}
@@ -458,7 +526,7 @@ const MessagesPane = ({friend}) => {
       
       <CardActions className={classes.contents} >
 
-      	<Slide in={reply.open} direction='up' >
+      	{reply.open &&
 	      	<div className={classes.replyHandel}
 	      	 >
 	      		<div className={classes.replyProps}
@@ -470,11 +538,10 @@ const MessagesPane = ({friend}) => {
 	      			<span> {reply.message} </span>
 	      		</div>
 	      		<div >
-	      			<CloseIcon onClick={closeReplyHandle} style={{fontSize: '1.2rem', color: '#c55044', margin: 3,}} />
+	      			<CloseIcon onClick={closeReplyHandle} style={{fontSize: '1.2rem', color: '#c55044', margin: 7,}} />
 	      		</div>
 	      	</div>
-	      </Slide>
-
+	      }
       	<InputBase 
       		multiline
       		placeholder='Type your messages'
@@ -494,6 +561,8 @@ const MessagesPane = ({friend}) => {
     	</CardActions>
 
 		</Card>
+			{showProfile && <Profile profile={friend.profile} open={showProfile} />}
+		</div>
 	)
 }
 

@@ -5,189 +5,141 @@ import UserAvatar from '../UserAvatar'
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import { makeStyles } from '@material-ui/core/styles';
+
 import CallIcon from '@material-ui/icons/Call'
 import VideocamIcon from '@material-ui/icons/Videocam'
 import InfoIcon from '@material-ui/icons/Info'
 import EmailIcon from '@material-ui/icons/Email'
+import TwitterIcon from '@material-ui/icons/Twitter'
+import FacebookIcon from '@material-ui/icons/Facebook'
+import InstagramIcon from '@material-ui/icons/Instagram'
 import LocalPhoneIcon from '@material-ui/icons/LocalPhone'
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft'
+
 import IconButton from '@material-ui/core/IconButton';
-import { setComponents, storeProfileInfos } from '../../../Redux/globalPropsSlice'
-import Loader from './Loader'
+import Typography from '@material-ui/core/Typography';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+
+import Backdrop from '@material-ui/core/Backdrop';
+
+import PersonPinIcon from '@material-ui/icons/PersonPin';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+
+import { ReactTransitionGroup } from 'react-transition-group'
+
+import { setProfile } from '../../../Redux/features/chatSlice'
+import { setComponents} from '../../../Redux/features/componentSlice'
+
+import Header from '../Header'
+import { getWindowHeight } from '../../../lib/script'
 
 const useStyles = makeStyles({
-	app: {
-		background: '#fffffff7',
-		backdropFilter: 'blur(4px)',
-		boxShadow: 'none',
-		position: 'sticky',
-		top: 0,
-		borderBottom: '1px solid #d1d1d1',
-		fontSize: '90%',
-		padding: '11px 0'
+	profilePage: {
+		background: '#fff',
+		width: 350,
+		minWidth: 300,
+		height: '100%',
+		position: 'absolute',
+		right: 0,
+		zIndex: 200,
+		height: '100%'
 	},
-	toolbar:{
-		justifyContent: 'space-between',
-		minHeight: 'auto',
-		paddingLeft: '0',
-		paddingRight: '10px'
+	body: {
+		padding: '36px 20px 0 20px',
+		textAlign: 'center'
 	},
-	headerItem: {
+	banner: {
 		display: 'flex',
-		alignItems: 'center',
-		'& button': {
-			marginLeft: '10px',
+		justifyContent: 'center'
+	},
+	profileContacts: {
+		marginTop: '.8rem',
+		'& .MuiTypography-body1:first-child': {
+			fontSize: '1.2rem',
+			marginBottom: '.2rem'
+		}
+	},
+	socials: {
+		marginTop: '.6rem',
+		'& a:first-child': {
+			marginRight: '.7rem',
 			'& svg': {
-				color: '#000'
+				fontSize: '1.6rem'
 			}
 		}
 	},
-	avatar: {
-		fontSize: '205% !important',
-		padding: '20% !important',
-		margin: '0 auto'
-	},
-	profileInfo: {
-		marginTop: '6%',
+	backdrop: {
 		width: '100%',
-		padding: '0 10px'
+		height: '100%',
+		position:'absolute',
+		zIndex: 190
 	},
-	info: {
-		fontSize: '17.9px',
-    // borderBottom: '1px solid #eee',
-		marginBottom: '15px'
-	},
-	infoHeader: {
-		fontSize: '13px',
-		fontWeight: 'normal',
-		paddingBottom: '3px',
-		marginBottom: '5px',
-		paddingRight: '20px',
-		width: 'max-content'
-	},
-	infoItems: {
-		fontSize: '17px',
-    marginBottom: '15px',
-    width: 'fit-content',
-    paddingBottom: '8px',
-    marginLeft: '8px'
-		// fontWeight: 'bold'
-	},
-	profileBanner: {
-		width: '100%'
-	},
-	contacts: {
-		display: 'flex',
-		alignItems: 'center',
-		'& svg': {
-			marginRight: '10px',
-			fontSize: '20px'
-		}
-	},
-	appBody: {
-		overflow: 'scroll'
-	}
 })
 
-const Profile = () => {
+const actions = [
+	{icon: <TwitterIcon style={{color: '#1DA1F2'}} /> , name: 'twitter'},
+	{icon: <FacebookIcon style={{color: '#4267B2'}} /> , name: 'facebook'},
+	{icon: <InstagramIcon style={{color: '#C13584'}} /> , name: 'instagram'},
+	{icon: <EmailIcon /> , name: 'email'},
+]
+
+
+const Profile = ({profile, open}) => {
 	const dispatch = useDispatch()
-	const showThis = useSelector(state => state.globalProps.components.profile)
-	const id = useSelector(state => state.globalProps.user.contacts.id)
-	const selectedUser = useSelector(state => state.globalProps.currentSelectedUser)
-	const profileInfos = useSelector(state => state.globalProps.profileInfos)
-	const [info, setInfo] = React.useState({
-		bio: '', gmail: '', username:''
-	})
-	const [display, setDisplay] = React.useState(false)
 	const classes = useStyles()
-	const fetchProfileInfo = () => {
-		fetch(`/getUserSettings/${selectedUser.username}/${id}`)
-		.then(res => res.json())
-		.then(res => {
-			dispatch(storeProfileInfos([res]))
-			setInfo({...info, ...res})
-			setDisplay(true)
-		})
-	}
-	React.useEffect(() => {
-		if (profileInfos.length === 0) {
-			fetchProfileInfo()
-		} else {
-			const find = profileInfos.find(user => user.username === selectedUser.username)
-			if (find !== undefined) {
-				setInfo({...info, ...find})
-				setDisplay(true)
-			} else {
-				fetchProfileInfo()
-			}
-		}
-		
-	}, [])
+	console.log(open)
+	const {id} = JSON.parse(localStorage.getItem('details'))
+
 	const setComp = (obj) => {
-		dispatch(setComponents(obj))
+		dispatch(setProfile({friendsName: profile.username, open: false}))
 	}
-	const [height, setHeight] = React.useState(`${window.innerHeight - 40}px`)
-  window.onresize = () => {
-  	setHeight(`${window.innerHeight - 40}px`)
-  }
+
   const handleCall = () => {
 
   }
 	return (
-		<section className={[styles.component, styles.profilePage, styles.animate__animated, styles.animate__fadeInRight].join(' ')}>
-			<AppBar position='static' className={classes.app} >
-				<Toolbar className={classes.toolbar} >
-					<div className={classes.headerItem}>
-						<IconButton onClick={() => setComp({component: 'profile', value: false})} >
-							<KeyboardArrowLeftIcon />
-						</IconButton>
-					</div>
-					<div className={classes.headerItem}>
-						{/*<IconButton onClick={handleCall} >
-							<CallIcon />
-						</IconButton>
-						<IconButton>
-							<VideocamIcon />
-						</IconButton>*/}
-					</div>
-				</Toolbar>
-			</AppBar>
-			{!display ? <Loader customStyle={[classes.loader, styles.loader].join(' ')} /> :
-				<div className={[styles.profile, styles.appBody].join(' ')} style={{
-					height: height
-				}} >
-					<div className={classes.profileBanner}>
-						<UserAvatar 
-							color={selectedUser.color}
-							name={selectedUser.username} 
-							className={classes.avatar} 
-						/>
-					</div>
-					<div className={[classes.profileInfo, styles.profileInfo].join(' ')}>
-						<div className={classes.info}>
-							<div className={classes.infoHeader}> Name </div>
-						 	<div className={classes.infoItems}> {selectedUser.username}  </div>
-						</div>
+		<><div className={classes.backdrop} onClick={setComp} > </div>
+		<section className={[classes.profilePage, styles.animate__animated, styles.animate__fadeInRight].join(' ')} 
+			style={{height: `${getWindowHeight()}px`}}
+		>
+			<Header>
+				<IconButton onClick={() => setComp({component: 'profile', value: false})} >
+					<KeyboardArrowLeftIcon />
+				</IconButton>
+				<Typography component='h6'>  </Typography>
+			</Header>
 
-						{info.bio !== '' && <div className={classes.info}>
-							<div className={classes.infoHeader}> Bio </div>
-							<div className={classes.infoItems}>
-								{info.bio} 
-							</div>
-						</div>}
-						{info.gmail !== '' && <div className={classes.info}>
-							<div className={classes.infoHeader}> Contact </div>
-							<div className={classes.infoItems}>
-								<div className={classes.contacts}>
-									<EmailIcon className={classes.contactIcon} />
-									{info.gmail} 
-								</div>
-							</div>
-						</div>}
-					</div>
-				</div>
-			}
-		</section>
+			<div className={classes.body}>
+				<div className={classes.banner}>
+					<UserAvatar username={profile.username} style={{
+		        	width: 200, height: 200, fontSize: '4rem'
+		        }} badge={false} />
+		    </div>
+
+		    <div className={classes.profileContacts}>
+		    	<Typography> {profile.username}</Typography>
+		      {profile.bio !== '' &&
+			      <Typography> {profile.bio} </Typography>
+			    }
+
+		    </div>
+		    <div className={classes.socials}>
+		    	{
+		    		profile.socials.map((social, i) => {
+		    			const find = actions.find(action => action.name === social.name)
+		    			return (
+		    				find !== undefined &&
+			    				<a href={social.link} rel='noreferrer' target='_blank'>
+			    					{find.icon}
+			    				</a>	
+		    			)
+		    		})
+		    	}
+		    </div>
+			</div>
+		</section></>
 	)
 }
 

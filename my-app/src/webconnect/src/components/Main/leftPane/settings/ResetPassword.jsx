@@ -19,11 +19,12 @@ import Snackbar from '@material-ui/core/Snackbar'
 import RepeatIcon from '@material-ui/icons/Repeat';
 
 import { Preloader, ThreeDots } from 'react-preloader-icon'
+import {CSSTransition } from 'react-transition-group'
 
 import { setComponents } from '../../../../Redux/features/componentSlice'
 import { useDispatch, useSelector } from 'react-redux'
 
-import Header from '../Header'
+import Header from '../../Header'
 import NetworkProgress from './NetworkProgress'
 
 const useStyles = makeStyles({
@@ -64,7 +65,7 @@ const useStyles = makeStyles({
 	
 })
 
-const ResetPassword = () => {
+const ResetPassword = ({className}) => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const dispatch = useDispatch()
 	const classes = useStyles()
@@ -164,112 +165,112 @@ const ResetPassword = () => {
 	}
  
 	return (
-		<div className={classes.resetPassword} >
-	  	<Header>
-				<IconButton onClick={() => setComp({component: 'settings', value: true})}>
-					<KeyboardBackspaceIcon />
-				</IconButton>
-				<Typography > Reset Password </Typography>
-				{ passwordUpdate &&
-					<NetworkProgress />
-				}
-			</Header>
-			<div className={classes.body}>
-				<form onSubmit={performReset} className={classes.form} >
-					<TextField 
-						variant='outlined'
-						onChange={e => setValue(e.target.value, 'former')} 
-						className={classes.input}
-						value={values.former} 
-						placeholder='Former password' type='password'
-						required
-						error={error.former}
-					  type={showPassword.former ? 'text' : 'password'}
-						helperText={help.former}
-						autoComplete='current-password'
-						InputProps={{
-							startAdornment: <InputAdornment position='start'>
-				    		<SecurityIcon color='secondary' />
-				    	</InputAdornment>,
-				    	endAdornment: <InputAdornment position='end' >
-				    		<IconButton color='secondary' aria-label='Toggle password visibility' 
-				    			onClick={() => setPasswordVisibility('former')}>
-				    			{showPassword.former ? <Visibility /> : <VisibilityOff />}
-				    		</IconButton>
-				    	</InputAdornment>
-				    }}
-					/>
-					<TextField variant='outlined' 
-						className={classes.input}
-						onChange={e => setValue(e.target.value, '_new')} 
-						value={values._new} 
-						placeholder='New password' type='password'
-						required
-						autoComplete='new-password'
-						error={error._new}
-					  type={showPassword._new ? 'text' : 'password'}
-						InputProps={{
-							startAdornment: <InputAdornment position='start'>
-				    		<LockSharpIcon color='secondary' />
-				    	</InputAdornment>,
-				    	endAdornment: <InputAdornment position='end' >
-				    		<IconButton color='secondary' aria-label='Toggle password visibility' 
-				    			onClick={() => setPasswordVisibility('_new')}>
-				    			{showPassword._new ? <Visibility /> : <VisibilityOff />}
-				    		</IconButton>
-				    	</InputAdornment>
-				    }}
-					/>
-					<TextField variant='outlined' 
-						className={classes.input} 
-						onChange={e => setValue(e.target.value, 'confirm')} value={values.confirm} 
-						placeholder='Confirm password' type='password'
-						required
-						autoComplete='new-password'
-						error={error.confirm}
-						helperText={help.confirm}
-					  type={showPassword.confirm ? 'text' : 'password'}
-						InputProps={{
-							startAdornment: <InputAdornment position='start'>
-				    		<RepeatIcon color='secondary' />
-				    	</InputAdornment>,
-				    	endAdornment: <InputAdornment position='end' >
-				    		<IconButton color='secondary' aria-label='Toggle password visibility' 
-				    			onClick={() => setPasswordVisibility('confirm')}>
-				    			{showPassword.confirm ? <Visibility /> : <VisibilityOff />}
-				    		</IconButton>
-				    	</InputAdornment>
-				    }}
-					/>
-					<ButtonGroup>
-						<Button 
-							variant='contained' 
-							disabled={passwordUpdate}
-							type='submit'
-							color='primary'
-						> 
-							Update password
-						</Button>
-						<Button 
-							onClick={() => {
-								setComp({component: 'settings', value: true})
-							}}
-							color='primary'
-							variant='contained' 
-							type='button'
+			<section className={[classes.resetPassword, className].join(' ')} >
+		  	<Header>
+					<IconButton onClick={() => setComp({component: 'settings', value: true})}>
+						<KeyboardBackspaceIcon />
+					</IconButton>
+					<Typography component='h6' > Reset Password </Typography>
+					{ passwordUpdate &&
+						<NetworkProgress />
+					}
+				</Header>
+				<div className={classes.body}>
+					<form onSubmit={performReset} className={classes.form} >
+						<TextField 
+							variant='outlined'
+							onChange={e => setValue(e.target.value, 'former')} 
+							className={classes.input}
+							value={values.former} 
+							placeholder='Former password' type='password'
+							required
+							error={error.former}
+						  type={showPassword.former ? 'text' : 'password'}
+							helperText={help.former}
+							autoComplete='current-password'
+							InputProps={{
+								startAdornment: <InputAdornment position='start'>
+					    		<SecurityIcon color='secondary' />
+					    	</InputAdornment>,
+					    	endAdornment: <InputAdornment position='end' >
+					    		<IconButton color='secondary' aria-label='Toggle password visibility' 
+					    			onClick={() => setPasswordVisibility('former')}>
+					    			{showPassword.former ? <Visibility /> : <VisibilityOff />}
+					    		</IconButton>
+					    	</InputAdornment>
+					    }}
+						/>
+						<TextField variant='outlined' 
+							className={classes.input}
+							onChange={e => setValue(e.target.value, '_new')} 
+							value={values._new} 
+							placeholder='New password' type='password'
+							required
+							autoComplete='new-password'
+							error={error._new}
+						  type={showPassword._new ? 'text' : 'password'}
+							InputProps={{
+								startAdornment: <InputAdornment position='start'>
+					    		<LockSharpIcon color='secondary' />
+					    	</InputAdornment>,
+					    	endAdornment: <InputAdornment position='end' >
+					    		<IconButton color='secondary' aria-label='Toggle password visibility' 
+					    			onClick={() => setPasswordVisibility('_new')}>
+					    			{showPassword._new ? <Visibility /> : <VisibilityOff />}
+					    		</IconButton>
+					    	</InputAdornment>
+					    }}
+						/>
+						<TextField variant='outlined' 
+							className={classes.input} 
+							onChange={e => setValue(e.target.value, 'confirm')} value={values.confirm} 
+							placeholder='Confirm password' type='password'
+							required
+							autoComplete='new-password'
+							error={error.confirm}
+							helperText={help.confirm}
+						  type={showPassword.confirm ? 'text' : 'password'}
+							InputProps={{
+								startAdornment: <InputAdornment position='start'>
+					    		<RepeatIcon color='secondary' />
+					    	</InputAdornment>,
+					    	endAdornment: <InputAdornment position='end' >
+					    		<IconButton color='secondary' aria-label='Toggle password visibility' 
+					    			onClick={() => setPasswordVisibility('confirm')}>
+					    			{showPassword.confirm ? <Visibility /> : <VisibilityOff />}
+					    		</IconButton>
+					    	</InputAdornment>
+					    }}
+						/>
+						<ButtonGroup>
+							<Button 
+								variant='contained' 
+								disabled={passwordUpdate}
+								type='submit'
+								color='primary'
 							> 
-								Cancel
-						</Button>
-					</ButtonGroup>
-				</form>
-			</div>
-			<Snackbar open={open} 
-				autoHideDuration={6000} onClose={handleClose}>
-			  <MuiAlert variant='filled' elevation={6} onClose={handleClose} severity="success">
-			    Password changed successfully
-			  </MuiAlert>
-			</Snackbar>
-		</div>
+								Update password
+							</Button>
+							<Button 
+								onClick={() => {
+									setComp({component: 'settings', value: true})
+								}}
+								color='primary'
+								variant='contained' 
+								type='button'
+								> 
+									Cancel
+							</Button>
+						</ButtonGroup>
+					</form>
+				</div>
+				<Snackbar open={open} 
+					autoHideDuration={6000} onClose={handleClose}>
+				  <MuiAlert variant='filled' elevation={6} onClose={handleClose} severity="success">
+				    Password changed successfully
+				  </MuiAlert>
+				</Snackbar>
+			</section>
 	)
 }
 

@@ -20,8 +20,9 @@ import ListItemText from '@material-ui/core/ListItemText'
 import ListItem from '@material-ui/core/ListItem'
 import List from '@material-ui/core/List'
 import { Link } from 'react-router-dom'
+import {CSSTransition } from 'react-transition-group'
 
-import Header from './Header'
+import Header from '../Header'
 import UserAvatar from '../UserAvatar'
 import { socket } from '../Main'
 import { getLastSeen, assert } from '../../../lib/script'
@@ -92,7 +93,9 @@ const UserList = ({user, style, secondaryItems}) => {
 	const handleClick = () => {
 
 		if (selectedUser.username !== user.username) {
-				
+			if (window.innerWidth < 660 ) {
+				dispatch(setComponents({component: 'leftPane', value: false}))
+			}
 			if (find !== undefined) {
 				if (find.unread > 0) {
 					dispatch(resetUnread(user.username))
@@ -109,6 +112,7 @@ const UserList = ({user, style, secondaryItems}) => {
 					fetchMessages({friendsName: user.username, token: id})
 				).then(() => {
 					dispatch(setSelectedUser(user))
+
 				})
 			}
 			
@@ -127,7 +131,7 @@ const UserList = ({user, style, secondaryItems}) => {
 				     />
 			    </ListItemIcon>
 	      	<ListItemText 
-	      		primary={<Typography component='p' style={{fontFamily: 'Roboto'}}> {user.username}</Typography>} 
+	      		primary={<Typography component='h6' style={{fontFamily: 'Roboto'}}> {user.username}</Typography>} 
 	      		secondary={user.lastSeen && secondaryText}
 	      	/>
 	    </ListItem>
@@ -136,7 +140,7 @@ const UserList = ({user, style, secondaryItems}) => {
 }
 
 
-const ActiveUsers = () => {
+const ActiveUsers = ({className}) => {
 	const { useEffect } = React
 	const classes = useStyles()
 	const dispatch = useDispatch()
@@ -147,30 +151,30 @@ const ActiveUsers = () => {
 		dispatch(setComponents({component: 'recentChats', value: true}))
 	}
 	return (
-		<>
-			<Header>
-				<IconButton onClick={setComponent} >
-					<KeyboardBackspaceIcon />
-				</IconButton>
+			<section className={[classes.activeUsers, className].join(' ')}>
+				<Header>
+					<IconButton onClick={setComponent} >
+						<KeyboardBackspaceIcon />
+					</IconButton>
 
-				<InputBase
-					className={classes.searchbar}
-		      placeholder='@user'
-		      type="text"
-		    />
+					<InputBase
+						className={classes.searchbar}
+			      placeholder='@user'
+			      type="text"
+			    />
 
-			</Header>
-			<div className={classes.userslist}>
-				{
-					showLoader ? <Preloader /> : 
-					activeUsers.map(user => {
-						return (
-							<UserList user={user} key={user.username} />
-						)
-					})
-				}
-			</div>
-		</>
+				</Header>
+				<div className={classes.userslist}>
+					{
+						showLoader ? <Preloader /> : 
+						activeUsers.map(user => {
+							return (
+								<UserList user={user} key={user.username} />
+							)
+						})
+					}
+				</div>
+			</section>
 	)
 }
 export default ActiveUsers

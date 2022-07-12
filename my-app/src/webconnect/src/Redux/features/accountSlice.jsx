@@ -10,6 +10,7 @@ export const fetchAccountData = createAsyncThunk(
 
 const initialState = {
 	account: {
+		showLoader: true,
 		...JSON.parse(localStorage.getItem('details')),
 		socketId: '',
 		online: '',
@@ -40,12 +41,25 @@ const accountSlice = createSlice({
 			state.account.settings = {...state.account.settings, ...payload}
 			localStorage.setItem('settings', JSON.stringify(state.account.settings))
 		},
-		updateSocial: (state, action) => {
-			state.account.socials = [...action.payload]
+		setNewSocial: (state, action) => {
+			const newSocial = action.payload
+			const find = state.account.socials.findIndex(i => i.name === newSocial.name)
+
+			if (find === -1) {
+				state.account.socials.push(newSocial)
+			} else {
+				state.account.socials[find] = newSocial
+			}
+			localStorage.setItem('socials', JSON.stringify({ ...state.account.socials, ...action.payload}))
+
 		},
-		updatePrivacy: (state, action) => {
-			localStorage.setItem('privacy', JSON.stringify({ ...state.account.privacy, ...action.payload}))
-			state.account.privacy = {...state.account.privacy, ...action.payload}
+		handleDeleteSocial: (state, action) => {
+			const social = action.payload
+			const find = state.account.socials.findIndex(i => i.name === social.name)
+
+			if (find > -1) {
+				state.account.socials.splice(find)
+			} 
 		},
 		editAccountInfo: (state, action) => {
 			state.account = {...state.account, ...action.payload}
@@ -54,6 +68,7 @@ const accountSlice = createSlice({
 	extraReducers: builder => {
 		builder.addCase(fetchAccountData.fulfilled, (state, action) => {
 			state.account = {...state.account, ...action.payload}
+			state.account.showLoader = false
 		})
 	}
 
@@ -61,10 +76,10 @@ const accountSlice = createSlice({
 
 export const {
 	updateSettings,
-	updateSocial,
+	setNewSocial,
 	setOnline,
+	handleDeleteSocial,
 	editAccountInfo,
-	updatePrivacy
 } = accountSlice.actions
 
 export default accountSlice.reducer

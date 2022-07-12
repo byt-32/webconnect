@@ -10,22 +10,24 @@ import MenuItem from '@material-ui/core/MenuItem'
 import Typography from '@material-ui/core/Typography';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import SearchIcon from '@material-ui/icons/Search'
-import UserAvatar from '../UserAvatar'
 import { Link } from 'react-router-dom'
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { assert } from '../../../lib/script'
+import UserAvatar from '../UserAvatar'
 
 const useStyles = makeStyles({
 	rightPane: {
 		flex: 9,
 		display: 'flex',
-		paddingLeft: 5
+		['@media (max-width: 625px)']: {
+			width: '100%',
+			zIndex: 30,
+			flex: 1
+			// display: 'none'
+		},
 	},
-	messagesPane: {
-		flex: 1
-	}
 })
 
 
@@ -34,8 +36,6 @@ const RightPane = ({user}) => {
 	const classes = useStyles()
 	const privateChats = useSelector(state => state.chat.privateChats)
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
-
-	const profile = useSelector(state => state.components.profile)
 
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const open = Boolean(anchorEl)
@@ -51,19 +51,14 @@ const RightPane = ({user}) => {
 	
 	return (
 		<section className={classes.rightPane} >
-			<div className={classes.messagesPane}>
-				{
-					assert(privateChats) &&
+			{
+				assert(privateChats) &&
 					privateChats.map( (friend, i) => {
 						return (
 							<MessagePane friend={friend} key={i} />
 						)
 					})
-				}
-			</div>
-			<div className={classes.friendProfile}>
-
-			</div>
+			}
 		</section>
 	)
 }

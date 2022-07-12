@@ -217,7 +217,7 @@ const ChatSingle = ({chat}) => {
 	// }
 
 	const handleCopy = () => {
-
+		navigator.clipboard.writeText(chat.message)
 	}
 	const starMessage = () => {
 		socket.emit('starredChat', {starredBy: username, friendsName: getFriendName(), starredChat: chat})
@@ -306,7 +306,7 @@ const ChatSingle = ({chat}) => {
 						<div className={classes.chatActions}>
 							<IconButton onClick={handleReply} > <ReplyIcon /> </IconButton>
 							<IconButton onClick={handleCopy} > <FileCopyOutlinedIcon style={{color:'#958783'}} /> </IconButton>
-							<IconButton onClick={starMessage} > <StarsIcon style={{color: '#5f547a'}} /> </IconButton>
+							{/*<IconButton onClick={starMessage} > <StarsIcon style={{color: '#5f547a'}} /> </IconButton>*/}
 							<IconButton onClick={beginDelete} > <DeleteSweepIcon style={{color: '#ed143d'}} /> </IconButton>
 						</div>
 					</Fade>

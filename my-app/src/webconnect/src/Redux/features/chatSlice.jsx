@@ -10,6 +10,16 @@ export const fetchMessages = createAsyncThunk('fetchMessages',
 	}
 )
 
+export const fetchUserProfile = createAsyncThunk('fetchUserProfile', 
+	async ({id, username}) => {
+		const response = await fetch(`/api/profiles/${id}/${username}`)
+		if (response.ok) {
+			const messages = await response.json()
+			return messages
+		}
+	}
+)
+
 const actionValues = {
 	pendingDelete: {},
 	reply: {open: false},
@@ -171,7 +181,13 @@ const chatSlice = createSlice({
 				
 			}
 		},
-
+		setProfile: (state, action) => {
+			const {friendsName, open} = action.payload
+			const find = state.privateChats.findIndex(i => i.username === friendsName)
+			if (find > -1) {
+				state.privateChats[find].actionValues.showProfile = open
+			}
+		}
 	},
 	extraReducers: builder => {
 		builder.addCase(fetchMessages.pending, (state, action) => {
@@ -186,11 +202,20 @@ const chatSlice = createSlice({
 				state.privateChats.push({
 					username,
 					messages,
-					actionValues: {...actionValues, starredChat}
+					actionValues: {...actionValues, starredChat, showProfile: false},
+					profile: {}
 				})
 			} else {
-				state.privateChats[idx] = {messages, actionValues, username, starredChat}
+				state.privateChats[idx] = {messages, actionValues, username, starredChat, profile: {}}
 			}
+		})
+		.addCase(fetchUserProfile.pending, (state, action) => {
+			// state.showLoaderProfile = true
+		})
+		.addCase(fetchUserProfile.fulfilled, (state, action) => {
+			const { profile } = action.payload
+			const idx = state.privateChats.findIndex( chat => chat.username === profile.username)
+			state.privateChats[idx].profile = profile
 		})
 	}
 })
@@ -205,6 +230,7 @@ export const {
 	performChatDelete,
 	setPendingDelete,
 	undoPendingDelete,
+	setProfile,
 	setReply
 } = chatSlice.actions
 

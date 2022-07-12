@@ -1,9 +1,11 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+
 
 const initialState = {
 	fetched: [],
 	currentSelectedUser: {},
-	onlineUsers: []
+	onlineUsers: [],
+	showLoaderProfile: false
 }
 
 const otherSlice = createSlice({

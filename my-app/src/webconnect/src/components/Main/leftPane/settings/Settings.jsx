@@ -59,13 +59,14 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
 
+import { CSSTransition } from 'react-transition-group'
 import { Link } from 'react-router-dom'
 
 import { setComponents} from '../../../../Redux/features/componentSlice'
 import { updateSettings, editAccountInfo} from '../../../../Redux/features/accountSlice'
 
 import UserAvatar from '../../UserAvatar'
-import Header from '../Header'
+import Header from '../../Header'
 import NetworkProgress from './NetworkProgress'
 
 const useStyles = makeStyles((theme) => ({
@@ -173,7 +174,7 @@ const useStyles = makeStyles((theme) => ({
     }
 	},
 	nested: {
-		padding: '0 0 0 32px'
+		padding: '3px 10px 0 25px'
 	}
 }))
 
@@ -195,7 +196,7 @@ const DropDownList = ({children, listItem}) => {
 	)
 }
 
-const Settings = () => {
+const Settings = ({className}) => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
@@ -354,175 +355,175 @@ const Settings = () => {
 		setIcon(bool)
 	}
 	return (
-		<>
-			<Header>
-				<IconButton onClick={() => setComp({component: 'recentChats', value: true})}>
-					<KeyboardBackspaceIcon />
-				</IconButton>
-				<Typography component='h6'> Profile </Typography>
-				<div className={classes.headerActions}>
-					<IconButton onClick={(e) => handleMenu(e)}> <MoreVertIcon /> </IconButton>
-					<Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'left',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={open}
-            onClose={handleClose}
-          >
-            <MenuItem onClick={handleClose} className={classes.logout}>
-            	<ExitToAppIcon />
-            	<Typography style={{color:''}} > Log out </Typography>
-            </MenuItem>
-          </Menu>
-				</div>
-				{ showProgress &&
-					<NetworkProgress />
-				}
-			</Header>
-				
-			<Dialog
-        open={openDialog}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-	    	 <DialogContent>
-	        <DialogContentText id="alert-dialog-description">
-	          {daysUntil}
-	        </DialogContentText>
-	      </DialogContent>
-      </Dialog>
-			<div className={classes.profileBody}>
-				<div className={classes.banner}>
-					<div className={classes.profileImage} 
-						onMouseEnter={() => showAvatarPlaceholder(true)} 
-						onMouseLeave={() => showAvatarPlaceholder(false)} 
-					>
-						<Fade in={showPhotoIcon}>
-							<div className={classes.avatarPlaceholder}>
-								<AddAPhotoIcon />
-								{/*<Typography > Upload photo </Typography>*/}
-							</div>
-						</Fade>
-		        <UserAvatar username={username} style={{
-		        	width: 200, height: 200, fontSize: '4rem'
-		        }} badge={false} />
+			<section className={[classes.settings, className].join(' ')}>
+				<Header>
+					<IconButton onClick={() => setComp({component: 'recentChats', value: true})}>
+						<KeyboardBackspaceIcon />
+					</IconButton>
+					<Typography component='h6'> Profile </Typography>
+					<div className={classes.headerActions}>
+						<IconButton onClick={(e) => handleMenu(e)}> <MoreVertIcon /> </IconButton>
+						<Menu
+	            id="menu-appbar"
+	            anchorEl={anchorEl}
+	            anchorOrigin={{
+	              vertical: 'top',
+	              horizontal: 'left',
+	            }}
+	            keepMounted
+	            transformOrigin={{
+	              vertical: 'top',
+	              horizontal: 'right',
+	            }}
+	            open={open}
+	            onClose={handleClose}
+	          >
+	            <MenuItem onClick={handleClose} className={classes.logout}>
+	            	<ExitToAppIcon />
+	            	<Typography style={{color:''}} > Log out </Typography>
+	            </MenuItem>
+	          </Menu>
 					</div>
-					<div className={classes.profileInfo}>
-						<div className={classes.info}>
-							<ListItem>
-				        <ListItemIcon>
-						 			<AccountBoxIcon style={{marginRight: 10, fontSize: '1.2rem', color: '#95898b'}} />
-				        </ListItemIcon>
-				        <ListItemText onDoubleClick={() => handleInputVisibility({name: true})} primary={username} />
-				      </ListItem>
+					{ showProgress &&
+						<NetworkProgress />
+					}
+				</Header>
+					
+				<Dialog
+	        open={openDialog}
+	        onClose={handleClose}
+	        aria-labelledby="alert-dialog-title"
+	        aria-describedby="alert-dialog-description"
+	      >
+		    	 <DialogContent>
+		        <DialogContentText id="alert-dialog-description">
+		          {daysUntil}
+		        </DialogContentText>
+		      </DialogContent>
+	      </Dialog>
+				<div className={classes.profileBody}>
+					<div className={classes.banner}>
+						<div className={classes.profileImage} 
+							onMouseOver={() => showAvatarPlaceholder(true)} 
+							onMouseLeave={() => showAvatarPlaceholder(false)} 
+						>
+							<Fade in={showPhotoIcon}>
+								<div className={classes.avatarPlaceholder}>
+									<AddAPhotoIcon />
+									{/*<Typography > Upload photo </Typography>*/}
+								</div>
+							</Fade>
+			        <UserAvatar username={username} style={{
+			        	width: 200, height: 200, fontSize: '4rem'
+			        }} badge={false} />
 						</div>
-
-						 <div className={classes.info}>
-							 <ListItem>
+						<div className={classes.profileInfo}>
+							<div className={classes.info}>
+								<ListItem>
 					        <ListItemIcon>
-							 			<InfoOutlinedIcon style={{marginRight: 10, fontSize: '1.2rem'}} />
+							 			<AccountBoxIcon style={{marginRight: 10, fontSize: '1.2rem', color: '#95898b'}} />
 					        </ListItemIcon>
-
-									{showInput.bio ?	
-										<OutlinedInput
-											onChange={({target}) => handleBioInput(target.value)} 
-											placeholder='Give a short description about yourself'
-											style={{width: '100%'}}
-											multiline
-											endAdornment={
-												<InputAdornment position="end" style={{height: '100%'}}>
-													<IconButton onClick={changeBio} >
-														<CheckIcon />
-													</IconButton>
-												</InputAdornment>
-											}
-
-										/>
-										:
-						        <ListItemText 
-						        	primary={bio} 
-						        	secondary={
-						        		<Button className={classes.editButton} onClick={() => handleInputVisibility({bio: true})}> edit </Button>
-						        	}
-						        /> 
-					      	}
+					        <ListItemText onDoubleClick={() => handleInputVisibility({name: true})} primary={username} />
 					      </ListItem>
-							</div> 
+							</div>
+
+							 <div className={classes.info}>
+								 <ListItem>
+						        <ListItemIcon>
+								 			<InfoOutlinedIcon style={{marginRight: 10, fontSize: '1.2rem'}} />
+						        </ListItemIcon>
+
+										{showInput.bio ?	
+											<OutlinedInput
+												onChange={({target}) => handleBioInput(target.value)} 
+												placeholder='Give a short description about yourself'
+												style={{width: '100%'}}
+												multiline
+												endAdornment={
+													<InputAdornment position="end" style={{height: '100%'}}>
+														<IconButton onClick={changeBio} >
+															<CheckIcon />
+														</IconButton>
+													</InputAdornment>
+												}
+
+											/>
+											:
+							        <ListItemText 
+							        	primary={bio} 
+							        	secondary={
+							        		<Button className={classes.editButton} onClick={() => handleInputVisibility({bio: true})}> edit </Button>
+							        	}
+							        /> 
+						      	}
+						      </ListItem>
+								</div> 
+						</div>
 					</div>
-				</div>
-				<Divider />
-				<div className={classes.settings}>
-					<List
-			      component="nav"
-			      aria-labelledby="nested-list-subheader"
-			      subheader={
-			        <ListSubheader component="div" id="nested-list-subheader">
-			          Account Settings
-			        </ListSubheader>
-			      }
-			      className={classes.list}
-			    >
-						<DropDownList 
-						listItem={
-							<>
-								<ListItemIcon> <AccountCircleIcon /> </ListItemIcon>
-								
-							</>
-						} >
-							<List component="div" disablePadding>
-			          <ListItem button className={classes.nested} onClick={() => setComp({component: 'contactInfo', value: true})}>
-			            <ListItemText primary="Contact info" />
-			            <NavigateNextIcon />
-			          </ListItem>
-			          <ListItem button className={classes.nested} onClick={() => setComp({component: 'resetPassword', value: true})}>
-			            <ListItemText primary="Update password" />
-			            <NavigateNextIcon />
-			          </ListItem>
-			        </List>
-						</DropDownList>
-						<DropDownList 
+					<Divider />
+					<div className={classes.settings}>
+						<List
+				      component="nav"
+				      aria-labelledby="nested-list-subheader"
+				      subheader={
+				        <ListSubheader component="div" id="nested-list-subheader">
+				          Account Settings
+				        </ListSubheader>
+				      }
+				      className={classes.list}
+				    >
+							<DropDownList 
 							listItem={
 								<>
-									<ListItemIcon> <NotificationsIcon /> </ListItemIcon>
+									<ListItemIcon> <AccountCircleIcon /> </ListItemIcon>
+									
 								</>
 							} >
-							<List component="div" disablePadding>
-			          <ListItem button className={classes.nested}
-			          	onClick={() => handleSettings({notifications: !settings.notifications})} >
-			            <ListItemText primary="Notification" />
-			            <IconButton >
-			            	{ settings.notifications ?
-			            		<NotificationsActiveIcon /> :
-			            		<NotificationsOffIcon style={{color: '#818181'}} />
-			            	}
-			            </IconButton>
-			          </ListItem>
-			          <ListItem button className={classes.nested} 
-			          	onClick={() => handleSettings({sound: !settings.sound})}
-			          >
-			            <ListItemText primary="Sound" />
-			            <IconButton >
-			            	{ settings.sound ? 
-			            		<VolumeUpIcon /> : 
-			            		<VolumeOffIcon style={{color: '#818181'}} />
-			            	}
-			            </IconButton>
-			          </ListItem>
-			        </List>
-						</DropDownList>
-					</List>
+								<List component="div" disablePadding>
+				          <ListItem button className={classes.nested} onClick={() => setComp({component: 'contactInfo', value: true})}>
+				            <ListItemText primary="Contact info" />
+				            <NavigateNextIcon />
+				          </ListItem>
+				          <ListItem button className={classes.nested} onClick={() => setComp({component: 'resetPassword', value: true})}>
+				            <ListItemText primary="Update password" />
+				            <NavigateNextIcon />
+				          </ListItem>
+				        </List>
+							</DropDownList>
+							<DropDownList 
+								listItem={
+									<>
+										<ListItemIcon> <NotificationsIcon /> </ListItemIcon>
+									</>
+								} >
+								<List component="div" disablePadding>
+				          <ListItem button className={classes.nested}
+				          	onClick={() => handleSettings({notifications: !settings.notifications})} >
+				            <ListItemText primary="Notification" />
+				            <IconButton >
+				            	{ settings.notifications ?
+				            		<NotificationsActiveIcon /> :
+				            		<NotificationsOffIcon style={{color: '#818181'}} />
+				            	}
+				            </IconButton>
+				          </ListItem>
+				          <ListItem button className={classes.nested} 
+				          	onClick={() => handleSettings({sound: !settings.sound})}
+				          >
+				            <ListItemText primary="Sound" />
+				            <IconButton >
+				            	{ settings.sound ? 
+				            		<VolumeUpIcon /> : 
+				            		<VolumeOffIcon style={{color: '#818181'}} />
+				            	}
+				            </IconButton>
+				          </ListItem>
+				        </List>
+							</DropDownList>
+						</List>
+					</div>
 				</div>
-			</div>
-		</>
+			</section>
 	)
 }
 
