@@ -118,13 +118,10 @@ const recentChatsSlice = createSlice({
 		})
 		.addCase(fetchRecentChats.fulfilled, (state, action) => {
 			// console.log(action.payload)
-			const {recentChats, unread} = action.payload
+			const {recentChats} = action.payload
+			console.log(recentChats)
 			recentChats.forEach(i => {
 				if (i.messages.length > 0) {
-					const findInUnread = unread.find(user => user.username === i.username)
-					if (findInUnread !== undefined) {
-						i.unread = findInUnread.unreadArray
-					}
 					i.typing = false 
 					i.online = false
 					i.messages = i.messages[0]

@@ -47,6 +47,7 @@ const Main = () => {
 		}
 		socket.connect()
 
+		// emit 'getOnlineUsers after fetch to prevent conflict'
 		dispatch(fetchRecentChats(id)).then(() => socket.emit('getOnileUsers'))
 		dispatch(fetchActiveUsers(id)).then(() => socket.emit('getOnileUsers'))
 		dispatch(fetchAccountData(id))

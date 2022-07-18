@@ -57,9 +57,7 @@ const accountSlice = createSlice({
 			const social = action.payload
 			const find = state.account.socials.findIndex(i => i.name === social.name)
 
-			if (find > -1) {
-				state.account.socials.splice(find)
-			} 
+			state.account.socials.splice(find)
 		},
 		editAccountInfo: (state, action) => {
 			state.account = {...state.account, ...action.payload}

@@ -56,7 +56,7 @@ import { setComponents} from '../../../Redux/features/componentSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
-import { getWindowHeight, assert, getLastSeen, handleFetch } from '../../../lib/script'
+import { getWindowHeight, assert, getLastSeen } from '../../../lib/script'
 
 import Profile from './Profile'
 import { socket } from '../Main'
@@ -561,7 +561,7 @@ const MessagesPane = ({friend}) => {
     	</CardActions>
 
 		</Card>
-			{showProfile && <Profile profile={friend.profile} open={showProfile} />}
+			{showProfile && <Profile profile={friend.profile} />}
 		</div>
 	)
 }

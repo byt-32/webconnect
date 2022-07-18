@@ -28,6 +28,9 @@ export async function handleFetch(url, method, body, callback) {
 		.then(res => {
 			callback(res)
 		})
+		.catch(err => {
+			callback({error: true, msg: err})
+		})
 	}
 }
 

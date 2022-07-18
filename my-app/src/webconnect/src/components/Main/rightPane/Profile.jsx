@@ -86,10 +86,9 @@ const actions = [
 ]
 
 
-const Profile = ({profile, open}) => {
+const Profile = ({profile}) => {
 	const dispatch = useDispatch()
 	const classes = useStyles()
-	console.log(open)
 	const {id} = JSON.parse(localStorage.getItem('details'))
 
 	const setComp = (obj) => {
