@@ -3,14 +3,14 @@ const path = require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const htmlPlugin = new HtmlWebpackPlugin({
-  template: "./src/webconnect/src/index.html",
+  template: "./src/index.html",
   filename: "./index.html"
 })
 
 module.exports = {
-  entry: "./src/webconnect/src",
+  entry: "./src",
   output: {
-    path: path.resolve(__dirname, "../../webconnect_build/dist"),
+    path: path.resolve(__dirname, "../server/dist"),
     filename: "bundle.js",
   },
   "devServer": {
