@@ -5,9 +5,11 @@ import bcrypt from 'bcrypt'
 import apiRoute from './routes/apiRoute.js'
 import userRoute from './routes/userRoute.js'
 import chatRoute from './routes/chatRoute.js'
-import {saveChats, saveUnread, handleStarredChat, unstarChat, deleteChat, updateLastSeen} from './utils/script.js'
+import {
+	chatsUtil,
+	unreadUtil,
+} from './utils/script.js'
 
-import UnreadCount from './models/UnreadCount.js'
 import Chat from './models/Chat.js'
 
 import mongoose from 'mongoose'
@@ -39,6 +41,21 @@ const io = new Server(server, {
 
 })
 
+const error = (msg) => {
+	throw new Error(msg)
+}
+
+const search = (arr, testCase, str, callback) => {
+	if (!arr || !testCase || !str) error('expected 3 arguments')
+	if (!Array.isArray(arr)) error('first argument must be an array')
+
+	const result = arr.find(i => i[`${testCase}`] === str)
+	const index = arr.findIndex(i => i[`${testCase}`] === str)
+
+	callback({result, index})
+}
+
+
 /** ----- READ THIS ---------
 NEVER EMIT OR BROADCAST A USER, WITH TOKEN INCLUDED,
  ONLY THE NAME AND SOCKETID IS NEEDED. 
@@ -66,25 +83,19 @@ io.use((socket, next) => {
 
 io.on('connection', socket => {
 	for (let [id, socket] of io.of('/').sockets) {
-		let find = connectedClients.findIndex(i => i.token === socket.token)
-		let index = onlineUsers.findIndex(i => i.username === socket.username)
 
-		if (find !== -1) {
-			connectedClients[find].socketId = id
-		}
-
-		if (index === -1) {
-			onlineUsers.push({socketId: id, username: socket.username})
-		} else {
-			onlineUsers[index] = {socketId: id, username: socket.username}
-		}
+		search(onlineUsers, 'token', socket.token, ({result, index}) => {
+			if (index > -1) {
+				onlineUsers[index] = {socketId: id, username: socket.username}
+			} else {
+				onlineUsers.push({socketId: id, username: socket.username})
+			}
+		})
 	}
 
 	socket.on('getOnileUsers', () => {
 		io.emit('onlineUsers', onlineUsers)
 	})
-
-	
 
 	socket.on('disconnect', async reason => {
 		onlineUsers = onlineUsers.filter(user => user.username !== socket.username)
@@ -92,76 +103,86 @@ io.on('connection', socket => {
 
 		socket.broadcast.emit('userDisconnect', {username: socket.username, socketId: socket.id})
 
-		updateLastSeen(socket.token)
+		// updateLastSeen(socket.token)
 	})
+
 
 	socket.on('saveUnread', (sentBy, sentTo, chatId) => {
-		saveUnread(sentBy, sentTo, chatId)
+		unreadUtil.save(sentBy, sentTo, chatId)
 	})
 
-	socket.on('chatIsRead', async (sender, receiver) => {
-		const find = onlineUsers.find(i => i.username === sender)
-		if (find !== undefined) {
-			io.to(find.socketId).emit('chatHasBeenRead', sender, receiver)
-		}
 
-		await Chat.findOneAndUpdate(
-			{username: sender, 'chats.username': receiver},
-			{'$set': {'chats.$.messages.$[message].read': true}}, 
-			{arrayFilters: [{'message.read': false}]}
-		)
+	socket.on('chatIsRead', async (sentBy, sentTo) => {
+		search(onlineUsers, 'username', sentBy, ({result, index}) => {
+			result && io.to(result.socketId).emit('chatHasBeenRead', sentBy, sentTo)
+		})
 
-		await UnreadCount.findOneAndUpdate({username: receiver, 'users.username': sender}, {'users.$.unreadArray': []})
+		unreadUtil.reset(sentBy, sentTo)
+
 	})
+
+
 	socket.on('starredChat', (obj) => {
 		const {starredBy, friendsName, starredChat} = obj
-		const find = onlineUsers.find(i => i.username === friendsName)
-		if (find !== undefined) {
-			io.to(find.socketId).emit('starredChat', starredBy, starredChat)
-		}
-		handleStarredChat(obj)
+
+		search(onlineUsers, 'username', friendsName, ({result, index}) => {
+			result && io.to(result.socketId).emit('starredChat', starredBy, starredChat)
+		})
+
+		// handleStarredChat(obj)
 	})
+
 
 	socket.on('unstarChat', obj => unstarChat(obj))
 
+
 	socket.on('deleteChat', obj => {
 		const {deletedBy, friendsName, chat} = obj
-		const find = onlineUsers.find(i => i.username === friendsName)
 
-		if (find !== undefined) {
-			if (deletedBy === chat.sentBy ){
-				io.to(find.socketId).emit('deleteChat', {friendsName: deletedBy, chat})
+		search(onlineUsers, 'username', friendsName, ({result, index}) => {
+
+			if (chat.sentBy === deletedBy) {
+				chatsUtil.deleteForAll(obj)
+				result && io.to(result.socketId).emit('deleteChat', {friendsName: deletedBy, chat})
+			} else {
+				chatsUtil.deleteForOne(obj)
 			}
-		}
-
-		deleteChat(obj)
+			
+		})
+		
 	})
 
 	socket.on('userIsTyping', obj => {
 		const {selectedUser, user, typing} = obj
-		const find = onlineUsers.find(i => i.username === selectedUser)
-		if (find !== undefined) {
-			io.to(find.socketId).emit('userIsTyping', {user, typing})
-		}
+
+		search(onlineUsers, 'username', selectedUser, ({result, index}) => {
+			result && io.to(result.socketId).emit('userIsTyping', {user, typing})
+		})
 	})
+
+
 
 	socket.on('sentChat', chat => {
 		const {sentTo, sentBy, message} = chat
-		const find = onlineUsers.find(i => i.username === sentTo)
 
-		saveChats(chat)
+		chatsUtil.save(chat)
 
-		if (find !== undefined) {
-			//it means the user is currently online, forward to socket
-			io.to(find.socketId).emit('chatFromUser', {sentBy, message})
-
-		} else {
-			saveUnread(sentBy, sentTo, chat.message.chatId)
-		}
+		search(onlineUsers, 'username', sentTo, ({result, index}) => {
+			// console.log(result)
+			if (result) {// user is online
+				io.to(result.socketId).emit('chatFromUser', {sentBy, message})
+			} else {// user is currently offline
+				unreadUtil.save(sentBy, sentTo, chat.message.chatId)
+			}
+		})
 	})
 })
 
 
 app.use(express.static('./webconnect_build/dist'))
+
+app.get('/', (req, res) => {
+	res.sendFile(__dirname, + 'webconnect_build/dist/index.html')
+})
 
 server.listen(port, () => console.log('webconnect running on port ' + port))

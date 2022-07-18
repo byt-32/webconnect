@@ -6,12 +6,15 @@ import User from '../models/User.js'
 import Chat from '../models/Chat.js'
 
 import UserSettings from '../models/UserSettings.js'
-import UserPrivacy from '../models/UserPrivacy.js'
-import UnreadCount from '../models/UnreadCount.js'
 
 import shado from 'shado'
 
 const userRoute = express.Router()
+
+userRoute.put('*', (req, res, next) => {
+	// const params = req.params
+	// console.log(req)
+})
 
 userRoute.post('/register', async (request, response) => {
 	const login = request.body 
@@ -27,6 +30,13 @@ userRoute.post('/register', async (request, response) => {
 			const inserToDB = await User.create({
 				username: login.username,
 				email: login.email,
+				socials: {
+					email: {
+						link: login.email,
+						name: 'email',
+						visible: true
+					},
+				},
 				password: hashedPassword,
 				remember: login.remember,
 				joined: Date.now(),
@@ -36,7 +46,7 @@ userRoute.post('/register', async (request, response) => {
 				response.send({
 					id: inserToDB.id,
 					username: inserToDB.username,
-					email: inserToDB.email,
+					socials: inserToDB.socials,
 				})
 			}
 		}
@@ -56,7 +66,7 @@ userRoute.post('/login', async (request, response) => {
 			try {
 				const compare = await bcrypt.compare(login.password, user.password)
 				if (compare) {
-					response.send({id: user.id, username: user.username, email: user.email})
+					response.send({id: user.id, username: user.username, 'socials.email': 1})
 
 				} else {
 					response.send({type: 'error'})
@@ -75,7 +85,7 @@ userRoute.post('/login', async (request, response) => {
 	}
 })
 
-userRoute.post('/updateSettings/:id', async (request, response) => {
+userRoute.put('/updateSettings/:id', async (request, response) => {
 	const {id} = request.params
 	const {obj} = request.body
 	if (id !== '' && id) {
@@ -90,19 +100,19 @@ userRoute.post('/updateSettings/:id', async (request, response) => {
 			}
 		} else {
 			const updateSettings = await UserSettings.findByIdAndUpdate(id, 
-				{settings: {...user.settings, ...obj}}, {upsert: true, new: true}
+				{settings: {...user.settings, ...obj}}, { new: true}
 			)
 			response.send(updateSettings.settings)
 		}
 	}
 })
 
-userRoute.post('/editBio/:id', async (request, response) => {
+userRoute.put('/editBio/:id', async (request, response) => {
 	const {bio} = request.body
 	const {id} = request.params
-	if (id !== '' || id) {
+	if (id !== '' && id) {
 		try {
-			const update = await User.findByIdAndUpdate(id, {bio: bio}, {upsert: true, new: true})
+			const update = await User.findByIdAndUpdate(id, {bio: bio}, { new: true})
 			response.send({bio: update.bio})
 		} catch (e) {
 			e && console.log('Err' + e)
@@ -120,7 +130,7 @@ userRoute.put('/updateName/:id', async (request, response) => {
 		const checkName = await User.findOne({username: newName}, {_id: 0})
 		if (checkName === null) {//if name has not been taken
 			await User.findByIdAndUpdate(id, {updateNameTimestamp: date})
-			const updateName = await User.findByIdAndUpdate(id, {username: newName}, {upsert: true, new: true})
+			const updateName = await User.findByIdAndUpdate(id, {username: newName}, { new: true})
 			response.send({type: 'success', response: updateName.username})
 		} else {//name has been taken, leave!!!
 			response.send({type: 'error', response: 'This name is unavailable'})
@@ -130,7 +140,7 @@ userRoute.put('/updateName/:id', async (request, response) => {
 
 	if (getLastUpdate.updateNameTimestamp === undefined) {//if the user has not updated his name before
 		queryAndUpdate()
-	} else {//oh, he has done it before
+	} else {// You cant update at this time
 		const daysSinceLastUpdate = 
 			shado.date.set(getLastUpdate.updateNameTimestamp, new Date()).getDays(true)
 		if (daysSinceLastUpdate >= 60) {
@@ -157,60 +167,49 @@ userRoute.put('/matchPassword/:id', async (request, response) => {
  		}
  	}
 })
- userRoute.put('/updatePassword/:userId', async (request, response) => {
+ userRoute.put('/updatePassword/:id', async (request, response) => {
 	const hashedPassword = await bcrypt.hash(request.body.value, 10)
-	const user = await User.findByIdAndUpdate(request.params.userId, {password: hashedPassword})
+	const user = await User.findByIdAndUpdate(request.params.id, {password: hashedPassword})
 	if (user) response.send({type: 'success'})
 })
 
 
 
 userRoute.put('/updateSocials/:id', async (request, response) => {
-	const {name, link} = request.body
+	const social = request.body
 	const {id} = request.params
-	const find = await User.findOne({_id: id}, {_id: 0, socials: 1})
-	const index = find.socials.findIndex(i => i.name === name)
 
-	if (index !== -1) {
-		find.socials[index] = {name, link}
-		const update = await User.findByIdAndUpdate(id, {socials: find.socials}, {upsert: true, new: true})
-		response.send(update.socials)
+	const saved = await User.findOne({_id: id}, {_id:0, socials: 1})
+	const index = saved.socials.findIndex(i => i.name === social.name)
+	// const saved
+	let update
+
+	if (index === -1) {
+		 update = await User.findOneAndUpdate(
+			{_id: id},
+			{$push: {'socials': social}}, 
+		)
 	} else {
-		find.socials.push({link, name})
-		const update = await User.findByIdAndUpdate(id, {socials: find.socials}, {upsert: true, new: true})
-		response.send(update.socials)
+		update = await User.findOneAndUpdate(
+			{_id: id},
+			{'$set': {'socials.$[social]': social}}, 
+			{arrayFilters: [{'social.name': social.name}]},
+		)
 	}
-})
-
-userRoute.put('/updatePrivacy/:id', async (request, response) => {
-	const {id} = request.params
-	const obj = request.body
-	const update = await UserPrivacy.findById(id, {_id: 0, privacy: 1})
-	if (update !== null) {
-		const updateExisting = await UserPrivacy.findByIdAndUpdate(id, {privacy: {...update.privacy, ...obj}})
-
-		response.send(updateExisting.privacy)
-		
-	} else {
-		const newUpdate = await UserPrivacy.create({
-			_id: id,
-			privacy: obj
-		})
-
-		response.send(newUpdate.privacy)
-	}
+	// response.send(update.socials)
 })
 
 
 userRoute.delete('/deleteSocial/:id', async (request, response) => {
 	const {id} = request.params
-	const {name, link} = request.body
-	const find = await User.findOne({_id: id}, {_id: 0, socials: 1})
-	const index = find.socials.findIndex(i => i.name === name)
-	find.socials.splice(index, 1)
+	const social = request.body
 
-	const update = await User.findByIdAndUpdate(id, {socials: find.socials}, {upsert: true, new: true})
-	response.send(update.socials)
+	await User.findByIdAndUpdate(id, 
+		{
+			$pull: {socials: {name: social.name}}
+		}
+	)	
+
 })
 
 
@@ -218,16 +217,17 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 	const {id} = request.params
 	const recentChats = 
 		await Chat.findOne({_id: id}, 
-			{_id: 0, 'chats.username': 1, 'chats.lastSent': 1, 'chats.messages': {$slice: -1}}) || []
+			{
+				_id: 0,
+				'chats.username': 1, 
+				'chats.lastSent': 1, 
+				'chats.unread': 1,
+				'chats.messages': {$slice: -1}, 
+			}) || []
 
-	const unreadChatsArray = 
-		await UnreadCount.findOne({_id: id},
-			{_id: 0, 'users.username': 1, 'users.unreadArray': 1}
-		) || []
 
 	response.send({
 		recentChats: recentChats.chats || [],
-		unread: unreadChatsArray.users || []
 	})
 })
 

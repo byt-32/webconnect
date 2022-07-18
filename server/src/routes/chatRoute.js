@@ -2,7 +2,6 @@ import express from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
 import Chat from '../models/Chat.js'
-import UnreadCount from '../models/UnreadCount.js'
 
 const chatRoute = express.Router()
 

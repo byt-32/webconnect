@@ -1,5 +1,11 @@
 import mongoose from 'mongoose'
 
+const socialsSchema = new mongoose.Schema({
+	name: {type: String},
+	link: {type: String},
+	hidden: {type: Boolean},
+},{ _id: false})
+
 const userSchema = new mongoose.Schema({
 	username: {required: true, index: {unique: true}, type: String},
 	email: { type: String, lowercase: true, required: true, index: {unique: true}} ,
@@ -8,7 +14,7 @@ const userSchema = new mongoose.Schema({
 	bio: {type: String},
 	updateNameTimestamp: {type: Date},
 	lastSeen: {type: Number},
-	socials: {type: Array},
+	socials: [socialsSchema],
 	joined: {type: Date, default: Date.now},
 })
 
