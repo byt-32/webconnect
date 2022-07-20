@@ -146,8 +146,8 @@ const useStyles = makeStyles({
 	replyHandel: {
 		display: 'flex',
 		justifyContent: 'space-between',
-		position: 'sticky',
-		bottom: 0,
+		position: 'absolute',
+		bottom: '100%',
 		boxShadow: '0px 3px 6px 0px #00000012',
 		background: '#fdfdfd',
 		width: '100%',
@@ -177,9 +177,12 @@ const useStyles = makeStyles({
 			color: '#edb664'
 		}
 	},
+	snackbar: {
+		transform: 'none'
+	},
 	bottomSnackbar: {
-		width: '100%',
-		position: 'absolute',
+		position: 'sticky',
+		top: 230,
 		'& .MuiSnackbarContent-message': {
 			'& .MuiTypography-body1': {
 				marginLeft: 10,
@@ -364,15 +367,15 @@ const MessagesPane = ({friend}) => {
 			if (accountIsOnline) {
 				setNetworkError(false)
 				const chatObj = {
-					sentTo: friend.username,
-					sentBy: username,
+					receiver: friend.username,
+					sender: username,
 					lastSent: thisDate,
 					message: {
 						message: input,
 						chatId: thisDate, 
-						sentBy: username,
+						sender: username,
 						read: false,
-						sentTo: friend.username,
+						receiver: friend.username,
 						timestamp: date,
 						reply: reply
 					}
@@ -486,7 +489,7 @@ const MessagesPane = ({friend}) => {
 	    							<HighlightOffIcon />
 	    						</IconButton>
 	    					}
-	    					title={starredChat.sentBy === username ? 'You' : starredChat.sentBy}
+	    					title={starredChat.sender === username ? 'You' : starredChat.sender}
 	    					subheader={starredChat.message}
 	    				/>
 
@@ -499,7 +502,7 @@ const MessagesPane = ({friend}) => {
         
 
         <Snackbar open={networkError}
-        	className={classes.bottomSnackbar}
+        	className={[classes.bottomSnackbar, classes.snackbar].join(' ')}
 					autoHideDuration={6000} 
 					onClose={hideNetworkError}
 				>
@@ -509,7 +512,7 @@ const MessagesPane = ({friend}) => {
 				</Snackbar>
 
 				<Snackbar 
-					className={classes.bottomSnackbar}
+					className={[classes.bottomSnackbar, classes.snackbar].join(' ')}
 					anchorOrigin={{
 						vertical: 'bottom',
 						horizontal: 'center',
@@ -533,7 +536,7 @@ const MessagesPane = ({friend}) => {
 	      			onClick={handleChatHighlight}
 	      		>
 	      			<span style={{color: '#ad39ad', fontWeight: 'bold'}}>
-	      				{reply.sentBy === username ? 'You' : reply.sentBy} 
+	      				{reply.sender === username ? 'You' : reply.sender} 
 	      			</span>
 	      			<span> {reply.message} </span>
 	      		</div>

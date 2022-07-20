@@ -151,7 +151,7 @@ const ChatSingle = ({chat}) => {
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const username = useSelector(state => state.account.account.username)
-	let me = (chat.me || chat.sentBy === username) ? true : (!chat.me || chat.sentBy !== username) ? 
+	let me = (chat.me || chat.sender === username) ? true : (!chat.me || chat.sender !== username) ? 
 	false : ''
 	let className = me ? classes.fromAccount : classes.fromFriend
 	let wrapperClass = me ? classes.flexEnd : classes.flexStart
@@ -169,12 +169,12 @@ const ChatSingle = ({chat}) => {
 	 alternative to this would be to pass the username down to this component, 
 	 leading to props drilling.
 
-	 it checks if sentBy or sentTo is not equals the account username, and returns it
+	 it checks if sender or receiver is not equals the account username, and returns it
 	 as the friends name. common sense!
 		
 	**/
-		if (chat.sentBy !== username) return chat.sentBy
-		if (chat.sentTo !== username) return chat.sentTo
+		if (chat.sender !== username) return chat.sender
+		if (chat.receiver !== username) return chat.receiver
 	}
 	
 	const Reaction = ({name}) => {/* ignore this for now **/
@@ -196,7 +196,7 @@ const ChatSingle = ({chat}) => {
 			username,
 			open: true,
 			chatId: chat.chatId,
-			sentBy: chat.sentBy,
+			sender: chat.sender,
 			friendsName: getFriendName()
 		}))
 	}
@@ -227,10 +227,10 @@ const ChatSingle = ({chat}) => {
 	const beginDelete = () => {
 		/*** READ THIS 
 			YOU CANT DELETE A FRIENDS CHAT FROM THEIR DATABASE, 
-			TEST CASE 1: DELETING A FREINDS RECEIVED CHAT MODIFIES 
+			TEST CASE 1: DELETING A CHAT FROM A FRIEND MODIFIES 
 			YOUR DATABASE NOT THE SENDER'S, 
 
-			TEST CASE 2: DELETING A SENT CHAT(YOUR CHAT) MODIFES BOTH THE USER'S DATABASE
+			TEST CASE 2: DELETING A CHAT SENT BY YOU MODIFES BOTH THE RECEIVER'S DATABASE
 			ASS WELL AS THE SENDERS'
 		*/
 		dispatch(setPendingDelete({friendsName: getFriendName(), chat: chat}))
@@ -264,7 +264,7 @@ const ChatSingle = ({chat}) => {
 					<>
 						<div className={[className, classes.chatSingle].join(' ')}>
 							<div className={classes.reply} onClick={() => { chat.reply.message !== '' && handleChatHighlight()}}>
-								<span> {chat.reply.sentBy === username ? 'You' : chat.reply.sentBy} </span>
+								<span> {chat.reply.sender === username ? 'You' : chat.reply.sender} </span>
 								{ chat.reply.message !== '' ?
 										<span> {chat.reply.message} </span>
 									: 

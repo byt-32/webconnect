@@ -183,7 +183,7 @@ const UserList = ({user, style, secondaryItems}) => {
 	      				<span className={classes.typingStatus}> {'typing...'} </span>
 	      			: 
 	      				<span className={classes.lastChat}> 
-	      					{user.messages.sentBy === username && 
+	      					{user.messages.sender === username && 
 	      						<span className={classes.chatRead}> 
 											{user.messages.read ? <DoneAllIcon style={{color: '#00c759'}} /> : <DoneIcon />}
 	      						</span> 

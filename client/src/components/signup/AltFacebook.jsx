@@ -1,12 +1,11 @@
 import React from 'react'
-import styles from '../../stylesheet/main.module.css'
-import { FaFacebook } from 'react-icons/fa'
+import FacebookIcon from '@material-ui/icons/Facebook';
 
 const AltFacebook = () => {
 	return (
-		<div className={[styles.facebook, styles.altSignup].join(' ')}>
-			<FaFacebook />
-			<span className={styles.altSignupText}>Sign up with Facebook</span>
+		<div>
+			<FacebookIcon />
+			<span>Sign up with Facebook</span>
 		</div>
 	)
 }

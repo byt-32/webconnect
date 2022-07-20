@@ -8,6 +8,7 @@ import chatRoute from './routes/chatRoute.js'
 import {
 	chatsUtil,
 	unreadUtil,
+	validateUtil,
 } from './utils/script.js'
 
 import Chat from './models/Chat.js'
@@ -69,16 +70,20 @@ NEVER EMIT OR BROADCAST A USER, WITH TOKEN INCLUDED,
 
 io.use((socket, next) => {
 	const {token, username} = socket.handshake.auth
-	const find = connectedClients.findIndex(i => i.token === token)
-	if (find === -1) {
-		connectedClients.push({token, username})
-	} else {
-		connectedClients.splice(find, 1)
-		connectedClients.push({token, username})
-	}
-	socket.username = username
-	socket.token = token
-	next()
+
+	validateUtil.id(token, (id) => {
+		const find = connectedClients.findIndex(i => i.token === token)
+		if (find === -1) {
+			connectedClients.push({token, username})
+		} else {
+			connectedClients.splice(find, 1)
+			connectedClients.push({token, username})
+		}
+		socket.username = username
+		socket.token = token
+		next()
+	})
+
 })
 
 io.on('connection', socket => {
@@ -107,17 +112,17 @@ io.on('connection', socket => {
 	})
 
 
-	socket.on('saveUnread', (sentBy, sentTo, chatId) => {
-		unreadUtil.save(sentBy, sentTo, chatId)
+	socket.on('saveUnread', (sender, receiver, chatId) => {
+		unreadUtil.save(sender, receiver, chatId)
 	})
 
 
-	socket.on('chatIsRead', async (sentBy, sentTo) => {
-		search(onlineUsers, 'username', sentBy, ({result, index}) => {
-			result && io.to(result.socketId).emit('chatHasBeenRead', sentBy, sentTo)
+	socket.on('chatIsRead', async (sender, receiver) => {
+		search(onlineUsers, 'username', sender, ({result, index}) => {
+			result && io.to(result.socketId).emit('chatHasBeenRead', sender, receiver)
 		})
 
-		unreadUtil.reset(sentBy, sentTo)
+		unreadUtil.reset(sender, receiver)
 
 	})
 
@@ -141,7 +146,7 @@ io.on('connection', socket => {
 
 		search(onlineUsers, 'username', friendsName, ({result, index}) => {
 
-			if (chat.sentBy === deletedBy) {
+			if (chat.sender === deletedBy) {
 				chatsUtil.deleteForAll(obj)
 				result && io.to(result.socketId).emit('deleteChat', {friendsName: deletedBy, chat})
 			} else {
@@ -163,16 +168,16 @@ io.on('connection', socket => {
 
 
 	socket.on('sentChat', chat => {
-		const {sentTo, sentBy, message} = chat
+		const {receiver, sender,lastSent, message } = chat
 
-		chatsUtil.save(chat)
+		chatsUtil.save(sender, receiver, lastSent, message)
+		chatsUtil.save(receiver, sender, lastSent, message)
 
-		search(onlineUsers, 'username', sentTo, ({result, index}) => {
-			// console.log(result)
+		search(onlineUsers, 'username', receiver, ({result, index}) => {
 			if (result) {// user is online
-				io.to(result.socketId).emit('chatFromUser', {sentBy, message})
+				io.to(result.socketId).emit('chatFromUser', {sender, message})
 			} else {// user is currently offline
-				unreadUtil.save(sentBy, sentTo, chat.message.chatId)
+				unreadUtil.save(sender, receiver, chat.message.chatId)
 			}
 		})
 	})

@@ -37,27 +37,27 @@ const chatSlice = createSlice({
 	reducers: {
 		storeSentChat: (state, action) => {
 
-			const {sentTo, message} = action.payload
+			const {receiver, message} = action.payload
 
-			const find = state.privateChats.findIndex(i => i.username === sentTo)
+			const find = state.privateChats.findIndex(i => i.username === receiver)
 
 			if (find !== -1) {
 				state.privateChats[find].messages.push(message)
 			} else {
-				state.privateChats.push({username: sentTo, messages: [message]})
+				state.privateChats.push({username: receiver, messages: [message]})
 			}
 
 		},
 		storeReceivedChat: (state, action) => {
-			const {sentBy, message} = action.payload
+			const {sender, message} = action.payload
 
-			const find = state.privateChats.findIndex(i => i.username === sentBy)
+			const find = state.privateChats.findIndex(i => i.username === sender)
 
 			if (find !== -1) {
 				state.privateChats[find].messages.push(message)
 			} else {
 				state.privateChats.push({
-					username: sentBy,
+					username: sender,
 					messages: [message],
 					actionValues
 				})
@@ -82,13 +82,13 @@ const chatSlice = createSlice({
 			const find = state.privateChats.findIndex(i => i.username === friendsName)
 
 			if (open) {
-				const {username, chatId, sentBy} = action.payload
+				const {username, chatId, sender} = action.payload
 
 				if (find !== -1) {
 					const message = state.privateChats[find].messages.find(i => i.chatId === chatId).message
 					state.privateChats[find].actionValues.reply = {
 						open,
-						sentBy: sentBy,
+						sender: sender,
 						message: message,
 						chatId: chatId
 					}

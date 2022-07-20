@@ -1,26 +1,48 @@
 import Chat from '../models/Chat.js'
 import User from '../models/User.js'
 
+export const validateUtil = {
+	id: async function (id, callback) {
+		const userId = await User.findById(id, {_id: 1})
+
+		if (userId) {
+			callback(userId.id)
+		} 
+	}
+}
+
 export const unreadUtil = {
-	save: async function (sentTo, sentBy, chatId) {
-		await Chat.findOneAndUpdate(
-			{username: sentBy, 'chats.username': sentTo},
-			{
-				$push: {
-					'chats.$.unread': chatId,
+	save: async function (sender, receiver, chatId) {
+		await Chat.findOne({username: receiver})
+		.exec(async (err, docs) => {
+			if (docs !== null) {
+				const find = docs.chats.findIndex(i => i.username === sender)
+				if (find !== -1) {
+					if (docs.chats[find].unread !== null) {
+						docs.chats[find].unread.push(chatId)
+					} else {
+						docs.chats[find].unread = [chatId]
+					}
 				}
-			},
-			{upsert: true}
-		)
+				docs.save()
+			}
+			
+		})
 	},
-	reset: async function (sentBy, sentTo) {
+	reset: async function (sender, receiver) {
+		// This method resets unread array and sets a message read to true
 		await Chat.findOneAndUpdate(
-			{username: sentBy, 'chats.username': sentTo},
+			{username: receiver, 'chats.username': sender},
+			{
+				'chats.$.unread': []
+			}
+		)
+		await Chat.findOneAndUpdate(
+			{username: sender, 'chats.username': receiver},
 			{
 				'$set': {
 					'chats.$.messages.$[message].read': true,
-					'chats.$.$[unread]': [],
-				}
+				},
 			}, 
 			{arrayFilters: [{'message.read': false}]}
 		)
@@ -28,52 +50,34 @@ export const unreadUtil = {
 }
 
 export const chatsUtil = {
-	save: async function ({sentBy, sentTo, lastSent, message}) {
-		const receiver = await User.findOne({username: sentTo}, {_id: 1})
-		const sender = await User.findOne({username: sentBy}, {_id: 1})
+	save: async function (user1, user2, lastSent, message) {
+		const user1Id = await User.findOne({username: user1}, {_id: 1})
+		const user2Id = await User.findOne({username: user2}, {_id: 1})
 
-		await Chat.findOne({username: sentBy})
+		const newChatObj = {
+			id: user2Id.id,
+			username: user2,
+			lastSent: lastSent,
+			messages: [message]
+		}
+
+		await Chat.findOne({username: user1})
 		.exec(async (err, docs) => {
+			// console.log(docs)
 			if (docs !== null) {
-				const find = docs.chats.findIndex(i => i.username === sentTo)
-				if (find > -1) {
+				const find = docs.chats.findIndex(i => i.username === user2)
+				if (find !== -1) {
 					docs.chats[find].messages.push(message)
 					docs.chats[find].lastSent = lastSent
+				} else {
+					docs.chats.push(newChatObj)
 				}
 				docs.save()
 			} else {
 				await Chat.create({
-					_id: sender.id,
-					username: sentBy,
-					chats: [{
-						id: receiver.id,
-						username: sentTo,
-						lastSent: lastSent,
-						messages: [message]
-					}]
-				})
-			}
-		})
-
-		await Chat.findOne({username: sentTo})
-		.exec(async (err, docs) => {
-			if (docs !== null) {
-				const find = docs.chats.findIndex(i => i.username === sentBy)
-				if (find > -1) {
-					docs.chats[find].messages.push(message)
-					docs.chats[find].lastSent = lastSent
-				}
-				docs.save()
-			} else {
-				await Chat.create({
-					_id: receiver.id,
-					username: sentTo,
-					chats: [{
-						id: sender.id,
-						username: sentBy,
-						lastSent: lastSent,
-						messages: [message]
-					}]
+					_id: user1Id.id,
+					username: user1,
+					chats: [newChatObj]
 				})
 			}
 		})

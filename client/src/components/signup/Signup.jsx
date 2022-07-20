@@ -6,7 +6,6 @@ import AltFacebook from './AltFacebook'
 import AltGoogle from './AltGoogle'
 import Form from './Form'
 import ImageBanner from '../ImageBanner'
-import props from '../../transitionProps'
 import { Link } from 'react-router-dom'
 
 // Making use of 3 APIs in the project

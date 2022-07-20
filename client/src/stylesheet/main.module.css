@@ -16,11 +16,11 @@ html, body, div, button, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p
 
 @font-face {
 	font-family: Quicksand;
-	src: url('../../../../public/fonts/Quicksand/Quicksand-Regular.ttf');
+	src: url('../../public/fonts/Quicksand/Quicksand-Regular.ttf');
 }
 @font-face {
   font-family: MuseoSans_300;
-  src: url('../../../../public/fonts/Museo Sans 300/MuseoSans-300.otf');
+  src: url('../../public/fonts/Museo Sans 300/MuseoSans-300.otf');
 }
 body {
   font-family: Quicksand, "Open Sans", sans-serif !important;

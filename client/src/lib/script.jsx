@@ -1,5 +1,4 @@
 import React from 'react'
-import shado from 'shado'
 
 export const getWindowHeight = () => {
 	const [height, setHeight] = React.useState(`${window.innerHeight}`)

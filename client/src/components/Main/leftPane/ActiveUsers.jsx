@@ -1,5 +1,4 @@
 import React from 'react'
-import shado from 'shado'
 
 import { useSelector, useDispatch } from 'react-redux'
 import Typography from '@material-ui/core/Typography';

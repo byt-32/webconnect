@@ -82,17 +82,17 @@ const Main = () => {
 	socket.off('chatFromUser').on('chatFromUser', chat => {
 		dispatch(storeReceivedChat(chat))
 		dispatch(updateRecentChats({
-			username: chat.sentBy,
+			username: chat.sender,
 			lastSent: chat.message.chatId,
 			online: true,
 			messages: chat.message,
 		}))
 
-		if (!assert(selectedUser) || selectedUser.username !== chat.sentBy) {
-			socket.emit('saveUnread', chat.sentBy, username, chat.message.chatId, () => {})
-			dispatch(setUnread({friendsName: chat.sentBy, chatId: chat.message.chatId}))
+		if (!assert(selectedUser) || selectedUser.username !== chat.sender) {
+			socket.emit('saveUnread', chat.sender, username, chat.message.chatId, () => {})
+			dispatch(setUnread({friendsName: chat.sender, chatId: chat.message.chatId}))
 		}
-		if (assert(selectedUser) && selectedUser.username === chat.sentBy) {
+		if (assert(selectedUser) && selectedUser.username === chat.sender) {
 			socket.emit('chatIsRead', selectedUser.username, username)
 		}
 	})
