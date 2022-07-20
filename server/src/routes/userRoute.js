@@ -13,7 +13,7 @@ const userRoute = express.Router()
 
 userRoute.put('*', (req, res, next) => {
 	// const params = req.params
-	// console.log(req)
+	console.log(req)
 })
 
 userRoute.post('/register', async (request, response) => {
