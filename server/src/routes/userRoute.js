@@ -11,11 +11,6 @@ import shado from 'shado'
 
 const userRoute = express.Router()
 
-userRoute.put('*', (req, res, next) => {
-	// const params = req.params
-	console.log(req)
-})
-
 userRoute.post('/register', async (request, response) => {
 	const login = request.body 
 	const hashedPassword = await bcrypt.hash(login.password, 10)
@@ -84,6 +79,11 @@ userRoute.post('/login', async (request, response) => {
 		}
 	}
 })
+
+// userRoute.put('*', (req, res, next) => {
+// 	// const params = req.params
+// 	console.log(req)
+// })
 
 userRoute.put('/updateSettings/:id', async (request, response) => {
 	const {id} = request.params
