@@ -68,7 +68,7 @@ const chatSlice = createSlice({
 			const receiver = action.payload
 			const find = state.privateChats.findIndex(i => i.username === receiver)
 
-			if (find > -1) {
+			if (find !== -1) {
 				state.privateChats[find].messages.forEach( i => {
 					if (!i.read && i.read !== undefined) {
 						i.read = true
@@ -134,7 +134,7 @@ const chatSlice = createSlice({
 			const {friendsName, chat} = action.payload
 			const find = state.privateChats.findIndex(i => i.username === friendsName)
 
-			if (find > -1) {
+			if (find !== -1) {
 				if (Object.keys(state.privateChats[find].actionValues.pendingDelete).length === 0) {
 					state.privateChats[find].actionValues.pendingDelete = chat
 				}
@@ -145,7 +145,7 @@ const chatSlice = createSlice({
 			const {friendsName} = action.payload
 			const find = state.privateChats.findIndex(i => i.username === friendsName)
 
-			if (find > -1) {
+			if (find !== -1) {
 				state.privateChats[find].actionValues.pendingDelete = {}
 			}
 
@@ -184,7 +184,7 @@ const chatSlice = createSlice({
 		setProfile: (state, action) => {
 			const {friendsName, open} = action.payload
 			const find = state.privateChats.findIndex(i => i.username === friendsName)
-			if (find > -1) {
+			if (find !== -1) {
 				state.privateChats[find].actionValues.showProfile = open
 			}
 		}
