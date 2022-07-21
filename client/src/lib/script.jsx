@@ -67,7 +67,7 @@ export function assert(obj) {
 		if (type(obj) === null || typeof obj === 'undefined') return false
 		if (type(obj) === 'string') return true
 		if (type(obj) === 'number') {
-			if (obj > -1) return true
+			if (obj !== -1) return true
 				else return false
 		}
 		if (type(obj) === 'boolean') return obj

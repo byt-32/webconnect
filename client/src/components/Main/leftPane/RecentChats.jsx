@@ -138,6 +138,24 @@ const UserList = ({user, style, secondaryItems}) => {
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const fetchedUsers = useSelector(state => state.other.fetched)
+	let dateValue, yearPos, year, fullDate
+
+	if (assert(user.messages)) {
+		// Get the date of the last chat 
+		if (user.messages.timestamp.fullDate === new Date().toDateString()) {
+			dateValue = user.messages.timestamp.time.slice(1)
+		} else {
+			fullDate = user.messages.timestamp.fullDate
+			yearPos = fullDate.match(/[0-9][0-9][0-9][0-9]/).index
+			year = parseInt(fullDate.slice(yearPos, fullDate.length).replaceAll(' ', ''))
+
+			if (year === new Date().getFullYear()) {
+				dateValue = fullDate.slice(0, yearPos)
+			} else {
+				dateValue = fullDate
+			}
+		}
+	}
 
 	const handleClick = () => {
 		if (window.innerWidth < 660 ) {
@@ -197,7 +215,7 @@ const UserList = ({user, style, secondaryItems}) => {
 		     			className={classes.lastSent} 
 		     			style={{color: assert(user.unread) ? '#6495ed' : 'initial'}}
 		     		> 
-		     			{getLastSeen(user.lastSent)} 
+		     			{dateValue}
 		     		</span>
 
 		     		{ assert(user.unread) &&
