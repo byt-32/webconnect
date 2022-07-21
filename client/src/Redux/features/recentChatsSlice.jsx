@@ -119,7 +119,6 @@ const recentChatsSlice = createSlice({
 		.addCase(fetchRecentChats.fulfilled, (state, action) => {
 			// console.log(action.payload)
 			const {recentChats} = action.payload
-			console.log(recentChats)
 			recentChats.forEach(i => {
 				if (i.messages.length > 0) {
 					i.typing = false 
