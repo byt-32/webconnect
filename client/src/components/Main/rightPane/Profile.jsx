@@ -47,7 +47,7 @@ const useStyles = makeStyles({
 		height: '100%'
 	},
 	body: {
-		padding: '36px 20px 0 20px',
+		padding: '26px 20px 0 20px',
 		textAlign: 'center'
 	},
 	banner: {
@@ -55,20 +55,36 @@ const useStyles = makeStyles({
 		justifyContent: 'center'
 	},
 	profileContacts: {
-		marginTop: '.8rem',
+		marginTop: '1.1rem',
 		'& .MuiTypography-body1:first-child': {
 			fontSize: '1.2rem',
+			fontWeight: 'bold',
 			marginBottom: '.2rem'
-		}
+		},
+		'& .MuiTypography-body1:last-of-type': {
+			fontSize: '1.05rem',
+			lineHeight: 1.3
+		}	
 	},
 	socials: {
-		marginTop: '.6rem',
-		'& a:first-child': {
-			marginRight: '.7rem',
+		marginTop: '1rem',
+		display: 'flex',
+		flexWrap: 'wrap',
+		justifyContent: 'center',
+		"& > a:hover": {
+			textDecoration: 'underline'
+		},
+		'& > a': {
+			margin: '5px 7px 0',
+			display: 'flex',
+			justifyContent: 'center',
+			alignItems: 'center',
+			transition: '.6s ease all',
 			'& svg': {
+				marginRight: '.3rem',
 				fontSize: '1.6rem'
 			}
-		}
+		},
 	},
 	backdrop: {
 		width: '100%',
@@ -130,9 +146,9 @@ const Profile = ({profile}) => {
 		    			const find = actions.find(action => action.name === social.name)
 		    			return (
 		    				find !== undefined &&
-			    				<a href={social.link} rel='noreferrer' target='_blank'>
-			    					{find.icon}
-			    				</a>	
+		    					<a href={social.link} rel='noreferrer' target='_blank'>
+		    						{find.icon} {social.link} 
+		    					</a>	
 		    			)
 		    		})
 		    	}
