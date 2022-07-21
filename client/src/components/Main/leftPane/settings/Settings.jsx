@@ -157,46 +157,22 @@ const useStyles = makeStyles((theme) => ({
 	},
 	list: {
 		width: '100%',
-    maxWidth: 360,
     backgroundColor: theme.palette.background.paper,
-    '& .MuiListItemIcon-root': {
-    	'& .MuiSvgIcon-root': {
-    		color: '#484848'
-    	}
-    },
     '& > .MuiListItem-root': {
+    	padding: '0 5px 5px 18px',
+    	cursor: 'pointer',
     	'& .MuiTypography-body1': {
-    		color: '#6a3f3c'
+    		color: '#000'
+    	},
+    	'& .MuiSvgIcon-root': {
+    		fontSize: '1.3rem'
     	}
     },
-    '& .MuiCollapse-root': {
-    	'& .MuiTypography-body1, .MuiSvgIcon-root': {
-    		color: '#5c5b5b'
-    	}, 
-    }
 	},
 	nested: {
-		padding: '3px 10px 0 25px'
+		padding: '0 10px 0 18px'
 	}
 }))
-
-const DropDownList = ({children, listItem}) => {
-	const [openList, setOpen] = React.useState(true)
-	const expandList = () => {
-		// setOpen(!openList)
-	}
-	return (
-		<>
-	  	<ListItem button onClick={expandList}>
-	      {listItem}
-	      {/*{openList ? <ExpandLess /> : <ExpandMore />}*/}
-	    </ListItem>
-	    <Collapse in={openList} timeout="auto" unmountOnExit>
-	      {children}
-	    </Collapse>
-    </>
-	)
-}
 
 const Settings = ({className}) => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
@@ -323,6 +299,10 @@ const Settings = ({className}) => {
 			})
 		}
 	}
+	const callToLogout = () => {
+		localStorage.clear()
+		document.location = '/'
+	}
 
 	const showAvatarPlaceholder = (bool) => {
 		setIcon(bool)
@@ -351,7 +331,11 @@ const Settings = ({className}) => {
             open={open}
             onClose={handleClose}
           >
-            <MenuItem onClick={handleClose} className={classes.logout}>
+            <MenuItem onClick={() => {
+            	handleClose()
+            	callToLogout()
+            }} 
+            	className={classes.logout}>
             	<ExitToAppIcon />
             	<Typography style={{color:''}} > Log out </Typography>
             </MenuItem>
@@ -435,65 +419,50 @@ const Settings = ({className}) => {
 				</div>
 				<Divider />
 				<div className={classes.settings}>
-					<List
-			      component="nav"
-			      aria-labelledby="nested-list-subheader"
-			      subheader={
+						
+					<List component="div" className={classes.list}
+						subheader={
 			        <ListSubheader component="div" id="nested-list-subheader">
-			          Account Settings
+			          Account
 			        </ListSubheader>
 			      }
-			      className={classes.list}
-			    >
-						<DropDownList 
-						listItem={
-							<>
-								<ListItemIcon> <AccountCircleIcon /> </ListItemIcon>
-								
-							</>
-						} >
-							<List component="div" disablePadding>
-			          <ListItem button className={classes.nested} onClick={() => setComp({component: 'contactInfo', value: true})}>
-			            <ListItemText primary="Contact info" />
-			            <NavigateNextIcon />
-			          </ListItem>
-			          <ListItem button className={classes.nested} onClick={() => setComp({component: 'resetPassword', value: true})}>
-			            <ListItemText primary="Update password" />
-			            <NavigateNextIcon />
-			          </ListItem>
-			        </List>
-						</DropDownList>
-						<DropDownList 
-							listItem={
-								<>
-									<ListItemIcon> <NotificationsIcon /> </ListItemIcon>
-								</>
-							} >
-							<List component="div" disablePadding>
-			          <ListItem button className={classes.nested}
-			          	onClick={() => handleSettings({notifications: !settings.notifications})} >
-			            <ListItemText primary="Notification" />
-			            <IconButton >
-			            	{ settings.notifications ?
-			            		<NotificationsActiveIcon /> :
-			            		<NotificationsOffIcon style={{color: '#818181'}} />
-			            	}
-			            </IconButton>
-			          </ListItem>
-			          <ListItem button className={classes.nested} 
-			          	onClick={() => handleSettings({sound: !settings.sound})}
-			          >
-			            <ListItemText primary="Sound" />
-			            <IconButton >
-			            	{ settings.sound ? 
-			            		<VolumeUpIcon /> : 
-			            		<VolumeOffIcon style={{color: '#818181'}} />
-			            	}
-			            </IconButton>
-			          </ListItem>
-			        </List>
-						</DropDownList>
-					</List>
+		      >
+	          <ListItem onClick={() => setComp({component: 'contactInfo', value: true})}>
+	            <ListItemText primary="Contact info" />
+	            <NavigateNextIcon />
+	          </ListItem>
+	          <ListItem onClick={() => setComp({component: 'resetPassword', value: true})}>
+	            <ListItemText primary="Update password" />
+	            <NavigateNextIcon />
+	          </ListItem>
+	        </List>
+						
+					<List component="div" className={classes.list} 
+						subheader={
+			        <ListSubheader component="div" id="nested-list-subheader">
+			          Notification
+			        </ListSubheader>
+			      }
+					>
+	          <ListItem button
+	          	onClick={() => handleSettings({notifications: !settings.notifications})} >
+	            <ListItemText primary="Notification" />
+	            <Switch 
+	            	checked={settings.notifications}
+	            	color='secondary'
+	            />
+	          </ListItem>
+	          <ListItem  button
+	          	onClick={() => handleSettings({sound: !settings.sound})}
+	          >
+	            <ListItemText primary="Sound" />
+            	<Switch 
+            		checked={settings.sound}
+            		color='secondary'
+            	/>
+	          </ListItem>
+	        </List>
+
 				</div>
 			</div>
 		</section>
