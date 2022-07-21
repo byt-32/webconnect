@@ -181,8 +181,7 @@ const useStyles = makeStyles({
 		transform: 'none'
 	},
 	bottomSnackbar: {
-		position: 'sticky',
-		top: 230,
+		bottom: '15%',
 		'& .MuiSnackbarContent-message': {
 			'& .MuiTypography-body1': {
 				marginLeft: 10,
