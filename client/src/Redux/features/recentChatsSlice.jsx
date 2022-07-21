@@ -33,7 +33,7 @@ const recentChatsSlice = createSlice({
 			
 			users.forEach(user => {
 				const index = state.recentChats.findIndex(i => i.username === user.username)
-				if (index > -1) {
+				if (index !== -1) {
 					state.recentChats[index].online = true
 				}
 			})
@@ -41,7 +41,7 @@ const recentChatsSlice = createSlice({
 		setRecentDisconnect: (state, action) => {
 			const {username} = action.payload
 			const index = state.recentChats.findIndex(i => i.username === username)
-			if (index > -1) {
+			if (index !== -1) {
 				state.recentChats[index].online = false
 				state.recentChats[index].lastSeen = Date.now()
 			}
@@ -50,7 +50,7 @@ const recentChatsSlice = createSlice({
 			const username = action.payload
 			const find = state.recentChats.findIndex(i => i.username === username)
 
-			if (find > -1) {
+			if (find !== -1) {
 				state.recentChats[find].unread = []
 			}
 		},
@@ -59,7 +59,7 @@ const recentChatsSlice = createSlice({
 
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
 
-			if (find > -1) {
+			if (find !== -1) {
 			// console.log(state.recentChats[find].unread)
 
 				state.recentChats[find].unread.push(chatId)
@@ -69,32 +69,31 @@ const recentChatsSlice = createSlice({
 		handleUserTypingActivity: (state, action) => {
 			const {user, typing} = action.payload
 			const find = state.recentChats.findIndex(i => i.username === user)
-			if (find > -1) {
+			if (find !== -1) {
 				state.recentChats[find].typing = typing
 			}
 		},
 		updateRecentChats: (state, action) => {
 			const {lastSent, username, online, messages} = action.payload
+			let index = state.recentChats.findIndex(i => i.username === username)
+			let spliced
 
-			const findIndex = state.recentChats.findIndex(i => i.username === username)
-			if (findIndex > -1) {
-				state.recentChats[findIndex].lastSent = lastSent
-				state.recentChats[findIndex].messages = messages
+			if (index !== -1) {
+				state.recentChats[index].lastSent = lastSent
+				state.recentChats[index].messages = messages
+				spliced = state.recentChats.splice(index, 1)
+				state.recentChats.unshift(spliced[0])
 			} else {
 				state.recentChats.unshift(action.payload)
 			}
-			state.recentChats.sort((a, b) => {
-				if (a.lastSent < b.lastSent) return 1
-				if (a.lastSent > b.lastSent) return -1
-			})
 		},
 		syncRecentsWithDeleted: (state, action) => {
 			const {friendsName, chat} = action.payload
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
 
-			if (find > -1) {
+			if (find !== -1) {
 				const findInUnread = state.recentChats[find].unread.findIndex(i => i === chat.chatId)
-				if (findInUnread > -1) {
+				if (findInUnread !== -1) {
 					state.recentChats[find].unread.splice(findInUnread, 1)
 				}
 				if (state.recentChats[find].messages.chatId === chat.chatId) {
@@ -106,7 +105,7 @@ const recentChatsSlice = createSlice({
 			const friendsName = action.payload
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
 
-			if (find > -1) {
+			if (find !== -1) {
 				state.recentChats[find].messages.read = true
 			}
 		}
