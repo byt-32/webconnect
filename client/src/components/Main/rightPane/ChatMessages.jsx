@@ -12,6 +12,9 @@ import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined'
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
 import Snackbar from '@material-ui/core/Snackbar'
+import Popover from '@material-ui/core/Popover';
+import Backdrop from '@material-ui/core/Backdrop';
+import Typography from '@material-ui/core/Typography';
 
 import SentimentVerySatisfiedIcon from '@material-ui/icons/SentimentVerySatisfied';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
@@ -107,12 +110,26 @@ const useStyles = makeStyles({
 		}
 	},
 	chatActions: {
-		position: 'absolute',
-		top: '-45px',
 		borderRadius: '5px',
-		zIndex: 25,
+		zIndex: 250000,
 		display: 'flex',
-		background: '#fff !important'
+		flexDirection: 'column',
+		background: '#fff !important',
+		'& > div': {display: 'flex'},
+		'& div:first-child': {
+
+		},
+		'& > div:last-of-type': {
+			flexDirection: 'column',
+			'& > button': {
+				padding: '12px 0 12px 15px',
+				borderRadius: 0,
+				'& > span > span.MuiTypography-root': {
+					padding: '0 25px 0 15px',
+					color: '#000'
+				}
+			}
+		}
 	},
 	chatTime: {
 		fontSize: '.65rem',
@@ -139,11 +156,11 @@ const useStyles = makeStyles({
 	
 })
 
-// const reactions = [
-// 	// {name: 'smile', icon: <SentimentVerySatisfiedIcon />},
-// 	{name: 'like', icon: <ThumbUpIcon />},
-// 	// {name: 'dislike', icon: <ThumbDownIcon />}
-// ]
+const reactions = [
+	{name: 'smile', icon: <SentimentVerySatisfiedIcon />},
+	{name: 'like', icon: <ThumbUpIcon />},
+	{name: 'dislike', icon: <ThumbDownIcon />}
+]
 // ///rgb(0 137 255 / 6%)
 
 const ChatSingle = ({chat}) => {
@@ -160,6 +177,7 @@ const ChatSingle = ({chat}) => {
 	const [open, setOpen] = React.useState(false)
 	const [timer, setTimer] = React.useState(null)
 	const chatRef = React.createRef(null)
+	const [anchorEl, setAnchorEl] = React.useState(null)
 
 	const deleted = chat.message === '' ? true : false
 
@@ -185,11 +203,13 @@ const ChatSingle = ({chat}) => {
 	function replace(text) {
 		return text.replaceAll('\n', '<br/>')
 	}
-	const handleChatActions = () => {
+	const handleChatActions = (e) => {
 		setOpen(!open)
+		setAnchorEl(e.target)
 	}
-	const handleClickAway = () => {
+	const handleClickAway = (e) => {
 		setOpen(false)
+		setAnchorEl(null)
 	}
 	const handleReply = () => {
 		dispatch(setReply({
@@ -200,6 +220,7 @@ const ChatSingle = ({chat}) => {
 			friendsName: getFriendName()
 		}))
 	}
+	const closeActions = () => setOpen(false)
 	// const handleReactions = (name) => {
 	// 	if (chat.reaction && name === chat.reaction.name) {
 	// 		dispatch(setReaction({
@@ -217,7 +238,10 @@ const ChatSingle = ({chat}) => {
 	// }
 
 	const handleCopy = () => {
+
 		navigator.clipboard.writeText(chat.message)
+		setOpen(false)
+		setOpen(true)
 	}
 	const starMessage = () => {
 		socket.emit('starredChat', {starredBy: username, friendsName: getFriendName(), starredChat: chat})
@@ -302,14 +326,54 @@ const ChatSingle = ({chat}) => {
 				}
 				{/** Don't show chat actions for a deleted chat **/
 					!deleted &&
-					<Fade in={open}>
-						<div className={classes.chatActions}>
-							<IconButton onClick={handleReply} > <ReplyIcon /> </IconButton>
-							<IconButton onClick={handleCopy} > <FileCopyOutlinedIcon style={{color:'#958783'}} /> </IconButton>
-							{/*<IconButton onClick={starMessage} > <StarsIcon style={{color: '#5f547a'}} /> </IconButton>*/}
-							<IconButton onClick={beginDelete} > <DeleteSweepIcon style={{color: '#ed143d'}} /> </IconButton>
-						</div>
-					</Fade>
+						<Popover open={open} 
+							anchorEl={anchorEl} 
+							onClose={handleClickAway} 
+							anchorOrigin={{
+						    vertical: 'bottom',
+						    horizontal: me ? 'left' : 'right',
+						  }}
+						  transformOrigin={{
+						    vertical: 'top',
+						    horizontal: me ? 'right' : 'left',
+						  }}
+						>
+							<div className={classes.chatActions}>
+								<div>
+									{/*{
+										reactions.map((reaction, i) => {
+											return (
+												<IconButton key={reaction.name}> {reaction.icon} </IconButton>
+											)
+										})
+									}*/}
+								</div>
+								<div>
+									<IconButton onClick={() => {
+										handleReply()
+										closeActions()
+									}} >
+										<ReplyIcon /> 
+										<Typography component='span'> Reply </Typography>
+									</IconButton>
+
+									<IconButton onClick={() => {
+										handleCopy()
+									}} >
+										<FileCopyOutlinedIcon style={{color:'#958783'}} /> 
+										<Typography component='span'> Copy </Typography>
+									</IconButton>
+									{/*<IconButton onClick={starMessage} > <StarsIcon style={{color: '#5f547a'}} /> </IconButton>*/}
+									<IconButton onClick={() => {
+										beginDelete()
+										closeActions()
+									}} >
+										<DeleteSweepIcon style={{color: '#ed143d'}} /> 
+										<Typography component='span'> Delete </Typography>
+									</IconButton>
+								</div>
+							</div>
+						</Popover>
 				}
 
 				
