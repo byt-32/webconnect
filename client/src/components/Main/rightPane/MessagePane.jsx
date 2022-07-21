@@ -337,7 +337,7 @@ const MessagesPane = ({friend}) => {
 
 		const newTimer = setTimeout( async () => {
 			handleTypingStatus(false)
-		}, 2000)
+		}, 1500)
 		if (!typing) {// This is vital to prevent multiple dispatches
 			handleTypingStatus(true)
 		}
@@ -351,6 +351,7 @@ const MessagesPane = ({friend}) => {
 	}
 
 	const sendMessage = async () => {
+		handleTypingStatus(false)
 		const textarea = inputRef.current.querySelector('textarea')
 		const input = textarea.value
 		const dateNow = () => Date.now()
@@ -398,7 +399,6 @@ const MessagesPane = ({friend}) => {
 			}
 		}
 
-		handleTypingStatus(false)
 	}
 
 	const handleChatHighlight = () => {

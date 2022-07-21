@@ -96,9 +96,11 @@ const useStyles = makeStyles({
 		flexDirection: 'column',
 		justifyContent: 'center',
 		fontSize: '.8rem',
+		whiteSpace: 'nowrap'
 	},
 	lastSent: {
 		marginBottom: 6,
+		textAlign: 'right',
 		color: '#53555e'
 	},
 	unread: {
