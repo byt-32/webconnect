@@ -95,22 +95,24 @@ const useStyles = makeStyles({
 			},
 			['@media (max-width: 660px)']: {
 				// width: '100%'
+				marginLeft: 0,
 				padding: '0 16px 0 39px'
 			},
 		},
 		'& .MuiCardHeader-action': {
 			alignSelf: 'center',
 			marginTop: 0,
-			['@media (max-width: 687px)']: {
+			['@media (max-width: 351px)']: {
 				marginLeft: 0,
 				display: 'none'
 			},
 		},
 		'& .MuiCardContent-root': {
-			background: grey[200],
 			padding: 0,
 			overflowY: 'scroll',
-			position: 'relative'
+			position: 'relative',
+			['@media (max-width: 660px)']: {
+			},
 		},
 		'& .MuiCardActions-root': {
 			background: common.white,
@@ -129,26 +131,27 @@ const useStyles = makeStyles({
 	},
 	backBtn: {
 		position: 'absolute',
-		top: '0.25rem',
-		left: '-.5rem',
+		top: '11px',
+		padding: 5,
 		display: 'none',
+		zIndex: 100,
 		['@media (max-width: 660px)']: {
 			display: 'block'
 		},
 	},
 	contents: {
-		width: '80%',
-		margin: '0 auto',
+		margin: '0 10%',
 		['@media (max-width: 900px)']: {
-			width: '97%'
+			margin: '0 2%',
 		},
+		
 	},
 	replyHandel: {
 		display: 'flex',
 		justifyContent: 'space-between',
 		position: 'absolute',
 		bottom: '100%',
-		boxShadow: '0px 3px 6px 0px #00000012',
+		boxShadow: 'inset -1px -3px 5px 0px #0000000d',
 		background: '#fdfdfd',
 		width: '100%',
 		zIndex: 40,
@@ -199,6 +202,7 @@ function retrieveDate(date) {
 
 	return {year: year, day: day, fullDate: fullDate}
 }
+
 function ActionNotifier(props) {
 	const classes = useStyles()
   const [progress, setProgress] = React.useState(10);
@@ -435,16 +439,15 @@ const MessagesPane = ({friend}) => {
 		<div className={classes.messagesPane} style={{
 			display: selectedUser.username === friend.username ? 'flex' : 'none'
 		}} >
+		
 		<Card className={classes.card} >
-			
+			<IconButton className={classes.backBtn} onClick={() => handleComponent()} >
+				<ArrowBackIcon style={{color: '#959494'}} />
+			</IconButton>
 			<CardHeader
         avatar={
           <div onClick={showProfilePage}>
-          	<Link to='/'>
-					    <IconButton className={classes.backBtn} onClick={() => handleComponent()} >
-								<ArrowBackIcon style={{color: '#959494'}} />
-							</IconButton>
-						</Link>
+				    
 	          <UserAvatar 
 				      username={friend.username} 
 				      badge={false}
@@ -496,9 +499,7 @@ const MessagesPane = ({friend}) => {
 	    		</Slide>
 	    	}
 
-        <ChatMessages chats={friend.messages} pendingDelete />
-
-        
+        <ChatMessages chats={friend.messages} />
 
         <Snackbar open={networkError}
         	className={[classes.bottomSnackbar, classes.snackbar].join(' ')}
@@ -528,22 +529,24 @@ const MessagesPane = ({friend}) => {
       
       <CardActions className={classes.contents} >
 
-      	{reply.open &&
-	      	<div className={classes.replyHandel}
-	      	 >
-	      		<div className={classes.replyProps}
-	      			onClick={handleChatHighlight}
-	      		>
-	      			<span style={{color: '#ad39ad', fontWeight: 'bold'}}>
-	      				{reply.sender === username ? 'You' : reply.sender} 
-	      			</span>
-	      			<span> {reply.message} </span>
-	      		</div>
-	      		<div >
-	      			<CloseIcon onClick={closeReplyHandle} style={{fontSize: '1.2rem', color: '#c55044', margin: 7,}} />
-	      		</div>
-	      	</div>
-	      }
+      		<Slide in={reply.open} direction='up'>
+		      	<div className={classes.replyHandel}
+		      	 >
+	      			{reply.open && 
+			      		<><div className={classes.replyProps}
+			      			onClick={handleChatHighlight}
+			      		>
+			      			<span style={{color: '#ad39ad', fontWeight: 'bold'}}>
+			      				{reply.sender === username ? 'You' : reply.sender} 
+			      			</span>
+			      			<span> {reply.message} </span>
+			      		</div>
+			      		<div >
+			      			<CloseIcon onClick={closeReplyHandle} style={{fontSize: '1.2rem', color: '#c55044', margin: 7,}} />
+			      		</div></>
+			     	 }
+		      	</div>
+	      	</Slide>
       	<InputBase 
       		multiline
       		placeholder='Type your messages'
@@ -563,7 +566,7 @@ const MessagesPane = ({friend}) => {
     	</CardActions>
 
 		</Card>
-			{showProfile && <Profile profile={friend.profile} />}
+			{/*{showProfile && <Profile profile={friend.profile} />}*/}
 		</div>
 	)
 }
