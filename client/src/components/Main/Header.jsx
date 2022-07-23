@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
     top: 0,
     opacity: .95,
     backdropFilter: 'blur(5px)',
-    boxShadow: '-3px 1px 1px 0px #f1f1f1',
+    boxShadow: '-3px 1px 3px 0px #e5e5e5',
     '& .MuiToolbar-root': {
       padding: 0,
       height: '100%'
