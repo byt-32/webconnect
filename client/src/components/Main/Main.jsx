@@ -22,7 +22,7 @@ export const socket = io('/', {autoConnect: false})
 
 const useStyles = makeStyles({
 	main: {
-		background: grey[200] ,
+		background: 'linear-gradient(227deg, #f3f4ff, #d3920033)' ,
 		display: 'flex',
 		height: '100%'
 	}
@@ -51,6 +51,8 @@ const Main = () => {
 		dispatch(fetchRecentChats(id)).then(() => socket.emit('getOnileUsers'))
 		dispatch(fetchActiveUsers(id)).then(() => socket.emit('getOnileUsers'))
 		dispatch(fetchAccountData(id))
+
+
 	}, [])
 
 	socket.on('connect', () => {
