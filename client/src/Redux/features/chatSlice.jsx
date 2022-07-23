@@ -28,7 +28,7 @@ const actionValues = {
 
 const initialState = {
 	privateChats: [],
-	
+	networkError: false
 }
 
 const chatSlice = createSlice({
@@ -191,9 +191,13 @@ const chatSlice = createSlice({
 	},
 	extraReducers: builder => {
 		builder.addCase(fetchMessages.pending, (state, action) => {
-
+			state.networkError = false
+		})
+		.addCase(fetchMessages.rejected, (state, action) => {
+			state.networkError = true
 		})
 		.addCase(fetchMessages.fulfilled, (state, action) => {
+			state.networkError= false
 			const { username, messages, starredChat } = action.payload
 
 			const idx = state.privateChats.findIndex( chat => chat.username === username)
