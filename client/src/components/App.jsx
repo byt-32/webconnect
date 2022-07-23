@@ -42,7 +42,7 @@ const App = () => {
 				<Routes>
 					{JSON.parse(localStorage.getItem('details')) && 
 						<Route path='/' element={<Main /> } >
-							<Route path='/chat' element={<RightPane />} />
+							<Route path='/' element={<RightPane />} />
 						</Route>
 					}
 					<Route path='/signup' element={<SignUp /> } />
