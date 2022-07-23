@@ -48,7 +48,7 @@ const useStyles = makeStyles({
 			fontSize: '.83rem',
 			padding: '3px 7px',
 			background: common.white,
-			boxShadow: '0 0 2px 1px #f1f1f1',
+			boxShadow: '0 0 2px 0px #00000021',
 			borderRadius: '5px',
 		}
 	},
@@ -83,6 +83,7 @@ const useStyles = makeStyles({
 		width: 'auto',
 		font: 'message-box',
 		borderRadius: '5px' ,
+		boxShadow: '1px 1px 1px 0px #00000012',
 		position: 'relative',
 		'& > span': {
 			padding: '4px 8px',
@@ -105,7 +106,7 @@ const useStyles = makeStyles({
 		}
 	},
 	isLast: {
-		marginBottom: 10
+		marginBottom: 12
 	},
 	reply: {
 		background: common.white,
