@@ -1,7 +1,6 @@
 import React from 'react'
 import { TextField, InputAdornment, IconButton, Checkbox, Button } from '@material-ui/core'
 import { Visibility, VisibilityOff, LockSharp, AccountCircle, AlternateEmail } from '@material-ui/icons'
-import styles from '../../stylesheet/main.module.css'
 import { createTheme, ThemeProvider } from '@material-ui/core/styles'
 import { Preloader, ThreeDots } from 'react-preloader-icon'
 
@@ -86,13 +85,13 @@ const Form = () => {
 		 
 	}
 	return (
-		<form className={styles.Form} onSubmit={submitForm} >
+		<form className={'Form'} onSubmit={submitForm} >
 			<fieldset>
-			<div className={styles.formField}>
-					<label htmlFor='username' className={styles.fieldset_1_label}> Name </label>
+			<div className={'formField'}>
+					<label htmlFor='username' className={'fieldset_1_label'}> Name </label>
 					<TextField
 						required
-						classes={{root: styles.formInput}} 
+						classes={{root: 'formInput'}} 
 						type='text' 
 						id='username' 
 						autoComplete='username'
@@ -108,11 +107,11 @@ const Form = () => {
 							</InputAdornment>
 					}} />
 				</div>
-				<div className={styles.formField}>
-					<label htmlFor='email' className={styles.fieldset_1_label}> Email Address </label>
+				<div className={'formField'}>
+					<label htmlFor='email' className={'fieldset_1_label'}> Email Address </label>
 					<TextField
 						required
-						classes={{root: styles.formInput}} 
+						classes={{root: 'formInput'}} 
 						type='email' 
 						id='email' 
 						error={error.email} 
@@ -128,9 +127,9 @@ const Form = () => {
 							</InputAdornment>
 					}} />
 				</div>
-				<div className={styles.formField}>
-					<label htmlFor='new-password' className={styles.fieldset_1_label}> Password </label>
-					  <TextField classes={{root: styles.formInput}}
+				<div className={'formField'}>
+					<label htmlFor='new-password' className={'fieldset_1_label'}> Password </label>
+					  <TextField classes={{root: 'formInput'}}
 							required
 					    id="new-password"
 					    variant="outlined"
@@ -156,17 +155,17 @@ const Form = () => {
 				</div>
 			</fieldset>
 			<fieldset>
-				<div className={styles.formField}>
-					<Checkbox value='agree' checked={checked} onChange={handleCheckbox} required id='agree' color='primary' classes={{root: styles.checkbox}} />
+				<div className={'formField'}>
+					<Checkbox value='agree' checked={checked} onChange={handleCheckbox} required id='agree' color='primary' classes={{root: 'checkbox'}} />
 					<label htmlFor='agree'> I agree to the Terms of Service and Privacy Policy </label>
 				</div>
 			</fieldset>
 			<fieldset>
-				<div className={styles.formField}>
+				<div className={'formField'}>
 					<Button 
 					variant='contained' 
 					disabled={isSubmitting}
-					classes={{root: styles.button}} 
+					classes={{root: 'button'}} 
 					type='submit'> 
 						{isSubmitting && <Preloader
 						 use={ThreeDots}

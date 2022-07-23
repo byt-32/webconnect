@@ -43,7 +43,7 @@ const useStyles = makeStyles({
 		margin: '10px 0',
 		position: 'sticky',
 		zIndex: 20,
-		top: 0,
+		top: '10px',
 		'& span:first-child': {
 			fontSize: '.83rem',
 			padding: '3px 7px',
@@ -57,8 +57,8 @@ const useStyles = makeStyles({
 		position: 'relative',
 		alignItems: 'flex-end',
 		width: '100%',
-		padding: '5px 0',
-		transition: '.4s ease background'
+		padding: '2px 0',
+		transition: '.4s ease all'
 	},
 	flexStart: {
 		justifyContent: 'flex-start',
@@ -82,7 +82,7 @@ const useStyles = makeStyles({
 	chatSingle: {
 		width: 'auto',
 		font: 'message-box',
-		borderRadius: '5px 0' ,
+		borderRadius: '5px' ,
 		position: 'relative',
 		'& > span': {
 			padding: '4px 8px',
@@ -90,6 +90,22 @@ const useStyles = makeStyles({
 			alignItems: 'center',
 			justifyContent: 'space-between'
 		}
+	},
+	isFirst: {
+		'& > div::before': {
+			width: '40px',
+			height: '40px',
+			position: 'absolute',
+			content: '',
+			top: '-45px',
+			borderBottomLeftRadius: '50%',
+			background: 'tranparent',
+			left: '0',
+			boxShadow: '0 20px 0 0 #ffffff'
+		}
+	},
+	isLast: {
+		marginBottom: 10
 	},
 	reply: {
 		background: common.white,
@@ -161,9 +177,15 @@ const reactions = [
 	{name: 'like', icon: <ThumbUpIcon />},
 	{name: 'dislike', icon: <ThumbDownIcon />}
 ]
+
+const Reaction = ({name}) => {/* ignore this for now **/
+	if (name === 'smile') return <SentimentVerySatisfiedIcon className={classes.reaction} />
+	if (name === 'like') return <ThumbUpIcon className={classes.reaction} />
+	return <ThumbDownIcon className={classes.reaction} />
+}
 // ///rgb(0 137 255 / 6%)
 
-const ChatSingle = ({chat}) => {
+const ChatSingle = ({chat, isFirst, isLast}) => {
 	// console.log(props)
 	const classes = useStyles()
 	const dispatch = useDispatch()
@@ -195,11 +217,7 @@ const ChatSingle = ({chat}) => {
 		if (chat.receiver !== username) return chat.receiver
 	}
 	
-	const Reaction = ({name}) => {/* ignore this for now **/
-		if (name === 'smile') return <SentimentVerySatisfiedIcon className={classes.reaction} />
-		if (name === 'like') return <ThumbUpIcon className={classes.reaction} />
-		return <ThumbDownIcon className={classes.reaction} />
-	}
+	
 	function replace(text) {
 		return text.replaceAll('\n', '<br/>')
 	}
@@ -275,9 +293,17 @@ const ChatSingle = ({chat}) => {
 		chatRef.current.scrollIntoView({behavior: "smooth", block: "nearest", inline: "nearest"});
 	}, [chat.highlightChat])
 
+	React.useEffect(() => {
+
+	}, [])
+
 	return (
 		<ClickAwayListener onClickAway={handleClickAway}>
-			<div className={[classes.chatWrapper, wrapperClass].join(' ')} style={wrapperStyle} ref={chatRef} >
+			<div 
+				className={
+					[classes.chatWrapper, wrapperClass, isFirst && classes.isFirst, isLast && classes.isLast].join(' ')} 
+					style={wrapperStyle} ref={chatRef} 
+			>
 				{
 					deleted ? 
 					<div className={[className, classes.deleted].join(' ')}>
@@ -385,17 +411,49 @@ const ChatSingle = ({chat}) => {
 
 const ChatsByDate = ({chat}) => {
 	const classes = useStyles()
-	const day = new Date().toDateString().slice(0, -4);
+	const day = new Date().toDateString().slice(0, -5)
+	
 	return (
 		<div >
 			<header className={classes.dateNotice} >
 				<span> {chat.day === day ? 'Today' : chat.day} </span>
 			</header>
-				
+
+
 			<div className={classes.indexedChats}>
 				{
 					chat.chats.length > 0 &&
-						chat.chats.map((message, i) => <ChatSingle key={i} chat={message} /> )
+						chat.chats.map((message, i) => {
+
+							let indicators = {isFirst: false, isLast: false}
+
+							if (i === 0) indicators.isFirst = true
+							else if (i > 0) {
+								if (message.sender !== chat.chats[i-1].sender) {
+									indicators = {isFirst: true, isLast: false}
+								} 
+								if (i === chat.chats.length-1) indicators = {isLast: true}
+								if (i < chat.chats.length-1) {
+									if (message.sender !== chat.chats[i+1].sender) {
+										indicators = {isFirst: false, isLast: true}
+									}
+									if (message.sender !== chat.chats[i-1].sender && 
+										message.sender === chat.chats[i+1].sender) 
+									{
+										indicators = {isFirst: true, isLast: false}
+									}
+									if (message.sender !== chat.chats[i-1].sender && 
+										message.sender !== chat.chats[i+1].sender) {
+										indicators = {isFirst: true, isLast: true}
+									}
+								}
+									
+							}
+							
+							return (
+								<ChatSingle key={message.chatId} chat={message} {...indicators} /> 
+							)
+						})
 				}
 			</div>
 		</div>
@@ -403,10 +461,12 @@ const ChatsByDate = ({chat}) => {
 }
 
 const ChatMessages = ({chats}) => {
+	/** Index chats by date **/
 	const classes = useStyles()
 
-	let dates = [], _chats = []
+	let dates = [], chatsIndexedByDate = []
 
+	/** Index chats according to their dates */
 	chats.forEach(i => {
 		const dateInDates = dates.findIndex(d => d === i.timestamp.day)
 		if (dateInDates === -1) {
@@ -415,15 +475,15 @@ const ChatMessages = ({chats}) => {
 	})
 
 	dates.forEach(day => {
-		const chatByDate = chats.filter(chat => chat.timestamp.day === day)
-		_chats.push({day: day, chats: [...chatByDate]})
+		const chatsWithSameDate = chats.filter(chat => chat.timestamp.day === day)
+		chatsIndexedByDate.push({day: day, chats: [...chatsWithSameDate]})
 	})
 
 	return (
 		<> 
 				<div className={classes.chats}>
-					{ _chats.length > 0 &&
-							_chats.map((chatCollection, i) => <ChatsByDate key={i} chat={chatCollection} />)
+					{ chatsIndexedByDate.length > 0 &&
+							chatsIndexedByDate.map((chatCollection, i) => <ChatsByDate key={i} chat={chatCollection} />)
 					}
 				</div>
 		</>

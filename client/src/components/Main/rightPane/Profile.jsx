@@ -1,5 +1,4 @@
 import React from 'react'
-import styles from '../../../stylesheet/main.module.css'
 import { useDispatch,useSelector } from 'react-redux'
 import UserAvatar from '../UserAvatar'
 import AppBar from '@material-ui/core/AppBar';
@@ -116,7 +115,7 @@ const Profile = ({profile}) => {
   }
 	return (
 		<><div className={classes.backdrop} onClick={setComp} > </div>
-		<section className={[classes.profilePage, styles.animate__animated, styles.animate__fadeInRight].join(' ')} 
+		<section className={[classes.profilePage, 'animate__animated', 'animate__fadeInRight'].join(' ')} 
 			style={{height: `${getWindowHeight()}px`}}
 		>
 			<Header>

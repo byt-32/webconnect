@@ -1,7 +1,6 @@
 import React from 'react'
 import Avatar from '@material-ui/core/Avatar'
 import Badge from '@material-ui/core/Badge'
-import styles from '../../stylesheet/main.module.css'
 import { makeStyles } from '@material-ui/core/styles';
 
 const colors = [

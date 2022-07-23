@@ -1,6 +1,5 @@
 import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import styles from '../../../stylesheet/main.module.css'
 import { setComponents } from '../../../Redux/features/componentSlice'
 import TextField from '@material-ui/core/TextField'
 import Menu from '@material-ui/core/Menu'

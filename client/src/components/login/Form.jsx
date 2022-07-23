@@ -4,7 +4,7 @@ import InputAdornment from '@material-ui/core/InputAdornment'
 import IconButton from '@material-ui/core/IconButton'
 import Button from '@material-ui/core/Button'
 import { Visibility, VisibilityOff, LockSharp, AccountCircle } from '@material-ui/icons'
-import styles from '../../stylesheet/main.module.css'
+// import 'from' '../../'eet'/main.css'
 import { Preloader, ThreeDots } from 'react-preloader-icon'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
@@ -87,13 +87,13 @@ const Form = ({login}) => {
 		 
 	}
 	return (
-		<form className={styles.Form} onSubmit={submitForm} >
+		<form className={'form'} onSubmit={submitForm} >
 			<fieldset>
-				<div className={styles.formField}>
-					<label htmlFor='username' className={styles.fieldset_1_label}> Username </label>
+				<div className={'formField'}>
+					<label htmlFor='username' className={'fieldset_1_label'}> Username </label>
 					<TextField
 						required
-						classes={{root: styles.formInput}} 
+						classes={{root: 'formInput'}} 
 						type='text' 
 						autoComplete='username'
 						id='username' 
@@ -109,9 +109,9 @@ const Form = ({login}) => {
 							</InputAdornment>
 					}} />
 				</div>
-				<div className={styles.formField}>
-					<label htmlFor='current-password' className={styles.fieldset_1_label}> Password </label>
-					  <TextField classes={{root: styles.formInput}}
+				<div className={'formField'}>
+					<label htmlFor='current-password' className={'fieldset_1_label'}> Password </label>
+					  <TextField classes={{root: 'formInput'}}
 							required
 							autoComplete='current-password'
 					    id="current-password"
@@ -136,18 +136,18 @@ const Form = ({login}) => {
 				</div>
 			</fieldset>
 			{/*<fieldset>
-				<div className={[styles.formField, styles.formMisc].join(' ')}>
+				<div className={['formField', 'formMisc'].join(' ')}>
 					<div>
-						<button className={styles.forgot} type='button'> Forgot Password? </button>
+						<button className={'forgot'} type='button'> Forgot Password? </button>
 					</div>
 				</div>
 			</fieldset>*/}
 			<fieldset>
-				<div className={styles.formField}>
+				<div className={'formField'}>
 					<Button 
 					variant='contained' 
 					disabled={isSubmitting}
-					classes={{root: styles.button}} 
+					classes={{root: 'button'}} 
 					type='submit'> 
 						{isSubmitting && 
 							<Preloader use={ThreeDots} size={25} strokeColor='#fff' duration={1000} /> 

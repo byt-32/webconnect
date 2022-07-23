@@ -140,12 +140,13 @@ const UserList = ({user, style, secondaryItems}) => {
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const fetchedUsers = useSelector(state => state.other.fetched)
-	let dateValue, yearPos, year, fullDate
+	let dateValue, yearPos, year, fullDate, timestamp
 
 	if (assert(user.messages)) {
+		timestamp = user.messages.timestamp
 		// Get the date of the last chat 
-		if (user.messages.timestamp.fullDate === new Date().toDateString()) {
-			dateValue = user.messages.timestamp.time.slice(1)
+		if (timestamp.fullDate === new Date().toDateString()) {
+			dateValue = timestamp.time[0] === '0' ? timestamp.time.slice(1) : timestamp.time
 		} else {
 			fullDate = user.messages.timestamp.fullDate
 			yearPos = fullDate.match(/[0-9][0-9][0-9][0-9]/).index

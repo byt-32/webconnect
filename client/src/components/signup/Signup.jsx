@@ -1,7 +1,6 @@
 import React from 'react'
 import { Card, CardContent, CardActions, Typography } from '@material-ui/core'
 import { useDispatch } from 'react-redux'
-import styles from '../../stylesheet/main.module.css'
 import AltFacebook from './AltFacebook'
 import AltGoogle from './AltGoogle'
 import Form from './Form'
@@ -25,26 +24,26 @@ const imgUrls = [
 
 const SignUp = () => {
 	return (
-		<div className={[styles.signupMain, styles.animate__animated, styles.animate__fadeIn].join(' ')} >
-			<div className={styles.spx1}>
+		<div className={['signupMain', 'animate__animated', 'animate__fadeIn'].join(' ')} >
+			<div className={'spx1'}>
 
 				{/*<ImageBanner imgUrls={imgUrls} />*/}
 
-				<section className={[styles.signupMainRight, styles.signupMainFc].join(' ')}>
-					<div className={styles.SMRContainer} >
+				<section className={['signupMainRight', 'signupMainFc'].join(' ')}>
+					<div className={'SMRContainer'} >
 
 						<header>
 							<h1> Get started </h1>
-							<p> Already have an account? <button className={styles.headerBtn} type='button' >
+							<p> Already have an account? <button className={'headerBtn'} type='button' >
 							 <Link to='/login'> Log in </Link>
 							 </button> </p>
 						</header>
-						<div className={styles.altSignups} >
+						<div className={'altSignups'} >
 							{/*<AltGoogle />
 							<AltFacebook />*/}
 						</div>
-						<div className={styles.signupForm}>
-							{/*<div className={styles.borderDivider}>
+						<div className={'signupForm'}>
+							{/*<div className={'borderDivider'}>
 								<span> Or </span>
 							</div>*/}
 							<Form />

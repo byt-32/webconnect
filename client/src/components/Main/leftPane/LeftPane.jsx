@@ -1,5 +1,4 @@
 import React from 'react'
-import styles from '../../../stylesheet/main.module.css'
 import ActiveUsers from './ActiveUsers'
 import RecentChats from './RecentChats'
 import Settings from './settings/Settings'
@@ -42,18 +41,18 @@ const LeftPane = () => {
 	const trasitionProps = {
 		timeout: 500,
 		unmountOnExit: true,
-		className: styles.animate__animated,
+		className: 'animate__animated',
 		classNames: {
-			enter: styles.animate__fadeInRight,
+			enter: 'animate__fadeInRight',
 		}
 	}
 	return (
 		<section className={classes.leftpane}  >
-			{activeUsers && <ActiveUsers className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
-			{recentChats && <RecentChats className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
-			{settings && <Settings className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
-			{contactInfo && <ContactInfo className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
-			{resetPassword && <ResetPassword className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
+			{activeUsers && <ActiveUsers className={['animate__fadeInRight', 'animate__animated'].join(' ')}/>}
+			{recentChats && <RecentChats className={['animate__fadeInRight', 'animate__animated'].join(' ')} />}
+			{settings && <Settings className={['animate__fadeInRight', 'animate__animated'].join(' ')} />}
+			{contactInfo && <ContactInfo className={['animate__fadeInRight', 'animate__animated'].join(' ')}/>}
+			{resetPassword && <ResetPassword className={['animate__fadeInRight', 'animate__animated'].join(' ')}/>}
 		</section>
 			
 	)

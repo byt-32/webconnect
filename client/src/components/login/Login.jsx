@@ -1,5 +1,5 @@
 import React from 'react'
-import styles from '../../stylesheet/main.module.css'
+// import '../../'eet'/main.css'
 import Form from './Form'
 import ImageBanner from '../ImageBanner'
 import { Link } from 'react-router-dom'
@@ -14,21 +14,21 @@ const imgUrls = [
 const Login = () => {
 	
 	return (
-		<div className={[styles.signupMain, styles.animate__animated, styles.animate__fadeIn].join(' ')}  >
-			<div className={styles.spx1}>
+		<div className={['signupMain', 'animate__animated', 'animate__fadeIn'].join(' ')}  >
+			<div className={'spx1'}>
 				{/*<ImageBanner imgUrls={imgUrls} />*/}
 				
-				<section className={[styles.signupMainRight, styles.signupMainFc].join(' ')}>
-					<div className={styles.SMRContainer} >
+				<section className={['signupMainRight', 'signupMainFc'].join(' ')}>
+					<div className={'SMRContainer'} >
 
 						<header>
 							<h1> Welcome back </h1>
-							<button type='button' className={styles.headerBtn}>
+							<button type='button' className={'headerBtn'}>
 								<Link to='/signup'>Create Account </Link>
 							</button>
 						</header>
 						
-						<div className={styles.Form}>
+						<div className={'Form'}>
 							<Form />
 						</div>
 					</div>
