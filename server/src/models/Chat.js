@@ -7,8 +7,11 @@ const chatSchema = new mongoose.Schema({
 		{
 			_id: String,
 			username: String,
+			isStarred: {
+				value: {type: Boolean, default: false},
+				date: {type: Number}
+			},
 			lastSent: Number,
-			starred: Object,
 			unread: Array,
 			messages: Array
 		}

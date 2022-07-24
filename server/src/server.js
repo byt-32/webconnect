@@ -8,6 +8,7 @@ import chatRoute from './routes/chatRoute.js'
 import {
 	chatsUtil,
 	unreadUtil,
+	userUtil,
 	validateUtil,
 } from './utils/script.js'
 
@@ -90,7 +91,7 @@ io.on('connection', socket => {
 	for (let [id, socket] of io.of('/').sockets) {
 
 		search(onlineUsers, 'token', socket.token, ({result, index}) => {
-			if (index > -1) {
+			if (index !== -1) {
 				onlineUsers[index] = {socketId: id, username: socket.username}
 			} else {
 				onlineUsers.push({socketId: id, username: socket.username})
@@ -108,7 +109,7 @@ io.on('connection', socket => {
 
 		socket.broadcast.emit('userDisconnect', {username: socket.username, socketId: socket.id})
 
-		// updateLastSeen(socket.token)
+		userUtil.setLastSeen(socket.token)
 	})
 
 
@@ -155,6 +156,14 @@ io.on('connection', socket => {
 			
 		})
 		
+	})
+
+	socket.on('starConversation', (user, friendsName, isStarred) => {
+		chatsUtil.starConversation(user, friendsName, isStarred)
+	})
+
+	socket.on('clearConversation', (user, friendsName) => {
+		chatsUtil.clearConversation(user, friendsName)
 	})
 
 	socket.on('userIsTyping', obj => {

@@ -11,6 +11,12 @@ export const validateUtil = {
 	}
 }
 
+export const userUtil = {
+	setLastSeen: async (id) => {
+		await User.findOneAndUpdate({_id: id}, {lastSeen: Date.now()})
+	}
+}
+
 export const unreadUtil = {
 	save: async function (sender, receiver, chatId) {
 		await Chat.findOne({username: receiver})
@@ -50,6 +56,18 @@ export const unreadUtil = {
 }
 
 export const chatsUtil = {
+	starConversation: async (user, friendsName, isStarred) => {
+		await Chat.findOneAndUpdate({username: user, 'chats.username': friendsName,}, {
+			'chats.$.isStarred': isStarred
+		})
+	},
+	clearConversation: async (user, friendsName) => {
+		await Chat.findOneAndUpdate({username: user}, {
+			$pull: {
+				chats: {username: friendsName}
+			}
+		})
+	},
 	save: async function (user1, user2, lastSent, message) {
 		const user1Id = await User.findOne({username: user1}, {_id: 1})
 		const user2Id = await User.findOne({username: user2}, {_id: 1})

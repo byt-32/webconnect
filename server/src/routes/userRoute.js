@@ -222,6 +222,7 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 				'chats.username': 1, 
 				'chats.lastSent': 1, 
 				'chats.unread': 1,
+				'chats.isStarred': 1,
 				'chats.messages': {$slice: -1}, 
 			}) || []
 
