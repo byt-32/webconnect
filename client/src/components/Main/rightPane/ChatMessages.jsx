@@ -118,7 +118,7 @@ const useStyles = makeStyles({
 	chatTime: {
 		fontSize: '.65rem',
 		marginLeft: 9,
-		opacity: .7,
+		opacity: .9,
 		alignSelf: 'flex-end'
 	},
 	deleted: {
