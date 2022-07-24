@@ -231,7 +231,6 @@ const MessagesPane = ({friend}) => {
 	const {username, id} = JSON.parse(localStorage.getItem('details'))
 	const friendInUsers = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username))
 
-	const online = friendInUsers !== undefined ? friendInUsers.online : false
 	const profile = useSelector(state => state.components.profile)
 	// console.log(online)
 
@@ -260,7 +259,7 @@ const MessagesPane = ({friend}) => {
 	const [secondaryText, setText] = React.useState('')
 
 	React.useEffect(() => {
-		if (friendInUsers.online) {
+		if (friendInUsers !== undefined && friendInUsers.online) {
 			setText('online')
 		} else {
 			if (typeof friendInUsers.lastSeen === 'number') {
@@ -316,7 +315,6 @@ const MessagesPane = ({friend}) => {
 	if (friendInRecent !== undefined) {
 		friendIsTyping = friendInRecent.typing
 	}
-	
 	
 	const toggleMenu = (event) => {
 		setAnchorEl(event.target)
