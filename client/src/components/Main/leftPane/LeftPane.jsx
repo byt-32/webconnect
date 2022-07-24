@@ -7,12 +7,17 @@ import ContactInfo from './settings/ContactInfo'
 import { CSSTransition } from 'react-transition-group'
 import { makeStyles } from '@material-ui/core/styles';
 import common from '@material-ui/core/colors/common';
+import Snackbar from '@material-ui/core/Snackbar'
+import MuiAlert from '@material-ui/lab/Alert';
+
+import styles from '../../../stylesheet/transition.css'
 
 import { useSelector } from 'react-redux'
 
 const useStyles = makeStyles(() => ({
 	leftpane: {
 		background: common.white,
+		// background: 'linear-gradient(39deg, #ffffff, #e5af1800)',
 		zIndex: 25,
 		minWidth: 250,
 		maxWidth: 400,
@@ -38,6 +43,8 @@ const LeftPane = () => {
 		resetPassword
 	} = useSelector(state => state.components.stack)
 
+	const networkError = useSelector(state => state.chat.networkError)
+
 	const trasitionProps = {
 		timeout: 500,
 		unmountOnExit: true,
@@ -47,12 +54,21 @@ const LeftPane = () => {
 		}
 	}
 	return (
-		<section className={classes.leftpane}  >
-			{activeUsers && <ActiveUsers className={['animate__fadeInRight', 'animate__animated'].join(' ')}/>}
-			{recentChats && <RecentChats className={['animate__fadeInRight', 'animate__animated'].join(' ')} />}
-			{settings && <Settings className={['animate__fadeInRight', 'animate__animated'].join(' ')} />}
-			{contactInfo && <ContactInfo className={['animate__fadeInRight', 'animate__animated'].join(' ')}/>}
-			{resetPassword && <ResetPassword className={['animate__fadeInRight', 'animate__animated'].join(' ')}/>}
+		<section className={classes.leftpane} >
+			<Snackbar open={networkError}
+      	className={[classes.bottomSnackbar, classes.snackbar].join(' ')}
+				autoHideDuration={6000} 
+			>
+			  <MuiAlert variant='filled' elevation={6} severity="error">
+			    Network error. Check your connection.
+			  </MuiAlert>
+			</Snackbar>
+
+			{activeUsers && <ActiveUsers className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
+			{recentChats && <RecentChats className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
+			{settings && <Settings className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
+			{contactInfo && <ContactInfo className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
+			{resetPassword && <ResetPassword className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
 		</section>
 			
 	)
