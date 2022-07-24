@@ -449,7 +449,7 @@ const Settings = ({className}) => {
 	            <ListItemText primary="Notification" />
 	            <Switch 
 	            	checked={settings.notifications}
-	            	color='secondary'
+	            	color='primary'
 	            />
 	          </ListItem>
 	          <ListItem  button
@@ -458,7 +458,7 @@ const Settings = ({className}) => {
 	            <ListItemText primary="Sound" />
             	<Switch 
             		checked={settings.sound}
-            		color='secondary'
+            		color='primary'
             	/>
 	          </ListItem>
 	        </List>
