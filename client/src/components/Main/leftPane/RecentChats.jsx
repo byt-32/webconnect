@@ -76,6 +76,12 @@ const useStyles = makeStyles({
 	listItem: {
 		position: 'relative',
 		padding: 12,
+		'&.MuiListItem-root.Mui-selected': {
+			backgroundColor: 'rgb(248 247 255)'
+		},
+		'&:hover': {
+			backgroundColor: 'rgb(248 247 255)'
+		},
 		'& .MuiAvatar-root': {
 			width: 45, height: 45
 		},
@@ -145,6 +151,7 @@ const UserList = ({user, style, secondaryItems}) => {
 	if (assert(user.messages)) {
 		timestamp = user.messages.timestamp
 		// Get the date of the last chat 
+		//example of a fulldate: fri July 21, 2022
 		if (timestamp.fullDate === new Date().toDateString()) {
 			dateValue = timestamp.time[0] === '0' ? timestamp.time.slice(1) : timestamp.time
 		} else {
@@ -161,8 +168,10 @@ const UserList = ({user, style, secondaryItems}) => {
 	}
 
 	const handleClick = () => {
-		if (window.innerWidth < 660 ) {
-			dispatch(setComponents({component: 'leftPane', value: false}))
+		const setPane = () => {
+			if (window.innerWidth < 660 ) {
+				dispatch(setComponents({component: 'leftPane', value: false}))
+			}
 		}
 		if (selectedUser.username !== user.username) {
 			
@@ -172,61 +181,61 @@ const UserList = ({user, style, secondaryItems}) => {
 			}
 			if (assert(fetchedUsers.find(i => i === user.username))) {
 				dispatch(setSelectedUser({username: user.username}))
+				setPane()
 			} else {
-				dispatch(assertFetch(user.username))
 				dispatch(
 					fetchMessages({friendsName: user.username, token: id})
 				).then(() => {
+					dispatch(assertFetch(user.username))
 					dispatch(setSelectedUser({username: user.username}))
+					setPane()
 				})
 			}
 			
 		}
 	}
 	return (
-		<Link to='chat'>
-			<ListItem	button 
-				className={classes.listItem}
-				selected={user.username === selectedUser.username}
-	  		onClick={handleClick}>
-	    		<ListItemIcon>
-			      <UserAvatar
-				      username={user.username} 
-				      badge={user.online ? true : false}
-				     />
-			    </ListItemIcon>
-	      	<ListItemText 
-	      		primary={
-	      			<Typography component='h6'> {user.username}</Typography>
-	      		} 
-	      		secondary={
-	      			user.typing ?
-	      				<span className={classes.typingStatus}> {'typing...'} </span>
-	      			: 
-	      				<span className={classes.lastChat}> 
-	      					{user.messages.sender === username && 
-	      						<span className={classes.chatRead}> 
-											{user.messages.read ? <DoneAllIcon style={{color: '#00c759'}} /> : <DoneIcon />}
-	      						</span> 
-	      					} 
-	      					 <span> {user.messages.message} </span>
-	      				</span>
-	      		}
-	      	/>
-		     	<div className={classes.chatMisc} > 
-		     		<span 
-		     			className={classes.lastSent} 
-		     			style={{color: assert(user.unread) ? '#6495ed' : 'initial'}}
-		     		> 
-		     			{dateValue}
-		     		</span>
+		<ListItem	button 
+			className={classes.listItem}
+			selected={user.username === selectedUser.username}
+  		onClick={handleClick}>
+    		<ListItemIcon>
+		      <UserAvatar
+			      username={user.username} 
+			      badge={user.online ? true : false}
+			     />
+		    </ListItemIcon>
+      	<ListItemText 
+      		primary={
+      			<Typography component='h6'> {user.username}</Typography>
+      		} 
+      		secondary={
+      			user.typing ?
+      				<span className={classes.typingStatus}> {'typing...'} </span>
+      			: 
+      				<span className={classes.lastChat}> 
+      					{user.messages.sender === username && 
+      						<span className={classes.chatRead}> 
+										{user.messages.read ? <DoneAllIcon style={{color: '#00c759'}} /> : <DoneIcon />}
+      						</span> 
+      					} 
+      					 <span> {user.messages.message} </span>
+      				</span>
+      		}
+      	/>
+	     	<div className={classes.chatMisc} > 
+	     		<span 
+	     			className={classes.lastSent} 
+	     			style={{color: assert(user.unread) ? '#6495ed' : 'initial'}}
+	     		> 
+	     			{dateValue}
+	     		</span>
 
-		     		{ assert(user.unread) &&
-		     			<span className={classes.unread}> {user.unread.length} </span>
-		     		}
-		     	</div>
-	    </ListItem>
-    </Link>
+	     		{ assert(user.unread) &&
+	     			<span className={classes.unread}> {user.unread.length} </span>
+	     		}
+	     	</div>
+    </ListItem>
 	)
 }
 

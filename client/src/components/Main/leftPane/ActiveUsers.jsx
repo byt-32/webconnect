@@ -43,6 +43,12 @@ const useStyles = makeStyles({
 		cursor: 'pointer'
 	},
 	listItem: {
+		'&.MuiListItem-root.Mui-selected': {
+			backgroundColor: 'rgb(248 247 255)'
+		},
+		'$:hover': {
+			backgroundColor: 'rgb(248 247 255)'
+		},
 		position: 'relative',
 		'& .MuiAvatar-root': {
 			width: 45, height: 45
@@ -92,8 +98,10 @@ const UserList = ({user, style, secondaryItems}) => {
 	const handleClick = () => {
 
 		if (selectedUser.username !== user.username) {
-			if (window.innerWidth < 660 ) {
-				dispatch(setComponents({component: 'leftPane', value: false}))
+			const setPane = () => {
+				if (window.innerWidth < 660 ) {
+					dispatch(setComponents({component: 'leftPane', value: false}))
+				}
 			}
 			if (find !== undefined) {
 				if (find.unread > 0) {
@@ -104,37 +112,35 @@ const UserList = ({user, style, secondaryItems}) => {
 			
 			if (selectedUsersArr.find(i => i === user.username) !== undefined) {
 				dispatch(setSelectedUser(user))
-				
+				setPane()
 			} else {
-				dispatch(assertFetch(user.username))
 				dispatch(
 					fetchMessages({friendsName: user.username, token: id})
 				).then(() => {
+					dispatch(assertFetch(user.username))
 					dispatch(setSelectedUser(user))
-
+					setPane()
 				})
 			}
 			
 		}
 	}
 	return (
-		<Link to='chat'>
-			<ListItem	button 
-				className={classses.listItem}
-				selected={user.username === selectedUser.username}
-	  		onClick={handleClick}>
-	    		<ListItemIcon>
-			      <UserAvatar
-				      username={user.username} 
-				      badge={user.online ? true : false}
-				     />
-			    </ListItemIcon>
-	      	<ListItemText 
-	      		primary={<Typography component='h6' style={{fontFamily: 'Roboto'}}> {user.username}</Typography>} 
-	      		secondary={user.lastSeen && secondaryText}
-	      	/>
-	    </ListItem>
-    </Link>
+		<ListItem	button 
+			className={classses.listItem}
+			selected={user.username === selectedUser.username}
+  		onClick={handleClick}>
+    		<ListItemIcon>
+		      <UserAvatar
+			      username={user.username} 
+			      badge={user.online ? true : false}
+			     />
+		    </ListItemIcon>
+      	<ListItemText 
+      		primary={<Typography component='h6' style={{fontFamily: 'Roboto'}}> {user.username}</Typography>} 
+      		secondary={user.lastSeen && secondaryText}
+      	/>
+    </ListItem>
 	)
 }
 
