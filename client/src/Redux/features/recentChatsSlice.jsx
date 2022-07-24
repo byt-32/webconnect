@@ -81,10 +81,26 @@ const recentChatsSlice = createSlice({
 			if (index !== -1) {
 				state.recentChats[index].lastSent = lastSent
 				state.recentChats[index].messages = messages
+				state.recentChats[index].isStarred = {value: false}
 				spliced = state.recentChats.splice(index, 1)
 				state.recentChats.unshift(spliced[0])
 			} else {
 				state.recentChats.unshift(action.payload)
+			}
+		},
+		handleStarred: (state, action) => {
+			const {friendsName, isStarred} = action.payload
+			const find = state.recentChats.findIndex(i => i.username === friendsName)
+
+			if (find !== -1) {
+				state.recentChats[find].isStarred = isStarred
+			}
+		},
+		clearConversation: (state, action) => {
+			const friendsName = action.payload
+			const find = state.recentChats.findIndex(i => i.username === friendsName)
+			if (find !== -1) {
+				state.recentChats.splice(find, 1)
 			}
 		},
 		syncRecentsWithDeleted: (state, action) => {
@@ -140,6 +156,8 @@ export const {
 	search,
 	setRecentOnline,
 	resetUnread,
+	handleStarred,
+	clearConversation,
 	setUnread,
 	syncRecentsWithDeleted,
 	updateRecentChats,

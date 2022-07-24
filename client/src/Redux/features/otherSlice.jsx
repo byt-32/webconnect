@@ -19,6 +19,13 @@ const otherSlice = createSlice({
 			const username = action.payload
 			state.fetched.push(username)
 		},
+		clearFromFetched: (state, action) => {
+			const friendsName = action.payload
+			const find = state.fetched.findIndex(i => i === friendsName)
+			if (find !== -1) {
+				state.fetched.splice(find, 1)
+			}
+		},
 		setOnlineUsers: (state, action) => {
 			const users = action.payload
 
@@ -47,6 +54,7 @@ const otherSlice = createSlice({
 export const {
 	setSelectedUser,
 	assertFetch,
+	clearFromFetched,
 	setOnlineUsers,
 	setDisconnectedUsers
 } = otherSlice.actions
