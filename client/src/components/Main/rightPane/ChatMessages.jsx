@@ -12,7 +12,6 @@ import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined'
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles } from '@material-ui/core/styles';
 import Snackbar from '@material-ui/core/Snackbar'
-import Popover from '@material-ui/core/Popover';
 import Backdrop from '@material-ui/core/Backdrop';
 import Typography from '@material-ui/core/Typography';
 
@@ -32,6 +31,8 @@ import blue from '@material-ui/core/colors/blue';
 import deepOrange from '@material-ui/core/colors/deepOrange';
 import { assert } from '../../../lib/script'
 import { socket } from '../Main'
+
+import ChatActions from '../ChatActions'
 
 const useStyles = makeStyles({
 	indexedChats: {
@@ -112,28 +113,6 @@ const useStyles = makeStyles({
 			paddingBottom: 3,
 			fontSize: '.8rem', 
 			fontWeight: 'bold'
-		}
-	},
-	chatActions: {
-		borderRadius: '5px',
-		zIndex: 250000,
-		display: 'flex',
-		flexDirection: 'column',
-		background: '#fff !important',
-		'& > div': {display: 'flex'},
-		'& div:first-child': {
-
-		},
-		'& > div:last-of-type': {
-			flexDirection: 'column',
-			'& > button': {
-				padding: '12px 0 12px 15px',
-				borderRadius: 0,
-				'& > span > span.MuiTypography-root': {
-					padding: '0 25px 0 15px',
-					color: '#000'
-				}
-			}
 		}
 	},
 	chatTime: {
@@ -362,7 +341,8 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 				}
 				{/** Don't show chat actions for a deleted chat **/
 					!deleted &&
-						<Popover open={open} 
+						<ChatActions 
+							open={open} 
 							anchorEl={anchorEl} 
 							onClose={handleClickAway} 
 							anchorOrigin={{
@@ -374,43 +354,41 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 						    horizontal: me ? 'right' : 'left',
 						  }}
 						>
-							<div className={classes.chatActions}>
-								<div>
-									{/*{
-										reactions.map((reaction, i) => {
-											return (
-												<IconButton key={reaction.name}> {reaction.icon} </IconButton>
-											)
-										})
-									}*/}
-								</div>
-								<div>
-									<IconButton onClick={() => {
-										handleReply()
-										closeActions()
-									}} >
-										<ReplyIcon /> 
-										<Typography component='span'> Reply </Typography>
-									</IconButton>
-
-									<IconButton onClick={() => {
-										handleCopy()
-									}} >
-										<FileCopyOutlinedIcon style={{color:'#958783'}} /> 
-										<Typography component='span'> Copy </Typography>
-									</IconButton>
-									{/*<IconButton onClick={starMessage} > <StarsIcon style={{color: '#5f547a'}} /> </IconButton>*/}
-									<IconButton onClick={() => {
-										beginDelete()
-										closeActions()
-									}} >
-										<DeleteSweepIcon style={{color: '#ed143d'}} /> 
-										<Typography component='span'> Delete </Typography>
-									</IconButton>
-								</div>
+							<div>
+								{/*{
+									reactions.map((reaction, i) => {
+										return (
+											<IconButton key={reaction.name}> {reaction.icon} </IconButton>
+										)
+									})
+								}*/}
 							</div>
-						</Popover>
-				}
+							<div>
+								<IconButton onClick={() => {
+									handleReply()
+									closeActions()
+								}} >
+									<ReplyIcon /> 
+									<Typography component='span'> Reply </Typography>
+								</IconButton>
+
+								<IconButton onClick={() => {
+									handleCopy()
+								}} >
+									<FileCopyOutlinedIcon style={{color:'#958783'}} /> 
+									<Typography component='span'> Copy </Typography>
+								</IconButton>
+								{/*<IconButton onClick={starMessage} > <StarsIcon style={{color: '#5f547a'}} /> </IconButton>*/}
+								<IconButton onClick={() => {
+									beginDelete()
+									closeActions()
+								}} >
+									<DeleteSweepIcon style={{color: '#ed143d'}} /> 
+									<Typography component='span'> Delete </Typography>
+								</IconButton>
+							</div>
+						</ChatActions>
+					}
 
 				
 			</div>
