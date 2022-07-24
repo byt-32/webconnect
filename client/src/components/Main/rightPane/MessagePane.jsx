@@ -116,7 +116,8 @@ const useStyles = makeStyles({
 		},
 		'& .MuiCardActions-root': {
 			background: common.white,
-			position: 'relative'
+			position: 'relative',
+			boxShadow: '0px 0px 2px 1px #0000000d'
 		},
 		'& .MuiInputBase-root': {
 			flex: 1,
@@ -389,13 +390,14 @@ const MessagesPane = ({friend}) => {
 					lastSent: chatObj.lastSent,
 					messages: chatObj.message,
 					online: selectedUser.online,
-					unread: 0
+					isStarred: {value: false},
+					unread: []
 				}))
 
 				dispatch(storeSentChat(chatObj))
 				textarea.value = ''
 				// setInput('')
-				assert(reply) && closeReplyHandle()
+				reply.open && closeReplyHandle()
 			} else {
 				setNetworkError(true)
 			}
@@ -550,7 +552,7 @@ const MessagesPane = ({friend}) => {
       		placeholder='Type your messages'
       		ref={inputRef}
       		className={classes.inputBase}
-      		onChange={() => online && handleTextInput()}
+      		onChange={() => secondaryText === 'online' && handleTextInput()}
       		endAdornment={
 						<InputAdornment position="end" style={{height: '100%'}}>
 							<IconButton onClick={sendMessage} >
