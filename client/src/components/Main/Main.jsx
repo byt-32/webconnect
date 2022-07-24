@@ -65,12 +65,12 @@ const Main = () => {
 	socket.off('onlineUsers').on('onlineUsers', users => {
 		dispatch(setRecentOnline(users.filter(user => user.username !== username)))
 		dispatch(setActiveOnline(users.filter(user => user.username !== username)))
-		dispatch(setOnlineUsers(users.filter(user => user.username !== username)))
+		// dispatch(setOnlineUsers(users.filter(user => user.username !== username)))
 	})
 	socket.off('userDisconnect').on('userDisconnect', user => {
 		dispatch(setActiveDisconnect(user))
 		dispatch(setRecentDisconnect(user))
-		dispatch(setDisconnectedUsers(user))
+		// dispatch(setDisconnectedUsers(user))
 	})
 
 	socket.off('starredChat').on('starredChat', (starredBy, starredChat) => {

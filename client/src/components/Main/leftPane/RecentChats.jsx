@@ -1,5 +1,4 @@
 import React from 'react'
-import IconButton from '@material-ui/core/IconButton'
 import { useSelector, useDispatch } from 'react-redux'
 
 import {setComponents} from '../../../Redux/features/componentSlice'
@@ -12,6 +11,8 @@ import TextField from '@material-ui/core/TextField'
 import MenuItem from '@material-ui/core/MenuItem';
 import InputBase from '@material-ui/core/InputBase'
 import Badge from '@material-ui/core/Badge';
+import Popover from '@material-ui/core/Popover';
+import IconButton from '@material-ui/core/IconButton'
 
 import GroupIcon from '@material-ui/icons/Group'
 import MenuIcon from '@material-ui/icons/Menu'
@@ -23,10 +24,13 @@ import AccountCircleRoundedIcon from '@material-ui/icons/AccountCircleRounded';
 import FiberManualRecordRoundedIcon from '@material-ui/icons/FiberManualRecordRounded';
 import DoneAllIcon from '@material-ui/icons/DoneAll'
 import DoneIcon from '@material-ui/icons/Done';
+import StarBorderIcon from '@material-ui/icons/StarBorder';
+import StarIcon from '@material-ui/icons/Star';
+import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 
-import { setSelectedUser, assertFetch } from '../../../Redux/features/otherSlice'
-import { fetchMessages } from '../../../Redux/features/chatSlice'
-import { resetUnread } from '../../../Redux/features/recentChatsSlice'
+import { setSelectedUser, assertFetch, clearFromFetched } from '../../../Redux/features/otherSlice'
+import { fetchMessages, clearChats } from '../../../Redux/features/chatSlice'
+import { resetUnread, handleStarred, clearConversation } from '../../../Redux/features/recentChatsSlice'
 
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText'
@@ -38,10 +42,11 @@ import { Link } from 'react-router-dom'
 import Preloader from '../../Preloader'
 
 import { socket } from '../Main'
-import { assert, getLastSeen } from '../../../lib/script'
+import { assert, getLastSeen, handleFetch } from '../../../lib/script'
 
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 import Header from '../Header'
+import ChatActions from '../ChatActions'
 
 const useStyles = makeStyles({
 	add: {
@@ -144,6 +149,8 @@ const UserList = ({user, style, secondaryItems}) => {
 	const {useState, useEffect} = React
 	const classes = useStyles()
 	const dispatch = useDispatch()
+	const [showMenu, setMenu] = useState(false)
+	const [anchorEl, setAnchorEl] = React.useState(null)
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const fetchedUsers = useSelector(state => state.other.fetched)
 	let dateValue, yearPos, year, fullDate, timestamp
@@ -167,7 +174,8 @@ const UserList = ({user, style, secondaryItems}) => {
 		}
 	}
 
-	const handleClick = () => {
+	const handleClick = (e) => {
+		e.preventDefault()
 		const setPane = () => {
 			if (window.innerWidth < 660 ) {
 				dispatch(setComponents({component: 'leftPane', value: false}))
@@ -194,10 +202,44 @@ const UserList = ({user, style, secondaryItems}) => {
 			
 		}
 	}
+	const openContextMenu = (e) => {
+		e.preventDefault()
+
+		console.log(e)
+		setMenu(true)
+		setAnchorEl(e.currentTarget)
+		return false
+	}
+	const closeContextMenu = (e) => {
+		setMenu(false)
+		setAnchorEl(null)
+	}
+
+	const starConversation = () => {
+		const isStarred = {value: !user.isStarred.value, date: Date.now()}
+
+		socket.emit('starConversation', username, user.username, 
+			isStarred, () => {})
+		dispatch(handleStarred({friendsName: user.username, isStarred }))
+	}
+	const handleDelete = () => {
+		
+		if (assert(assert(fetchedUsers.find(i => i === user.username)))) {
+			dispatch(clearFromFetched(user.username))
+		}
+		if (selectedUser.username === user.username) {
+			dispatch(setSelectedUser({}))
+		}
+		socket.emit('clearConversation', username, user.username, () => {})
+		dispatch(clearConversation(user.username))
+		dispatch(clearChats(user.username))
+	}
 	return (
+		<>
 		<ListItem	button 
 			className={classes.listItem}
-			selected={user.username === selectedUser.username}
+			selected={user.username === selectedUser.username || showMenu}
+			onContextMenu={openContextMenu}
   		onClick={handleClick}>
     		<ListItemIcon>
 		      <UserAvatar
@@ -235,7 +277,37 @@ const UserList = ({user, style, secondaryItems}) => {
 	     			<span className={classes.unread}> {user.unread.length} </span>
 	     		}
 	     	</div>
+
+	     
     </ListItem>
+  	<ChatActions 
+   		open={showMenu} 
+   		anchorEl={anchorEl} 
+   		onClose={closeContextMenu}
+   		anchorOrigin={{
+		    vertical: 'center',
+		    horizontal: 'center',
+		  }}
+		  transformOrigin={{
+		    vertical: 'center',
+		    horizontal: 'center',
+		  }}
+   	>
+   		<div> 
+   			<IconButton onClick={starConversation} >	
+   				{user.isStarred.value ? <StarIcon style={{color: '#6495ed'}} /> : 
+   					<StarBorderIcon style={{color: '#6495ed'}} />
+   				}
+					<Typography component='span'> {`${user.isStarred.value ? 'Unstar' : 'Star'} conversation` }</Typography>
+   			</IconButton>
+   			<IconButton onClick={handleDelete} >	
+   				<DeleteSweepIcon style={{color: '#ff6a6a'}} />
+					<Typography component='span'> Clear conversation </Typography>
+   			</IconButton>
+   		</div>
+
+   	</ChatActions>
+   	</>
 	)
 }
 
