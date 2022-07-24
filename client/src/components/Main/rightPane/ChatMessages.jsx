@@ -92,19 +92,6 @@ const useStyles = makeStyles({
 			justifyContent: 'space-between'
 		}
 	},
-	isFirst: {
-		'& > div::before': {
-			width: '40px',
-			height: '40px',
-			position: 'absolute',
-			content: '',
-			top: '-45px',
-			borderBottomLeftRadius: '50%',
-			background: 'tranparent',
-			left: '0',
-			boxShadow: '0 20px 0 0 #ffffff'
-		}
-	},
 	isLast: {
 		marginBottom: 12
 	},
@@ -114,7 +101,8 @@ const useStyles = makeStyles({
 		padding: '5px 0' ,
 		borderBottom: '1px solid #efefef',
 		borderLeft: '2px solid #ffb55c',
-		borderRadius: '5px 0',
+		borderRadius: 'inherit',
+		borderBottomLeftRadius: '0',
 		'& > span': {
 			padding: '0 10px',
 			display: 'block',
@@ -173,6 +161,10 @@ const useStyles = makeStyles({
 	
 })
 
+const stylesForFirst = (me) => {
+
+}
+
 const reactions = [
 	{name: 'smile', icon: <SentimentVerySatisfiedIcon />},
 	{name: 'like', icon: <ThumbUpIcon />},
@@ -196,6 +188,17 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 	let className = me ? classes.fromAccount : classes.fromFriend
 	let wrapperClass = me ? classes.flexEnd : classes.flexStart
 	let wrapperStyle = {background: chat.highlightChat ? 'rgb(0 137 255 / 8%)' : 'inherit'}
+	let stylesForFirst = {
+		borderRadius: me ? '5px 0 5px 5px' : '0 8px 5px 5px',
+		// '::before': {
+		// 	content: '',
+		// 	position: 'absolute',
+		// 	left: 0,
+		// 	top: 0,
+		// 	height: 30,
+		// 	width: 30
+		// }
+	}
 
 	const [open, setOpen] = React.useState(false)
 	const [timer, setTimer] = React.useState(null)
@@ -303,7 +306,8 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 			<div 
 				className={
 					[classes.chatWrapper, wrapperClass, isFirst && classes.isFirst, isLast && classes.isLast].join(' ')} 
-					style={wrapperStyle} ref={chatRef} 
+					style={wrapperStyle} 
+					ref={chatRef} 
 			>
 				{
 					deleted ? 
@@ -313,8 +317,13 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 					:
 					chat.reply.open ? 
 					<>
-						<div className={[className, classes.chatSingle].join(' ')}>
-							<div className={classes.reply} onClick={() => { chat.reply.message !== '' && handleChatHighlight()}}>
+						<div className={[className, classes.chatSingle].join(' ')} 
+							style={isFirst ? stylesForFirst : {}} 
+						>
+							<div 
+								className={classes.reply} 
+								onClick={() => { chat.reply.message !== '' && handleChatHighlight()}}
+							>
 								<span> {chat.reply.sender === username ? 'You' : chat.reply.sender} </span>
 								{ chat.reply.message !== '' ?
 										<span> {chat.reply.message} </span>
@@ -337,7 +346,7 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 					</>
 					:
 					<>
-						<div className={[className, classes.chatSingle].join(' ')}>
+						<div className={[className, classes.chatSingle].join(' ')} style={isFirst? stylesForFirst : {}} >
 							<span className={classes.chat} onClick={handleChatActions} >
 								{chat.message}
 								<span className={classes.chatTime}> {chat.timestamp.time} </span>
@@ -427,6 +436,11 @@ const ChatsByDate = ({chat}) => {
 						chat.chats.map((message, i) => {
 
 							let indicators = {isFirst: false, isLast: false}
+							
+							{/*if (i > 1) {
+								determineIndicator(message)
+							} else if (chat.chats.length > 1) {
+								determineIndicator()*/}
 
 							if (i === 0) indicators.isFirst = true
 							else if (i > 0) {
@@ -435,14 +449,17 @@ const ChatsByDate = ({chat}) => {
 								} 
 								if (i === chat.chats.length-1) indicators = {isLast: true}
 								if (i < chat.chats.length-1) {
+
 									if (message.sender !== chat.chats[i+1].sender) {
 										indicators = {isFirst: false, isLast: true}
 									}
+
 									if (message.sender !== chat.chats[i-1].sender && 
-										message.sender === chat.chats[i+1].sender) 
-									{
+										message.sender === chat.chats[i+1].sender) {
+
 										indicators = {isFirst: true, isLast: false}
 									}
+
 									if (message.sender !== chat.chats[i-1].sender && 
 										message.sender !== chat.chats[i+1].sender) {
 										indicators = {isFirst: true, isLast: true}
@@ -459,6 +476,10 @@ const ChatsByDate = ({chat}) => {
 			</div>
 		</div>
 	)
+}
+
+const determineIndicator = (curr, prev, next) => {
+
 }
 
 const ChatMessages = ({chats}) => {
