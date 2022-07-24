@@ -130,6 +130,15 @@ const chatSlice = createSlice({
 			
 		},
 
+		clearChats: (state, action) => {
+			const friendsName = action.payload
+			const find = state.privateChats.findIndex(i => i.username === friendsName)
+
+			if (find !== -1) {
+				state.privateChats.splice(find, 1)
+			}
+		},
+
 		setPendingDelete: (state, action) => {
 			const {friendsName, chat} = action.payload
 			const find = state.privateChats.findIndex(i => i.username === friendsName)
@@ -230,6 +239,7 @@ export const {
 	storeReceivedChat,
 	setChatRead,
 	setReaction,
+	clearChats,
 	handleStarredChat,
 	performChatDelete,
 	setPendingDelete,
