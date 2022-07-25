@@ -26,29 +26,42 @@ const imgUrls = [
 ]
 const useStyles = makeStyles({
 	signup: {
-		padding: '0 3rem',
-		// height: '100%',
+		padding: '2.5rem',
 		overflowY: 'scroll',
 		display: 'flex',
-		alignItems: 'center',
-		fontFamily: 'helvetica !important'
-	},
-	banner: {
-		flex: 1,
-		alignItems: 'flex-end'
+		justifyContent: 'space-around',
+		fontFamily: 'helvetica !important',
+		['@media (max-width: 924px)']: {
+			justifyContent: 'center'
+		},
+		['@media (max-width: 445px)']: {
+			padding: 0
+		},
 	},
 	formPage: {
-		paddingTop: '1rem',
-		width: '400px',
+		width: '417px',
+		boxShadow: '0px 0px 20px 20px #1900ff05',
+		padding: '1rem 2rem',
+		['@media (max-width: 445px)']: {
+			width: '95%',
+			marginTop: '1rem',
+			padding: '1rem'
+		},
 
 		'& > header': {
 			display: 'flex',
 			alignItems: 'center',
 			justifyContent: 'flex-end',
+			
+			['@media (max-width: 445px)']: {
+				alignItems: 'flex-end',
+				flexDirection: 'column'
+			},
 
 			'& > p': {
 				marginRight: '1rem'
 			}
+
 		}
 	},
 	pageBody: {
@@ -56,7 +69,8 @@ const useStyles = makeStyles({
 			margin: '2rem 0',
 
 			'& > h1': {
-				fontSize: '1.3rem'
+				fontSize: '1.3rem',
+				color: '#bf6423'
 			}
 		}
 	}
@@ -65,9 +79,7 @@ const SignUp = () => {
 	const classes = useStyles()
 	return (
 		<div className={[classes.signup].join(' ')} >
-			<div className={classes.banner}>
-
-			</div>
+			<ImageBanner />
 
 			<div className={classes.formPage}>
 				<header>
