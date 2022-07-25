@@ -60,6 +60,9 @@ const useStyles = makeStyles({
 
 			'& > p': {
 				marginRight: '1rem'
+			},
+			'& .MuiButton-root': {
+				border: '2px solid #c7a893'
 			}
 
 		}
@@ -70,7 +73,11 @@ const useStyles = makeStyles({
 
 			'& > h1': {
 				fontSize: '1.3rem',
-				color: '#bf6423'
+				color: '#997a64',
+
+				'& strong': {
+					color: '#6495ed'
+				}
 			}
 		}
 	}
@@ -89,7 +96,7 @@ const SignUp = () => {
 
 				<div className={classes.pageBody}>
 					<header> 
-						<Typography component='h1'> Welcome to webconnect </Typography>
+						<Typography component='h1'> Welcome to <strong> webconnect </strong> </Typography>
 						<Typography variant='body1'> Register your account </Typography>
 					</header>
 					<div className={classes.form}>

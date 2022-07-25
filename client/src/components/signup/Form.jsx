@@ -2,14 +2,14 @@ import React from 'react'
 import { TextField, InputAdornment, IconButton, Checkbox, Button } from '@material-ui/core'
 import { Visibility, VisibilityOff, LockSharp, AccountCircle, AlternateEmail } from '@material-ui/icons'
 import { createTheme, ThemeProvider } from '@material-ui/core/styles'
-import { Preloader, ThreeDots } from 'react-preloader-icon'
+import { Preloader, Oval } from 'react-preloader-icon'
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles({
 	formField: {
 		// display: 'flex',
 		// flexDirection: 'column',
-		marginBottom: '.8rem',
+		marginBottom: '1rem',
 
 		'& > label': {
 			display: 'block',
@@ -27,6 +27,10 @@ const useStyles = makeStyles({
 			'& .MuiOutlinedInput-input': {
 				padding: '13px 10px'
 			}
+		},
+		'& .MuiButton-contained.Mui-disabled': {
+			color: '#fff',
+			backgroundColor: '#9eb9e9'
 		}
 			
 	}
@@ -71,8 +75,14 @@ const Form = () => {
 		if (/[^a-z0-9_ ]/ig.test(val)) {
 			setHelperText({...helperText, username: `username cannot contain ${val[val.length-1]} `})
 			setErrorState({...error, username: true})
+		} else if (val.includes(' ')) {
+			setHelperText({...helperText, username: `username cannot contain spaces`})
+			setErrorState({...error, username: true})
+		}	else if (!isNaN(val[0])) {
+			setHelperText({...helperText, username: `username cannot start with a number`})
+			setErrorState({...error, username: true})
 		} else {
-			setInputValues({...input, name: val.trimLeft()})
+			setInputValues({...input, name: val})
 			setHelperText({...helperText, username: ''})
 			setErrorState({...error, username: false})
 		}
@@ -119,7 +129,7 @@ const Form = () => {
 		<form className={classes.form} onSubmit={submitForm} >
 			<fieldset>
 			<div className={classes.formField}>
-					<label htmlFor='username' > Name </label>
+					<label htmlFor='username' > User name </label>
 					<TextField
 						required
 						classes={{root: 'formInput'}} 
@@ -191,13 +201,14 @@ const Form = () => {
 					disabled={isSubmitting}
 					color='primary'
 					type='submit'> 
-						{isSubmitting && <Preloader
-						 use={ThreeDots}
-						 size={25}
-						 strokeColor='#fff'
-						 duration={1000}
-						  />} 
-						 {!isSubmitting && 'Register' }
+						 {
+							isSubmitting ? 
+								<>
+									Register &nbsp;
+									<Preloader use={Oval} size={20} strokeWidth={10} strokeColor='#fff' duration={1000} /> 
+								</>
+							: 'Register'
+						}
 					</Button>
 				</div>
 			</fieldset>
