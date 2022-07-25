@@ -116,15 +116,24 @@ const useStyles = makeStyles({
 		textAlign: 'right',
 		color: '#53555e'
 	},
+	chatProps: {
+		alignItems: 'center',
+		display: 'flex',
+		justifyContent: 'center',
+
+		'& > svg': {
+			fontSize: '1.3rem',
+			color: '#a2aab9'
+		}
+	},
 	unread: {
 		minWidth: 17,
 		minHeight: 17,
 		background: '#6495ed',
 		borderRadius: '100%',
-		alignItems: 'center',
-		display: 'flex',
-		justifyContent: 'center',
 		color: '#fff',
+		marginLeft: 6,
+		textAlign: 'center'
 	},
 	typingStatus: {
 		color: '#6495ed'
@@ -238,11 +247,13 @@ const UserList = ({user, style, secondaryItems}) => {
 	}
 	return (
 		<>
+
 		<ListItem	button 
 			className={classes.listItem}
 			selected={user.username === selectedUser.username || showMenu}
 			onContextMenu={openContextMenu}
   		onClick={handleClick}>
+
     		<ListItemIcon>
 		      <UserAvatar
 			      username={user.username} 
@@ -275,9 +286,16 @@ const UserList = ({user, style, secondaryItems}) => {
 	     			{dateValue}
 	     		</span>
 
-	     		{ assert(user.unread) &&
-	     			<span className={classes.unread}> {user.unread.length} </span>
-	     		}
+	     			<span className={classes.chatProps}> 
+	     				{
+								user.isStarred.value &&
+									<StarIcon />
+							}
+	     				{assert(user.unread) && 
+	     					<span className={classes.unread}> {user.unread.length} </span>
+	     				} 
+	     				
+	     			</span>
 	     	</div>
 
 	     
