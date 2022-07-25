@@ -114,12 +114,12 @@ const useStyles = makeStyles({
 			overflowY: 'scroll',
 			paddingLeft: '1rem',
 			position: 'relative',
-			['@media (max-width: 660px)']: {
-			},
+			
 		},
 		'& .MuiCardActions-root': {
 			position: 'relative',
 			marginBottom: '1rem',
+			paddingTop: '.25rem',
 			flexDirection: 'column',
 			alignItems: 'stretch',
 			// boxShadow: '0px 0px 2px 1px #0000000d'
@@ -130,6 +130,10 @@ const useStyles = makeStyles({
 				padding: '11px 10px',
 				// borderRadius: '15px',
 				// boxShadow: '1px 2px 4px 0px #00000021'
+			},
+
+			['@media (max-width: 660px)']: {
+				marginBottom: '.2rem'
 			},
 		},
 
