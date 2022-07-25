@@ -112,7 +112,6 @@ const useStyles = makeStyles({
 		'& .MuiCardContent-root': {
 			flex: 1,
 			overflowY: 'scroll',
-			paddingLeft: '1rem',
 			position: 'relative',
 			
 		},
