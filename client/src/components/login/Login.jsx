@@ -15,25 +15,40 @@ const imgUrls = [
 
 const useStyles = makeStyles({
 	signin: {
-		padding: '0 3rem',
-		// height: '100%',
+		padding: '2.5rem',
 		overflowY: 'scroll',
 		display: 'flex',
-		alignItems: 'center',
-		fontFamily: 'helvetica !important'
-	},
-	banner: {
-		flex: 1,
-		alignItems: 'flex-end'
+		justifyContent: 'space-around',
+		fontFamily: 'helvetica !important',
+		['@media (max-width: 924px)']: {
+			justifyContent: 'center'
+		},
+		['@media (max-width: 445px)']: {
+			padding: 0
+		},
+
 	},
 	formPage: {
 		paddingTop: '1rem',
-		width: '400px',
+		boxShadow: '0px 0px 20px 20px #1900ff05',
+		width: '417px',
+		padding: '1rem 2rem',
+		['@media (max-width: 445px)']: {
+			width: '95%',
+			padding: '1rem',
+			marginTop: '1rem'
+		},
 
 		'& > header': {
 			display: 'flex',
 			alignItems: 'center',
 			justifyContent: 'flex-end',
+
+			
+			['@media (max-width: 445px)']: {
+				alignItems: 'flex-end',
+				flexDirection: 'column'
+			},
 
 			'& > p': {
 				marginRight: '1rem'
@@ -45,7 +60,8 @@ const useStyles = makeStyles({
 			margin: '2rem 0',
 
 			'& > h1': {
-				fontSize: '1.3rem'
+				fontSize: '1.3rem',
+				color: '#bf6423'
 			}
 		}
 	}
@@ -55,9 +71,7 @@ const Login = () => {
 	const classes = useStyles()
 	return (
 		<div className={[classes.signin].join(' ')} >
-			<div className={classes.banner}>
-
-			</div>
+			<ImageBanner />
 
 			<div className={classes.formPage}>
 				<header>
@@ -68,7 +82,7 @@ const Login = () => {
 				<div className={classes.pageBody}>
 					<header> 
 						<Typography component='h1'> Hello  ! Welcome back. </Typography>
-						<Typography variant='body1'> Log in with the data you entered <br /> during your registration. </Typography>
+						<Typography variant='body1'> Log in with the data you entered during your registration. </Typography>
 					</header>
 					<div className={classes.form}>
 						<Form />
