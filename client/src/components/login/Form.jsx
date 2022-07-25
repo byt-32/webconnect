@@ -10,8 +10,40 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import Snackbar from '@material-ui/core/Snackbar'
 import Alert from '@material-ui/lab/Alert';
+import { makeStyles } from '@material-ui/core/styles';
+
+
+const useStyles = makeStyles({
+	formField: {
+		// display: 'flex',
+		// flexDirection: 'column',
+		marginBottom: '.8rem',
+
+		'& > label': {
+			display: 'block',
+			marginBottom: '.4rem'
+		},
+		'& > button': {
+			color: '#fff',
+			margin: '1rem 0 1.5rem 0'
+		},
+
+		'& .MuiFormControl-root': {
+
+			width: '100%',
+
+			'& .MuiOutlinedInput-input': {
+				padding: '13px 10px'
+			}
+		}
+			
+	}
+
+})
+
 
 const Form = ({login}) => {
+	const classes = useStyles()
 	// sessionStorage.setItem('refresh', 'false')
 	let navigate = useNavigate()
 	const dispatch = useDispatch()
@@ -87,13 +119,12 @@ const Form = ({login}) => {
 		 
 	}
 	return (
-		<form className={'form'} onSubmit={submitForm} >
+		<form className={classes.form} onSubmit={submitForm} >
 			<fieldset>
-				<div className={'formField'}>
-					<label htmlFor='username' className={'fieldset_1_label'}> Username </label>
+				<div className={classes.formField}>
+					<label htmlFor='username' > Username </label>
 					<TextField
 						required
-						classes={{root: 'formInput'}} 
 						type='text' 
 						autoComplete='username'
 						id='username' 
@@ -109,9 +140,9 @@ const Form = ({login}) => {
 							</InputAdornment>
 					}} />
 				</div>
-				<div className={'formField'}>
-					<label htmlFor='current-password' className={'fieldset_1_label'}> Password </label>
-					  <TextField classes={{root: 'formInput'}}
+				<div className={classes.formField}>
+					<label htmlFor='current-password' > Password </label>
+					  <TextField
 							required
 							autoComplete='current-password'
 					    id="current-password"
@@ -143,9 +174,10 @@ const Form = ({login}) => {
 				</div>
 			</fieldset>*/}
 			<fieldset>
-				<div className={'formField'}>
+				<div className={classes.formField}>
 					<Button 
 					variant='contained' 
+					color='primary'
 					disabled={isSubmitting}
 					classes={{root: 'button'}} 
 					type='submit'> 

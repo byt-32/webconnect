@@ -3,8 +3,39 @@ import { TextField, InputAdornment, IconButton, Checkbox, Button } from '@materi
 import { Visibility, VisibilityOff, LockSharp, AccountCircle, AlternateEmail } from '@material-ui/icons'
 import { createTheme, ThemeProvider } from '@material-ui/core/styles'
 import { Preloader, ThreeDots } from 'react-preloader-icon'
+import { makeStyles } from '@material-ui/core/styles';
+
+const useStyles = makeStyles({
+	formField: {
+		// display: 'flex',
+		// flexDirection: 'column',
+		marginBottom: '.8rem',
+
+		'& > label': {
+			display: 'block',
+			marginBottom: '.4rem'
+		},
+		'& > button': {
+			color: '#fff',
+			margin: '1rem 0 1.5rem 0'
+		},
+
+		'& .MuiFormControl-root': {
+
+			width: '100%',
+
+			'& .MuiOutlinedInput-input': {
+				padding: '13px 10px'
+			}
+		}
+			
+	}
+
+})
+
 
 const Form = () => {
+	const classes = useStyles()
 	// sessionStorage.setItem('refresh', 'false')
   const [input, setInputValues] = React.useState({
   	email: '', password: '', name: ''
@@ -85,10 +116,10 @@ const Form = () => {
 		 
 	}
 	return (
-		<form className={'Form'} onSubmit={submitForm} >
+		<form className={classes.form} onSubmit={submitForm} >
 			<fieldset>
-			<div className={'formField'}>
-					<label htmlFor='username' className={'fieldset_1_label'}> Name </label>
+			<div className={classes.formField}>
+					<label htmlFor='username' > Name </label>
 					<TextField
 						required
 						classes={{root: 'formInput'}} 
@@ -107,11 +138,10 @@ const Form = () => {
 							</InputAdornment>
 					}} />
 				</div>
-				<div className={'formField'}>
-					<label htmlFor='email' className={'fieldset_1_label'}> Email Address </label>
+				<div className={classes.formField}>
+					<label htmlFor='email'> Email Address </label>
 					<TextField
 						required
-						classes={{root: 'formInput'}} 
 						type='email' 
 						id='email' 
 						error={error.email} 
@@ -127,9 +157,9 @@ const Form = () => {
 							</InputAdornment>
 					}} />
 				</div>
-				<div className={'formField'}>
-					<label htmlFor='new-password' className={'fieldset_1_label'}> Password </label>
-					  <TextField classes={{root: 'formInput'}}
+				<div className={classes.formField}>
+					<label htmlFor='new-password'> Password </label>
+					  <TextField
 							required
 					    id="new-password"
 					    variant="outlined"
@@ -155,17 +185,11 @@ const Form = () => {
 				</div>
 			</fieldset>
 			<fieldset>
-				<div className={'formField'}>
-					<Checkbox value='agree' checked={checked} onChange={handleCheckbox} required id='agree' color='primary' classes={{root: 'checkbox'}} />
-					<label htmlFor='agree'> I agree to the Terms of Service and Privacy Policy </label>
-				</div>
-			</fieldset>
-			<fieldset>
-				<div className={'formField'}>
+				<div className={classes.formField}>
 					<Button 
 					variant='contained' 
 					disabled={isSubmitting}
-					classes={{root: 'button'}} 
+					color='primary'
 					type='submit'> 
 						{isSubmitting && <Preloader
 						 use={ThreeDots}

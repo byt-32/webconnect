@@ -1,11 +1,14 @@
 import React from 'react'
-import { Card, CardContent, CardActions, Typography } from '@material-ui/core'
 import { useDispatch } from 'react-redux'
+
+import { Link } from 'react-router-dom'
+import { makeStyles } from '@material-ui/core/styles';
+import { Button, Typography  } from '@material-ui/core'
+
 import AltFacebook from './AltFacebook'
 import AltGoogle from './AltGoogle'
 import Form from './Form'
 import ImageBanner from '../ImageBanner'
-import { Link } from 'react-router-dom'
 
 // Making use of 3 APIs in the project
 //1. Contact picker api
@@ -21,35 +24,71 @@ const imgUrls = [
 		text: ''
 	}
 ]
+const useStyles = makeStyles({
+	signup: {
+		padding: '0 3rem',
+		// height: '100%',
+		overflowY: 'scroll',
+		display: 'flex',
+		alignItems: 'center',
+		fontFamily: 'helvetica !important'
+	},
+	banner: {
+		flex: 1,
+		alignItems: 'flex-end'
+	},
+	formPage: {
+		paddingTop: '1rem',
+		width: '400px',
 
+		'& > header': {
+			display: 'flex',
+			alignItems: 'center',
+			justifyContent: 'flex-end',
+
+			'& > p': {
+				marginRight: '1rem'
+			}
+		}
+	},
+	pageBody: {
+		'& > header': {
+			margin: '2rem 0',
+
+			'& > h1': {
+				fontSize: '1.3rem'
+			}
+		}
+	}
+})
 const SignUp = () => {
+	const classes = useStyles()
 	return (
-		<div className={['signupMain', 'animate__animated', 'animate__fadeIn'].join(' ')} >
-			<div className={'spx1'}>
+		<div className={[classes.signup].join(' ')} >
+			<div className={classes.banner}>
 
-				{/*<ImageBanner imgUrls={imgUrls} />*/}
+			</div>
 
-				<section className={['signupMainRight', 'signupMainFc'].join(' ')}>
-					<div className={'SMRContainer'} >
+			<div className={classes.formPage}>
+				<header>
+					<Typography variant='body1'> Already have an account ? </Typography>
+					<Link to='/login'> <Button> SIGN IN </Button> </Link>
+				</header>
 
-						<header>
-							<h1> Get started </h1>
-							<p> Already have an account? <button className={'headerBtn'} type='button' >
-							 <Link to='/login'> Log in </Link>
-							 </button> </p>
-						</header>
-						<div className={'altSignups'} >
-							{/*<AltGoogle />
-							<AltFacebook />*/}
-						</div>
-						<div className={'signupForm'}>
-							{/*<div className={'borderDivider'}>
-								<span> Or </span>
-							</div>*/}
-							<Form />
-						</div>
+				<div className={classes.pageBody}>
+					<header> 
+						<Typography component='h1'> Welcome to webconnect </Typography>
+						<Typography variant='body1'> Register your account </Typography>
+					</header>
+					<div className={classes.form}>
+						<Form />
 					</div>
-				</section>
+					{/*<div className={classes.footer}>
+						<Typography variant='body1'> Create account with </Typography>
+						<AltFacebook />
+						<AltGoogle />
+					</div>*/}
+				</div>
 			</div>
 		</div>
 	)
