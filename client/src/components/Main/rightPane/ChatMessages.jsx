@@ -93,6 +93,8 @@ const useStyles = makeStyles({
 			justifyContent: 'space-between'
 		}
 	},
+	
+	
 	isLast: {
 		marginBottom: 12
 	},
@@ -104,6 +106,7 @@ const useStyles = makeStyles({
 		borderLeft: '2px solid #ffb55c',
 		borderRadius: 'inherit',
 		borderBottomLeftRadius: '0',
+		borderBottomRightRadius: '0',
 		'& > span': {
 			padding: '0 10px',
 			display: 'block',
@@ -140,7 +143,7 @@ const useStyles = makeStyles({
 	
 })
 
-const stylesForFirst = (me) => {
+const chatBubbleStyles = (me) => {
 
 }
 
@@ -157,6 +160,7 @@ const Reaction = ({name}) => {/* ignore this for now **/
 }
 // ///rgb(0 137 255 / 6%)
 
+
 const ChatSingle = ({chat, isFirst, isLast}) => {
 	// console.log(props)
 	const classes = useStyles()
@@ -167,16 +171,13 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 	let className = me ? classes.fromAccount : classes.fromFriend
 	let wrapperClass = me ? classes.flexEnd : classes.flexStart
 	let wrapperStyle = {background: chat.highlightChat ? 'rgb(0 137 255 / 8%)' : 'inherit'}
-	let stylesForFirst = {
-		borderRadius: me ? '5px 0 5px 5px' : '0 8px 5px 5px',
-		// '::before': {
-		// 	content: '',
-		// 	position: 'absolute',
-		// 	left: 0,
-		// 	top: 0,
-		// 	height: 30,
-		// 	width: 30
-		// }
+
+	let bubbleClass = () => {
+		if (me) {
+			return 'rightBubble'
+		} else {
+			return 'leftBubble'
+		}
 	}
 
 	const [open, setOpen] = React.useState(false)
@@ -193,7 +194,7 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 	 leading to props drilling.
 
 	 it checks if sender or receiver is not equals the account username, and returns it
-	 as the friends name. common sense!
+	 as the friends name. 
 		
 	**/
 		if (chat.sender !== username) return chat.sender
@@ -296,9 +297,7 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 					:
 					chat.reply.open ? 
 					<>
-						<div className={[className, classes.chatSingle].join(' ')} 
-							style={isFirst ? stylesForFirst : {}} 
-						>
+						<div className={[className, classes.chatSingle, isFirst && bubbleClass(), 'reply'].join(' ')} >
 							<div 
 								className={classes.reply} 
 								onClick={() => { chat.reply.message !== '' && handleChatHighlight()}}
@@ -325,7 +324,7 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 					</>
 					:
 					<>
-						<div className={[className, classes.chatSingle].join(' ')} style={isFirst? stylesForFirst : {}} >
+						<div className={[className, classes.chatSingle, isFirst && bubbleClass()].join(' ')} >
 							<span className={classes.chat} onClick={handleChatActions} >
 								{chat.message}
 								<span className={classes.chatTime}> {chat.timestamp.time} </span>
