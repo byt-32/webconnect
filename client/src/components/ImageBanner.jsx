@@ -4,9 +4,9 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { Button, Typography, Fade , Slide } from '@material-ui/core';
 
-import image1 from '../../public/images/undraw_connected_re_lmq2.svg'
-import image2 from '../../public/images/undraw_online_re_x00h\ (1).svg'
-import image3 from '../../public/images/undraw_social_share_re_qb4v.svg'
+import image1 from '../../public/images/undraw_mobile_encryption_re_yw3o.svg'
+import image2 from '../../public/images/undraw_my_notifications_re_ehmk.svg'
+import image3 from '../../public/images/undraw_chatting_re_j55r.svg'
 
 import styles from  '../stylesheet/transition.css'
 
@@ -42,9 +42,9 @@ const ImageBanner = ({ imgUrls }) => {
 	const classes = useStyles()
 	const {useState, useEffect} = React
 	const urls = [
-		{url: image2, text: 'Online'},
-		// {url: image1, text: 'Connected'},
-		{url: image3, text: 'Share'},
+		// {url: image1, text: ''},
+		{url: image2, text: 'See those notifications as soon as they appear' },
+		{url: image3, text: 'Converse with friends and pals in real time'},
 	]
 
 	const [index, setIndex] = useState(0)
@@ -65,7 +65,7 @@ const ImageBanner = ({ imgUrls }) => {
 				}
 			})
 			
-		}, 3000)
+		}, 5000)
 
 		return () => clearInterval(interval)
 	}, [])
