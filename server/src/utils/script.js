@@ -19,21 +19,12 @@ export const userUtil = {
 
 export const unreadUtil = {
 	save: async function (sender, receiver, chatId) {
-		await Chat.findOne({username: receiver})
-		.exec(async (err, docs) => {
-			if (docs !== null) {
-				const find = docs.chats.findIndex(i => i.username === sender)
-				if (find !== -1) {
-					if (docs.chats[find].unread !== null) {
-						docs.chats[find].unread.push(chatId)
-					} else {
-						docs.chats[find].unread = [chatId]
-					}
-				}
-				docs.save()
+		await Chat.findOneAndUpdate({username: receiver, 'chats.username': sender}, {
+			$push: {
+				'chats.$.unread': chatId
 			}
-			
-		})
+		}, {upsert: true})
+		
 	},
 	reset: async function (sender, receiver) {
 		// This method resets unread array and sets a message read to true
