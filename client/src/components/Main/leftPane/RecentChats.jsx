@@ -82,10 +82,12 @@ const useStyles = makeStyles({
 		position: 'relative',
 		padding: 12,
 		'&.MuiListItem-root.Mui-selected': {
-			backgroundColor: 'rgb(248 247 255)'
+			backgroundColor: '#fbfbfb',
+			// backgroundColor: 'rgb(248 247 255)'
 		},
 		'&:hover': {
-			backgroundColor: 'rgb(248 247 255)'
+			backgroundColor: '#fbfbfb',
+			// backgroundColor: 'rgb(248 247 255)'
 		},
 		'& .MuiAvatar-root': {
 			width: 45, height: 45

@@ -44,10 +44,12 @@ const useStyles = makeStyles({
 	},
 	listItem: {
 		'&.MuiListItem-root.Mui-selected': {
-			backgroundColor: 'rgb(248 247 255)'
+			backgroundColor: '#fbfbfb',
+			// backgroundColor: 'rgb(248 247 255)'
 		},
 		'$:hover': {
-			backgroundColor: 'rgb(248 247 255)'
+			backgroundColor: '#fbfbfb',
+			// backgroundColor: 'rgb(248 247 255)'
 		},
 		position: 'relative',
 		'& .MuiAvatar-root': {
