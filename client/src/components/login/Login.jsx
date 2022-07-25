@@ -44,7 +44,7 @@ const useStyles = makeStyles({
 			alignItems: 'center',
 			justifyContent: 'flex-end',
 
-			
+
 			['@media (max-width: 445px)']: {
 				alignItems: 'flex-end',
 				flexDirection: 'column'
@@ -52,6 +52,9 @@ const useStyles = makeStyles({
 
 			'& > p': {
 				marginRight: '1rem'
+			},
+			'& .MuiButton-root': {
+				border: '2px solid #c7a893'
 			}
 		}
 	},

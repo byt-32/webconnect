@@ -5,7 +5,7 @@ import IconButton from '@material-ui/core/IconButton'
 import Button from '@material-ui/core/Button'
 import { Visibility, VisibilityOff, LockSharp, AccountCircle } from '@material-ui/icons'
 // import 'from' '../../'eet'/main.css'
-import { Preloader, ThreeDots } from 'react-preloader-icon'
+import { Preloader, ThreeDots, Oval } from 'react-preloader-icon'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import Snackbar from '@material-ui/core/Snackbar'
@@ -17,7 +17,7 @@ const useStyles = makeStyles({
 	formField: {
 		// display: 'flex',
 		// flexDirection: 'column',
-		marginBottom: '.8rem',
+		marginBottom: '1rem',
 
 		'& > label': {
 			display: 'block',
@@ -34,7 +34,12 @@ const useStyles = makeStyles({
 
 			'& .MuiOutlinedInput-input': {
 				padding: '13px 10px'
-			}
+			},
+
+		},
+		'& .MuiButton-contained.Mui-disabled': {
+			color: '#fff',
+			backgroundColor: '#9eb9e9'
 		}
 			
 	}
@@ -167,10 +172,8 @@ const Form = ({login}) => {
 				</div>
 			</fieldset>
 			{/*<fieldset>
-				<div className={['formField', 'formMisc'].join(' ')}>
-					<div>
-						<button className={'forgot'} type='button'> Forgot Password? </button>
-					</div>
+				<div className={[classes.formField, classes.forgotPassword].join(' ')}>
+					<button type='button'> Forgot Password? </button>
 				</div>
 			</fieldset>*/}
 			<fieldset>
@@ -181,10 +184,14 @@ const Form = ({login}) => {
 					disabled={isSubmitting}
 					classes={{root: 'button'}} 
 					type='submit'> 
-						{isSubmitting && 
-							<Preloader use={ThreeDots} size={25} strokeColor='#fff' duration={1000} /> 
+						{
+							isSubmitting ? 
+								<>
+									Login&nbsp;
+									<Preloader use={Oval} size={20} strokeWidth={10} strokeColor='#fff' duration={1000} /> 
+								</>
+							: 'Login'
 						}
-						{!isSubmitting && 'Login'}
 					</Button>
 				</div>
 			</fieldset>
