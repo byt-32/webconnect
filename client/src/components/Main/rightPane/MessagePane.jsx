@@ -79,6 +79,8 @@ const useStyles = makeStyles({
 	},
 	card: {
 		boxShadow: 'none',
+		display: 'flex',
+		flexDirection: 'column',
 		height: '100%',
 		width: '100%',
 		background: 'transparent',
@@ -108,22 +110,29 @@ const useStyles = makeStyles({
 			},
 		},
 		'& .MuiCardContent-root': {
-			padding: 0,
+			flex: 1,
 			overflowY: 'scroll',
+			paddingLeft: '1rem',
 			position: 'relative',
 			['@media (max-width: 660px)']: {
 			},
 		},
 		'& .MuiCardActions-root': {
-			background: common.white,
 			position: 'relative',
-			boxShadow: '0px 0px 2px 1px #0000000d'
+			marginBottom: '1rem',
+			flexDirection: 'column',
+			alignItems: 'stretch',
+			// boxShadow: '0px 0px 2px 1px #0000000d'
+			'& .MuiInputBase-root': {
+				flex: 1,
+				background: common.white,
+				margin: 0,
+				padding: '11px 10px',
+				// borderRadius: '15px',
+				// boxShadow: '1px 2px 4px 0px #00000021'
+			},
 		},
-		'& .MuiInputBase-root': {
-			flex: 1,
-			background: common.white,
-			padding: '11px 10px'
-		},
+
 		'& .MuiInputBase-inputMultiline': {
 			maxHeight: 70,
 			overflowY: 'scroll !important'
@@ -141,22 +150,20 @@ const useStyles = makeStyles({
 		},
 	},
 	contents: {
-		margin: '0 10%',
+		padding: '0 10%',
 		['@media (max-width: 900px)']: {
-			margin: '0 2%',
+			padding: '0 2%',
 		},
 		
 	},
 	replyHandel: {
 		display: 'flex',
+		borderBottom: '1px solid #f1f1f1',
 		justifyContent: 'space-between',
-		position: 'absolute',
-		bottom: '100%',
-		boxShadow: 'inset -1px -3px 5px 0px #0000000d',
+		// boxShadow: 'inset -1px -3px 5px 0px #0000000d',
 		background: '#fdfdfd',
 		width: '100%',
 		zIndex: 40,
-		left: 0,
 		borderRadius: '10px 10px 0 0'
 	},
 	replyProps: {
@@ -440,7 +447,10 @@ const MessagesPane = ({friend}) => {
 			display: selectedUser.username === friend.username ? 'flex' : 'none'
 		}} >
 		
-		<Card className={classes.card} >
+		<Card className={classes.card} 
+      style={{
+      	height: `${getWindowHeight()}px`
+      }}>
 			<IconButton className={classes.backBtn} onClick={() => handleComponent()} >
 				<ArrowBackIcon style={{color: '#959494'}} />
 			</IconButton>
@@ -475,9 +485,6 @@ const MessagesPane = ({friend}) => {
       <CardContent 
       	ref={cardContentRef}
       	className={classes.contents} 
-	      style={{
-	      	height: `${getWindowHeight()  - 135}px`
-	      }}
       >
 	    	{	assert(starredChat) &&
 	    		<Slide in={assert(starredChat)}>
