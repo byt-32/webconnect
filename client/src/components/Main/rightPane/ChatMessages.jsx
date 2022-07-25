@@ -64,6 +64,8 @@ const useStyles = makeStyles({
 	flexStart: {
 		justifyContent: 'flex-start',
 		alignSelf: 'flex-start',
+		paddingLeft: '.5rem',
+
 	},
 	flexEnd: {
 		alignSelf: 'flex-end',
@@ -422,19 +424,18 @@ const ChatsByDate = ({chat}) => {
 							if (i === 0) indicators.isFirst = true
 							else if (i > 0) {
 								if (message.sender !== chat.chats[i-1].sender) {
-									indicators = {isFirst: true, isLast: false}
+									indicators.isFirst = true
 								} 
-								if (i === chat.chats.length-1) indicators = {isLast: true}
+								if (i === chat.chats.length-1) indicators.isLast = true
 								if (i < chat.chats.length-1) {
 
 									if (message.sender !== chat.chats[i+1].sender) {
-										indicators = {isFirst: false, isLast: true}
+										indicators.isLast = true
 									}
 
 									if (message.sender !== chat.chats[i-1].sender && 
 										message.sender === chat.chats[i+1].sender) {
-
-										indicators = {isFirst: true, isLast: false}
+										indicators.isFirst = true
 									}
 
 									if (message.sender !== chat.chats[i-1].sender && 
