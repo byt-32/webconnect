@@ -22,7 +22,7 @@ export const socket = io('/', {autoConnect: false})
 
 const useStyles = makeStyles({
 	main: {
-		background: 'linear-gradient(227deg, #f3f4ff, #d3920033)' ,
+		background: 'linear-gradient(266deg, #e9e9e9, #d3920026)' ,
 		display: 'flex',
 		height: '100%'
 	}
