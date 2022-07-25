@@ -59,7 +59,7 @@ const useStyles = makeStyles({
 		alignItems: 'flex-end',
 		width: '100%',
 		padding: '2px 0',
-		transition: '.4s ease all'
+		transition: '.6s ease all'
 	},
 	flexStart: {
 		justifyContent: 'flex-start',
@@ -172,7 +172,7 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 	false : ''
 	let className = me ? classes.fromAccount : classes.fromFriend
 	let wrapperClass = me ? classes.flexEnd : classes.flexStart
-	let wrapperStyle = {background: chat.highlightChat ? 'rgb(0 137 255 / 8%)' : 'inherit'}
+	let wrapperStyle = {background: chat.highlightChat ? 'rgb(0 137 255 / 14%)' : 'inherit'}
 
 	let bubbleClass = () => {
 		if (me) {
@@ -270,7 +270,7 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 
 		let newTimer = setTimeout(() => {
 			dispatch(setHighlighted({chatId: chat.reply.chatId, friendsName: getFriendName(), show: false}))
-		}, 800)
+		}, 1500)
 
 		setTimer(newTimer)
 	}
