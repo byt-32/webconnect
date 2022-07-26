@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="robots" content="noindex, nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><title>webconnect</title><style>button.MuiIconButton-root {
+			padding: 7px;
+		}
+		.leftBubble {
+			border-radius: 0 8px 5px 5px;
+		}
+		.leftBubble::before {
+			content: '';
+			position: absolute;
+			width: 0;
+			height: 0;
+			border-left: 15px solid transparent;
+			border-top: 10px solid #fff;
+			left: -10px;
+			top: 0;
+		}
+
+		.rightBubble {
+			border-radius: 5px 0 5px 5px;
+		}
+		
+		.rightBubble::after {
+			content: '';
+			position: absolute;
+			width: 0;
+			height: 0;
+			border-left: 7px solid #727f93;
+			border-right: 10px solid transparent;
+			border-top: 8px solid #727f93;
+			border-bottom: 2px solid transparent;
+			right: -10px;
+			top: 0;
+		}
+		.rightBubble.reply::after {
+			border-left: 7px solid #fff !important;
+			border-top: 8px solid #fff !important;
+		}
+
+	},
+	
+	},</style><script defer="defer" src="bundle.js"></script></head><body><div id="root"></div></body></html>
