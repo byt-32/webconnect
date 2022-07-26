@@ -207,9 +207,9 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 	function replace(text) {
 		return text.replaceAll('\n', '<br/>')
 	}
-	const handleChatActions = (e) => {
+	const handleChatActions = (target) => {
 		setOpen(!open)
-		setAnchorEl(e.target)
+		setAnchorEl(target)
 	}
 	const handleClickAway = (e) => {
 		setOpen(false)
@@ -313,7 +313,9 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 										</div> 
 								}
 							</div>
-							<span className={classes.chat} onClick={handleChatActions} > 
+							<span className={classes.chat} onClick={({target}) => {
+								assert(chat.chatId) && handleChatActions(target)
+							}} > 
 								{chat.message}
 								<span className={classes.chatTime}> {chat.timestamp.time} </span>
 							</span>
@@ -327,7 +329,9 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 					:
 					<>
 						<div className={[className, classes.chatSingle, isFirst && bubbleClass()].join(' ')} >
-							<span className={classes.chat} onClick={handleChatActions} >
+							<span className={classes.chat} onClick={({target}) => {
+								assert(chat.chatId) && handleChatActions(target)
+							}} >
 								{chat.message}
 								<span className={classes.chatTime}> {chat.timestamp.time} </span>
 							</span>

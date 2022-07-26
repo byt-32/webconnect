@@ -11,8 +11,37 @@ export const fetchRecentChats = createAsyncThunk(
 	}
 )
 
+
+function traverse(arr) {
+	let starred = []
+	arr.forEach((chat, i) => {
+		if (chat.isStarred.value) {
+			starred.push(chat)
+		}
+	})
+
+	starred.sort((a,b) => {
+		if (a.isStarred.date > b.isStarred.date) return -1
+		else return 1
+	})
+
+	arr = arr.filter(i => !i.isStarred.value)
+
+	arr.sort((a,b) => {
+		if (a.lastSent > b.lastSent) return -1
+		else return 1
+	})
+	
+
+	arr = [...starred, ...arr]
+
+	return arr
+}
+
+
 const initialState = {
 	recentChats: [],
+	chatToBeCleared: [],
 	// defaultActions: {
 	// 	online: false,
 	// 	unread: [],
@@ -60,7 +89,6 @@ const recentChatsSlice = createSlice({
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
 
 			if (find !== -1) {
-			// console.log(state.recentChats[find].unread)
 
 				state.recentChats[find].unread.push(chatId)
 			}
@@ -74,20 +102,22 @@ const recentChatsSlice = createSlice({
 			}
 		},
 		updateRecentChats: (state, action) => {
-			const {lastSent, username, online, messages} = action.payload
+			const {lastSent, username, messages} = action.payload
 			let index = state.recentChats.findIndex(i => i.username === username)
 			let spliced
 
 			if (index !== -1) {
 				state.recentChats[index].lastSent = lastSent
 				state.recentChats[index].messages = messages
-				state.recentChats[index].isStarred = {value: false}
-				spliced = state.recentChats.splice(index, 1)
-				state.recentChats.unshift(spliced[0])
+
 			} else {
 				state.recentChats.unshift(action.payload)
 			}
+			
+			state.recentChats = traverse(state.recentChats)
+
 		},
+
 		handleStarred: (state, action) => {
 			const {friendsName, isStarred} = action.payload
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
@@ -95,7 +125,10 @@ const recentChatsSlice = createSlice({
 			if (find !== -1) {
 				state.recentChats[find].isStarred = isStarred
 			}
+
+			state.recentChats = traverse(state.recentChats)
 		},
+
 		clearConversation: (state, action) => {
 			const friendsName = action.payload
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
@@ -124,6 +157,10 @@ const recentChatsSlice = createSlice({
 			if (find !== -1) {
 				state.recentChats[find].messages.read = true
 			}
+		},
+
+		alertBeforeClear: (state, action) => {
+			state.chatToBeCleared = action.payload
 		}
 
 	},
@@ -142,10 +179,7 @@ const recentChatsSlice = createSlice({
 				}	
 			})
 
-			state.recentChats = recentChats.sort((a, b) => {
-				if (a.lastSent < b.lastSent) return 1
-				if (a.lastSent > b.lastSent) return -1
-			})
+			state.recentChats = traverse(recentChats)
 
 			state.showRecentUsersLoader = false
 		})
@@ -158,6 +192,7 @@ export const {
 	resetUnread,
 	handleStarred,
 	clearConversation,
+	alertBeforeClear,
 	setUnread,
 	syncRecentsWithDeleted,
 	updateRecentChats,

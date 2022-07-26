@@ -46,6 +46,9 @@ const chatSlice = createSlice({
 			} else {
 				state.privateChats.push({username: receiver, messages: [message]})
 			}
+			if (state.privateChats[find].messages.length > 15) {
+				state.privateChats[find].messages.splice(0, state.privateChats[find].messages.length -1 - 15)
+			}
 
 		},
 		storeReceivedChat: (state, action) => {
@@ -61,6 +64,9 @@ const chatSlice = createSlice({
 					messages: [message],
 					actionValues
 				})
+			}
+			if (state.privateChats[find].messages.length > 15) {
+				state.privateChats[find].messages.splice(0, state.privateChats[find].messages.length -1 - 15)
 			}
 
 		},

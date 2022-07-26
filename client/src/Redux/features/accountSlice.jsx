@@ -61,6 +61,9 @@ const accountSlice = createSlice({
 		},
 		editAccountInfo: (state, action) => {
 			state.account = {...state.account, ...action.payload}
+		},
+		profileUpdate: (state, action) => {
+			state.account = {...state.account, ...action.payload}
 		}
 	},
 	extraReducers: builder => {
@@ -78,6 +81,7 @@ export const {
 	setOnline,
 	handleDeleteSocial,
 	editAccountInfo,
+	profileUpdate,
 } = accountSlice.actions
 
 export default accountSlice.reducer

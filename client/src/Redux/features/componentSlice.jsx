@@ -5,9 +5,9 @@ const initialState = {
 	leftPane: true,
 	profile: false,
 	stack: {
-		recentChats: true,
+		recentChats: false,
 		activeUsers: false,
-		settings: false,
+		settings: true,
 		resetPassword: false,
 		contactInfo: false,
 	}

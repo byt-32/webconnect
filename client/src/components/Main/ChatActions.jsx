@@ -37,7 +37,7 @@ const ChatActions = ({children, open, anchorEl, onClose, anchorOrigin}) => {
    		open={open}
    		anchorEl={anchorEl} 
 			onClose={onClose}
-			anchorOrigin={ anchorOrigin !== null || anchorOrigin !== undefined ? anchorOrigin : {}}
+			anchorOrigin={ anchorOrigin }
    	>
 			<div className={classes.chatActions}>
 				{children}

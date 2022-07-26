@@ -44,11 +44,11 @@ const useStyles = makeStyles({
 	},
 	listItem: {
 		'&.MuiListItem-root.Mui-selected': {
-			backgroundColor: '#fbfbfb',
+			backgroundColor: '#e3e3e34d',
 			// backgroundColor: 'rgb(248 247 255)'
 		},
 		'$:hover': {
-			backgroundColor: '#fbfbfb',
+			backgroundColor: '#e3e3e34d',
 			// backgroundColor: 'rgb(248 247 255)'
 		},
 		position: 'relative',
@@ -77,15 +77,6 @@ const UserList = ({user, style, secondaryItems}) => {
 		} else {
 			setText('last seen ' + getLastSeen(user.lastSeen))
 		}
-		// if(!user.online) {
-		// 	setDate(getLastSeen( user.lastSeen))
-		// 	const newTimer = setInterval(() => {
-		// 		setDate(getLastSeen( user.lastSeen))
-		// 	}, 50000)
-
-		// 	setTimer(newTimer)
-		// }
-
 		return () => clearInterval(timer)
 	}, [])
 

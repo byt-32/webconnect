@@ -13,6 +13,12 @@ import InputBase from '@material-ui/core/InputBase'
 import Badge from '@material-ui/core/Badge';
 import Popover from '@material-ui/core/Popover';
 import IconButton from '@material-ui/core/IconButton'
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Button from '@material-ui/core/Button';
 
 import GroupIcon from '@material-ui/icons/Group'
 import MenuIcon from '@material-ui/icons/Menu'
@@ -30,7 +36,7 @@ import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 
 import { setSelectedUser, assertFetch, clearFromFetched } from '../../../Redux/features/otherSlice'
 import { fetchMessages, clearChats } from '../../../Redux/features/chatSlice'
-import { resetUnread, handleStarred, clearConversation } from '../../../Redux/features/recentChatsSlice'
+import { resetUnread, handleStarred, clearConversation, alertBeforeClear } from '../../../Redux/features/recentChatsSlice'
 
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText'
@@ -82,11 +88,11 @@ const useStyles = makeStyles({
 		position: 'relative',
 		padding: 12,
 		'&.MuiListItem-root.Mui-selected': {
-			backgroundColor: '#fbfbfb',
+			backgroundColor: '#e3e3e34d',
 			// backgroundColor: 'rgb(248 247 255)'
 		},
 		'&:hover': {
-			backgroundColor: '#fbfbfb',
+			backgroundColor: '#e3e3e34d',
 			// backgroundColor: 'rgb(248 247 255)'
 		},
 		'& .MuiAvatar-root': {
@@ -216,7 +222,6 @@ const UserList = ({user, style, secondaryItems}) => {
 	const openContextMenu = (e) => {
 		e.preventDefault()
 
-		console.log(e)
 		setMenu(true)
 		setAnchorEl(e.currentTarget)
 		return false
@@ -234,16 +239,7 @@ const UserList = ({user, style, secondaryItems}) => {
 		dispatch(handleStarred({friendsName: user.username, isStarred }))
 	}
 	const handleDelete = () => {
-		
-		if (assert(assert(fetchedUsers.find(i => i === user.username)))) {
-			dispatch(clearFromFetched(user.username))
-		}
-		if (selectedUser.username === user.username) {
-			dispatch(setSelectedUser({}))
-		}
-		socket.emit('clearConversation', username, user.username, () => {})
-		dispatch(clearConversation(user.username))
-		dispatch(clearChats(user.username))
+		dispatch(alertBeforeClear(user))
 	}
 	return (
 		<>
@@ -314,13 +310,19 @@ const UserList = ({user, style, secondaryItems}) => {
 		  }}
    	>
    		<div> 
-   			<IconButton onClick={starConversation} >	
+   			<IconButton onClick={() => {
+   				starConversation()
+   				closeContextMenu()
+   			}} >	
    				{user.isStarred.value ? <StarIcon style={{color: '#6495ed'}} /> : 
    					<StarBorderIcon style={{color: '#6495ed'}} />
    				}
 					<Typography component='span'> {`${user.isStarred.value ? 'Unstar' : 'Star'} conversation` }</Typography>
    			</IconButton>
-   			<IconButton onClick={handleDelete} >	
+   			<IconButton onClick={() => {
+   				handleDelete()
+   				closeContextMenu()
+   			}} >	
    				<DeleteSweepIcon style={{color: '#ff6a6a'}} />
 					<Typography component='span'> Clear conversation </Typography>
    			</IconButton>
@@ -333,6 +335,7 @@ const UserList = ({user, style, secondaryItems}) => {
 
 const RecentChats = ({className}) => {
 	const showRecentChats = useSelector(state => state.components.stack.recentChats)
+	const chatToBeCleared = useSelector(state => state.recentChats.chatToBeCleared)
 
 	const { useEffect } = React
 	const classes = useStyles()
@@ -346,8 +349,11 @@ const RecentChats = ({className}) => {
 		setAnchorEl(null)
 	}
 
+	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const recentChats = useSelector(state => state.recentChats.recentChats)
 	const showLoader = useSelector(state => state.recentChats.showRecentUsersLoader)
+	const fetchedUsers = useSelector(state => state.other.fetched)
+	const { username} = JSON.parse(localStorage.getItem('details'))
 
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
@@ -355,6 +361,21 @@ const RecentChats = ({className}) => {
 	
 	const performSearch = (searchVal) => {
 		dispatch(handleSearch({input: searchVal, component: 'recentChats'}))
+	}
+	const closeDialog = ()=> {
+		dispatch(alertBeforeClear({}))
+	}
+
+	const handleDelete = () => {
+		if (assert(assert(fetchedUsers.find(i => i === chatToBeCleared.username)))) {
+			dispatch(clearFromFetched(chatToBeCleared.username))
+		}
+		if (selectedUser.username === chatToBeCleared.username) {
+			dispatch(setSelectedUser({}))
+		}
+		socket.emit('clearConversation', username, chatToBeCleared.username, () => {})
+		dispatch(clearConversation(chatToBeCleared.username))
+		dispatch(clearChats(chatToBeCleared.username))
 	}
 	return (
 			<section className={[classes.recentChats, className].join(' ')}>
@@ -405,6 +426,32 @@ const RecentChats = ({className}) => {
 						})
 					}
 				</div>
+				{ assert(chatToBeCleared) &&
+					<Dialog
+		        open={assert(chatToBeCleared)}
+		        onClose={closeDialog}
+		        aria-labelledby="alert-dialog-title"
+		        aria-describedby="alert-dialog-description"
+		      >
+		        <DialogTitle id="alert-dialog-title">{"Clear conversation"}</DialogTitle>
+		        <DialogContent>
+		          <DialogContentText id="alert-dialog-description">
+		            {`This action will permanently clear your entire chat history with ${chatToBeCleared.username}. Continue?`}
+		          </DialogContentText>
+		        </DialogContent>
+		        <DialogActions>
+		          <Button onClick={closeDialog} color="primary">
+		            Cancel
+		          </Button>
+		          <Button color="secondary" autoFocus onClick={() => {
+		          	handleDelete()
+		          	closeDialog()
+		          }} >
+		            Yes
+		          </Button>
+		        </DialogActions>
+		      </Dialog>
+				}
 			</section>
 
 	)

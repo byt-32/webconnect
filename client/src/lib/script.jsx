@@ -33,17 +33,13 @@ export async function handleFetch(url, method, body, callback) {
 	}
 }
 
-
-function type(val) {
-	return typeof val
-}
-
 export function getLastSeen(timestamp) {
+	if (isNaN(timestamp)) return 
 	let newDate = new Date()
 	let oldDate = new Date(timestamp)
 	let mins = oldDate.toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit'})
-
-	if (type(timestamp) === 'number') {
+	console.log(oldDate)
+	if (typeof timestamp === 'number') {
 		if (oldDate.toDateString() === newDate.toDateString()) {
 			return mins
 		} else {
@@ -64,13 +60,12 @@ export function assert(obj) {
 	**/
 	try {
 		
-		if (type(obj) === null || typeof obj === 'undefined') return false
-		if (type(obj) === 'string') return true
-		if (type(obj) === 'number') {
+		if (obj === undefined || obj === null) return false
+		if (typeof obj === 'number') {
 			if (obj !== -1) return true
 				else return false
 		}
-		if (type(obj) === 'boolean') return obj
+		if (typeof obj === 'boolean') return obj
 
 		if (Array.isArray(obj)) {
 			if ( obj.length > 0) {

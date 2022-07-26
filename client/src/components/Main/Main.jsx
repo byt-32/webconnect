@@ -29,15 +29,17 @@ const useStyles = makeStyles({
 })
 
 const Main = () => {
-	const myWorker = new Worker('./workers/worker.js')
+	// const myWorker = new Worker('./workers/worker.js')
 
-	myWorker.postMessage('hi')
+	// myWorker.postMessage('hi')
 
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const {leftPane} = useSelector(state => state.components)
+	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
+
 	const { useEffect } = React
 
 	useEffect(() => {
@@ -82,13 +84,28 @@ const Main = () => {
 	})
 
 	socket.off('chatFromUser').on('chatFromUser', chat => {
-		dispatch(storeReceivedChat(chat))
-		dispatch(updateRecentChats({
-			username: chat.sender,
-			lastSent: chat.message.chatId,
-			online: true,
-			messages: chat.message,
-		}))
+		function handleDispatch() {
+			dispatch(storeReceivedChat(chat))
+			dispatch(updateRecentChats({
+				username: chat.sender,
+				lastSent: chat.message.chatId,
+				online: true,
+				unread: [],
+				isStarred: {value: false},
+				messages: chat.message,
+			}))
+		}
+
+		if (activeUsers.find(i => i.username === chat.sender) !== undefined) {
+			handleDispatch()
+		} else {
+			dispatch(fetchActiveUsers(id)).then(() => {
+				socket.emit('getOnileUsers')
+				handleDispatch()
+			})
+
+		}
+		
 
 		if (!assert(selectedUser) || selectedUser.username !== chat.sender) {
 			socket.emit('saveUnread', chat.sender, username, chat.message.chatId, () => {})

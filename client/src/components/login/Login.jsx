@@ -30,7 +30,7 @@ const useStyles = makeStyles({
 	},
 	formPage: {
 		paddingTop: '1rem',
-		boxShadow: '0px 0px 20px 20px #1900ff05',
+		boxShadow: '0px 0px 20px 20px #1900ff05, 0 0 4px 3px #dfd4d43d',
 		width: '417px',
 		padding: '1rem 2rem',
 		['@media (max-width: 445px)']: {

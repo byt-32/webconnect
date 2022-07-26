@@ -68,6 +68,7 @@ import { updateSettings, editAccountInfo} from '../../../../Redux/features/accou
 import UserAvatar from '../../UserAvatar'
 import Header from '../../Header'
 import NetworkProgress from './NetworkProgress'
+import ProfileEditor from './ProfileEditor'
 
 import { handleFetch } from '../../../../lib/script'
 
@@ -88,14 +89,11 @@ const useStyles = makeStyles((theme) => ({
 		right: 0,
 		
 	},
-	logout: {
+
+	profileEdit: {
 		'& svg': {
-			marginRight: 5
-		},
-		'& svg, p': {
-			color: '#b30f2e'
 		}
-	},
+	},	
 	banner: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -153,6 +151,11 @@ const useStyles = makeStyles((theme) => ({
 		},
 		'& .MuiIconButton-root': {
 			alignSelf: 'flex-end'
+		},
+		'& .MuiSvgIcon-root': {
+			color: '#6a74bf',
+			marginRight: 10, 
+			fontSize: '1.2rem',
 		}
 	},
 	list: {
@@ -171,14 +174,19 @@ const useStyles = makeStyles((theme) => ({
 	},
 	nested: {
 		padding: '0 10px 0 18px'
-	}
+	},
+	logout: {
+		'& .MuiListItemIcon-root': {
+			minWidth: '35px'
+		}
+	},
 }))
 
 const Settings = ({className}) => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const { username, bio, status, email, settings} = useSelector(state => state.account.account)
+	const { username, displayName, bio, status, email, settings} = useSelector(state => state.account.account)
 	const [showProgress, setProgress] = React.useState(false)
 
 	const [showInput, setInputs] = React.useState({name: false, bio: false})
@@ -194,6 +202,7 @@ const Settings = ({className}) => {
 	const [showInputCloseIcon, setInputCloseIcon] = React.useState({name: true})
 	const [openDialog, setDialog] = React.useState(false);
 	const [daysUntil, setDaysUntil] = React.useState('')
+	const [openEditor, setEditor] = React.useState(false)
 
 	const [showPhotoIcon, setIcon] = React.useState(false)
 
@@ -219,63 +228,66 @@ const Settings = ({className}) => {
 		setInputs({...showInput, ...input})
 	}
 
-	const updateProfileName = ({target}) => {
-		const value = target.value
-		clearTimeout(timerToValidateName)
-		updateNameStatus(false)
+	// const updateProfileName = ({target}) => {
+	// 	const value = target.value
+	// 	clearTimeout(timerToValidateName)
+	// 	updateNameStatus(false)
 
-		if (/[^a-z0-9_ ]/ig.test(value)) {
-			updateNameStatus(false)
-			setInputError({name: true})
-			setHelperText({name: `name cannot contain ${value[value.length-1]}`})
+	// 	if (/[^a-z0-9_ ]/ig.test(value)) {
+	// 		updateNameStatus(false)
+	// 		setInputError({name: true})
+	// 		setHelperText({name: `name cannot contain ${value[value.length-1]}`})
 
-		} else if (value.length < 3) {
-			setNameValue({name: value})
-			setInputError({name: true})
-			setHelperText({name: `name is too short`})
-		} else {
-			setNameValue({name: value})
-			setInputError({name: false})
-			setHelperText({name: ''})
-		}
+	// 	} else if (value.length < 3) {
+	// 		setNameValue({name: value})
+	// 		setInputError({name: true})
+	// 		setHelperText({name: `name is too short`})
+	// 	} else {
+	// 		setNameValue({name: value})
+	// 		setInputError({name: false})
+	// 		setHelperText({name: ''})
+	// 	}
 
-		if (value === '') {
-			setInputCloseIcon({name: true})
-		} else {
-			if (value.length >= 3 ) {
-				callTimer()
-				setInputCloseIcon({name: false})
-			}	
-		}
+	// 	if (value === '') {
+	// 		setInputCloseIcon({name: true})
+	// 	} else {
+	// 		if (value.length >= 3 ) {
+	// 			callTimer()
+	// 			setInputCloseIcon({name: false})
+	// 		}	
+	// 	}
 
-		function callTimer() {
-			const newTimer = setTimeout(() => {
-				updateNameStatus(true)
-				handleFetch(`/user/updateName/${id}`, 'put', {newName: target.value}, (res) => {
-					const {type, response} = res
-					updateNameStatus(false)
-					if (type === 'error') {
-						setInputError({name: true})
-						setHelperText({name: response })
-					} else if (type === 'isMax') {
-						setDaysUntil(response)
-						setDialog(true)
-					} else {
-						const login = JSON.parse(localStorage.getItem('details'))
-						localStorage.setItem('details', JSON.stringify({...login, username: response}))
+	// 	function callTimer() {
+	// 		const newTimer = setTimeout(() => {
+	// 			updateNameStatus(true)
+	// 			handleFetch(`/user/updateName/${id}`, 'put', {newName: target.value}, (res) => {
+	// 				const {type, response} = res
+	// 				updateNameStatus(false)
+	// 				if (type === 'error') {
+	// 					setInputError({name: true})
+	// 					setHelperText({name: response })
+	// 				} else if (type === 'isMax') {
+	// 					setDaysUntil(response)
+	// 					setDialog(true)
+	// 				} else {
+	// 					const login = JSON.parse(localStorage.getItem('details'))
+	// 					localStorage.setItem('details', JSON.stringify({...login, username: response}))
 
-						setInputError({name: false})
-						setHelperText({name: '' })
-						setInputs({name: false})
-						document.location.pathname = ''
-					}
-					res.error && updateNameStatus(false)
-				})
-				setTimer(newTimer)
+	// 					setInputError({name: false})
+	// 					setHelperText({name: '' })
+	// 					setInputs({name: false})
+	// 					document.location.pathname = ''
+	// 				}
+	// 				res.error && updateNameStatus(false)
+	// 			})
+	// 			setTimer(newTimer)
 				
-			})
-		}
-	}
+	// 		})
+	// 	}
+	// }
+
+	
+	
 
 	const handleSettings = (obj) => {
 		setProgress(true)
@@ -315,31 +327,7 @@ const Settings = ({className}) => {
 				</IconButton>
 				<Typography component='h6'> Profile </Typography>
 				<div className={classes.headerActions}>
-					<IconButton onClick={(e) => handleMenu(e)}> <MoreVertIcon /> </IconButton>
-					<Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'left',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={open}
-            onClose={handleClose}
-          >
-            <MenuItem onClick={() => {
-            	handleClose()
-            	callToLogout()
-            }} 
-            	className={classes.logout}>
-            	<ExitToAppIcon />
-            	<Typography style={{color:''}} > Log out </Typography>
-            </MenuItem>
-          </Menu>
+					<ProfileEditor />
 				</div>
 				{ showProgress &&
 					<NetworkProgress />
@@ -374,14 +362,24 @@ const Settings = ({className}) => {
 		        	width: 200, height: 200, fontSize: '4rem'
 		        }} badge={false} />
 					</div>
+
 					<div className={classes.profileInfo}>
 						<div className={classes.info}>
 							<ListItem>
 				        <ListItemIcon>
-						 			<AccountBoxIcon style={{marginRight: 10, fontSize: '1.2rem', color: '#95898b'}} />
+						 			<PermIdentityIcon />
 				        </ListItemIcon>
-				        <ListItemText onDoubleClick={() => handleInputVisibility({name: true})} primary={username} />
+				        <ListItemText primary={'@' +username} />
 				      </ListItem>
+
+				      { displayName !== undefined && displayName !== '' &&
+					      <ListItem>
+					        <ListItemIcon>
+							 			<AccountBoxIcon />
+					        </ListItemIcon>
+					        <ListItemText primary={displayName } />
+					      </ListItem>
+				      }
 						</div>
 
 						 <div className={classes.info}>
@@ -390,29 +388,12 @@ const Settings = ({className}) => {
 							 			<InfoOutlinedIcon style={{marginRight: 10, fontSize: '1.2rem'}} />
 					        </ListItemIcon>
 
-									{showInput.bio ?	
-										<OutlinedInput
-											onChange={({target}) => handleBioInput(target.value)} 
-											placeholder='Give a short description about yourself'
-											style={{width: '100%'}}
-											multiline
-											endAdornment={
-												<InputAdornment position="end" style={{height: '100%'}}>
-													<IconButton onClick={changeBio} >
-														<CheckIcon />
-													</IconButton>
-												</InputAdornment>
-											}
-
-										/>
-										:
-						        <ListItemText 
-						        	primary={bio} 
-						        	secondary={
-						        		<Button className={classes.editButton} onClick={() => handleInputVisibility({bio: true})}> edit </Button>
-						        	}
-						        /> 
-					      	}
+					        <ListItemText 
+					        	primary={
+					        		bio === '' ? <span style={{fontStyle: 'italic', color: '#818181'}}> Your bio is empty </span>
+					        		: {bio}
+					        	}
+					        /> 
 					      </ListItem>
 							</div> 
 					</div>
@@ -460,6 +441,19 @@ const Settings = ({className}) => {
             		checked={settings.sound}
             		color='primary'
             	/>
+	          </ListItem>
+	        </List>
+
+	        <List>
+	        	<ListItem 
+	        		button
+	        		className={classes.logout}
+	          	onClick={() => callToLogout()}
+	          >
+	          	<ListItemIcon>
+            		<ExitToAppIcon />
+            	</ListItemIcon>
+	            <ListItemText primary="Log out" />
 	          </ListItem>
 	        </List>
 

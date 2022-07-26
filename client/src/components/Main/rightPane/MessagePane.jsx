@@ -194,6 +194,13 @@ const useStyles = makeStyles({
 	snackbar: {
 		transform: 'none'
 	},
+	notChats: {
+		position: 'absolute',
+		bottom: '1rem',
+		textAlign: 'center',
+		width: '95%',
+		color: '#4e4f62'
+	},
 	bottomSnackbar: {
 		bottom: '15%',
 		'& .MuiSnackbarContent-message': {
@@ -469,17 +476,17 @@ const MessagesPane = ({friend}) => {
 				   </div>
         }
         title={<span onClick={showProfilePage}> {friend.username} </span>}
-        action={
-        	<>
+        // action={
+        // 	<>
 
-	          <IconButton aria-label="settings" onClick={showMoreOptions}>
-	            <PhoneIcon style={{color: '#676d78'}} />
-	          </IconButton>
-	          <IconButton aria-label="settings" onClick={showMoreOptions}>
-	            <VideoCallIcon style={{color: '#676d78'}} />
-	          </IconButton>
-	        </>
-        }
+	       //    <IconButton aria-label="settings" onClick={showMoreOptions}>
+	       //      <PhoneIcon style={{color: '#676d78'}} />
+	       //    </IconButton>
+	       //    <IconButton aria-label="settings" onClick={showMoreOptions}>
+	       //      <VideoCallIcon style={{color: '#676d78'}} />
+	       //    </IconButton>
+	       //  </>
+        // }
         subheader={
         	friendIsTyping ? <span style={{color: '#6495ed'}} > {'typing...'} </span>
         	: secondaryText
@@ -509,7 +516,10 @@ const MessagesPane = ({friend}) => {
 	    		</Slide>
 	    	}
 
-        <ChatMessages chats={friend.messages} />
+        { friend.messages.length > 0 ?
+        	<ChatMessages chats={friend.messages} />
+        	: <div className={classes.notChats}> {'Start the conversation by saying Hi'} </div>
+        }
 
         <Snackbar open={networkError}
         	className={[classes.bottomSnackbar, classes.snackbar].join(' ')}
