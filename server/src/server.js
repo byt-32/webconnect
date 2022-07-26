@@ -1,23 +1,25 @@
-import 'dotenv/config'
-import express from 'express'
-import bcrypt from 'bcrypt'
+require('dotenv').config()
+const express = require('express')
+const bcrypt = require('bcrypt')
+const mongoose = require('mongoose')
+const path = require('path')
 
-import apiRoute from './routes/apiRoute.js'
-import userRoute from './routes/userRoute.js'
-import chatRoute from './routes/chatRoute.js'
-import {
+const apiRoute = require('./routes/apiRoute.js')
+const userRoute = require('./routes/userRoute.js')
+const chatRoute = require('./routes/chatRoute.js')
+let app = express()
+
+const {
 	chatsUtil,
 	unreadUtil,
 	userUtil,
 	validateUtil,
-} from './utils/script.js'
+} = require('./utils/script.js')
 
-import Chat from './models/Chat.js'
+const Chat = require('./models/Chat.js')
 
-import mongoose from 'mongoose'
-
-import { createServer } from 'http'
-import { Server } from 'socket.io'
+const server = require('http').createServer(app)
+const io = require('socket.io')(server)
 
 const port = process.env.PORT || 3001;
 let connectedClients = [], onlineUsers = []
@@ -31,17 +33,12 @@ db.once('open', () => {
 	console.log('DB connected')
 })
 
-let app = express()
 app.use(express.json())
 
 app.use('/user/', userRoute)
 app.use('/api/', apiRoute)
 app.use('/chat/', chatRoute)
 
-const server = createServer(app)
-const io = new Server(server, {
-
-})
 
 const error = (msg) => {
 	throw new Error(msg)
@@ -71,7 +68,6 @@ NEVER EMIT OR BROADCAST A USER, WITH TOKEN INCLUDED,
 
 io.use((socket, next) => {
 	const {token, username} = socket.handshake.auth
-
 	validateUtil.id(token, (id) => {
 		const find = connectedClients.findIndex(i => i.token === token)
 		if (find === -1) {
@@ -139,7 +135,7 @@ io.on('connection', socket => {
 	})
 
 
-	socket.on('unstarChat', obj => unstarChat(obj))
+	// socket.on('unstarChat', obj => unstarChat(obj))
 
 
 	socket.on('deleteChat', obj => {
@@ -193,10 +189,10 @@ io.on('connection', socket => {
 })
 
 
-app.use(express.static('./webconnect_build/dist'))
+app.use(express.static(path.join(__dirname, '../dist')))
 
-app.get('/', (req, res) => {
-	res.sendFile(__dirname, + 'webconnect_build/dist/index.html')
+app.get('/', (req, res) => { 
+	res.sendFile('index.html', {root:  path.join(__dirname, '../dist')})
 })
 
 server.listen(port, () => console.log('webconnect running on port ' + port))

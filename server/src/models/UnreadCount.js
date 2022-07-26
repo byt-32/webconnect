@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 
 const unreadCountSchema = new mongoose.Schema({
 	_id: String,
@@ -13,4 +13,4 @@ const unreadCountSchema = new mongoose.Schema({
 })
 
 const UnreadCount = mongoose.model('unreadCount', unreadCountSchema)
-export default UnreadCount
+module.exports = UnreadCount

@@ -1,7 +1,6 @@
-import express from 'express'
-import { v4 as uuidv4 } from 'uuid'
+const express = require('express')
 
-import Chat from '../models/Chat.js'
+const Chat = require('../models/Chat.js')
 
 const chatRoute = express.Router()
 
@@ -28,4 +27,4 @@ chatRoute.get('/fetchMessages/:friendsName/:requesterId', async (request, respon
 	}
 })
 
-export default chatRoute
+module.exports = chatRoute

@@ -1,13 +1,12 @@
-import express from 'express'
-import { v4 as uuidv4 } from 'uuid'
-import bcrypt from 'bcrypt'
+const express = require('express')
+const bcrypt = require('bcrypt')
 
-import User from '../models/User.js'
-import Chat from '../models/Chat.js'
+const User = require('../models/User.js')
+const Chat = require('../models/Chat.js')
 
-import UserSettings from '../models/UserSettings.js'
+const UserSettings = require('../models/UserSettings.js')
 
-import shado from 'shado'
+const shado = require('shado')
 
 const userRoute = express.Router()
 
@@ -25,13 +24,11 @@ userRoute.post('/register', async (request, response) => {
 			const inserToDB = await User.create({
 				username: login.username,
 				email: login.email,
-				socials: {
-					email: {
-						link: login.email,
-						name: 'email',
-						visible: true
-					},
-				},
+				socials: [{
+					name: 'email',
+					link: login.email,
+					hidden: true
+				}],
 				password: hashedPassword,
 				remember: login.remember,
 				joined: Date.now(),
@@ -61,7 +58,7 @@ userRoute.post('/login', async (request, response) => {
 			try {
 				const compare = await bcrypt.compare(login.password, user.password)
 				if (compare) {
-					response.send({id: user.id, username: user.username, 'socials.email': 1})
+					response.send({id: user.id, username: user.username, socials: 1})
 
 				} else {
 					response.send({type: 'error'})
@@ -105,6 +102,19 @@ userRoute.put('/updateSettings/:id', async (request, response) => {
 			response.send(updateSettings.settings)
 		}
 	}
+})
+
+userRoute.put('/saveProfileInfo/:id', async (request, response) => {
+	const info = request.body
+	const id = request.params.id
+	if (id === undefined || id === null) return 
+	
+	const {bio, displayName} = await User.findByIdAndUpdate(id, {
+		bio: info.bio,
+		displayName: info.displayName
+	}, {upsert: true, new: true})
+console.log(update)
+// response.send()
 })
 
 userRoute.put('/editBio/:id', async (request, response) => {
@@ -238,4 +248,4 @@ userRoute.get('/accountData/:id', async (request, response) => {
 	response.send(user)
 })
 
-export default userRoute
+module.exports = userRoute

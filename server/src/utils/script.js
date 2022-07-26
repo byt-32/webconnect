@@ -1,29 +1,34 @@
-import Chat from '../models/Chat.js'
-import User from '../models/User.js'
+const Chat = require('../models/Chat.js')
+const User = require('../models/User.js')
 
-export const validateUtil = {
+const validateUtil = {
 	id: async function (id, callback) {
 		const userId = await User.findById(id, {_id: 1})
 
-		if (userId) {
+		if (userId !== null) {
 			callback(userId.id)
 		} 
 	}
 }
 
-export const userUtil = {
+const userUtil = {
 	setLastSeen: async (id) => {
 		await User.findOneAndUpdate({_id: id}, {lastSeen: Date.now()})
 	}
 }
 
-export const unreadUtil = {
+const unreadUtil = {
 	save: async function (sender, receiver, chatId) {
-		await Chat.findOneAndUpdate({username: receiver, 'chats.username': sender}, {
-			$push: {
-				'chats.$.unread': chatId
+		await Chat.findOne({username: receiver})
+		.exec((err, docs) => {
+			const find = docs.chats.findIndex(i => i.username === sender)
+			if (find !== -1) {
+				docs.chats[find].unread.push(chatId)
+			} else {
+
 			}
-		}, {upsert: true})
+			docs.save()
+		})
 		
 	},
 	reset: async function (sender, receiver) {
@@ -46,7 +51,7 @@ export const unreadUtil = {
 	}
 }
 
-export const chatsUtil = {
+const chatsUtil = {
 	starConversation: async (user, friendsName, isStarred) => {
 		await Chat.findOneAndUpdate({username: user, 'chats.username': friendsName,}, {
 			'chats.$.isStarred': isStarred
@@ -62,6 +67,7 @@ export const chatsUtil = {
 	save: async function (user1, user2, lastSent, message) {
 		const user1Id = await User.findOne({username: user1}, {_id: 1})
 		const user2Id = await User.findOne({username: user2}, {_id: 1})
+		if (user1Id === null || user2Id === null) return false
 
 		const newChatObj = {
 			id: user2Id.id,
@@ -136,4 +142,9 @@ export const chatsUtil = {
 			{arrayFilters: [{'message.reply.chatId': chat.chatId}]}
 		)
 	}
+}
+
+
+module.exports = {
+	userUtil, chatsUtil, unreadUtil, validateUtil
 }

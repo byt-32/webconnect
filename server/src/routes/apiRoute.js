@@ -1,5 +1,6 @@
-import express from 'express'
-import User from '../models/User.js'
+const express = require('express')
+const mongoose = require('mongoose')
+const User = require('../models/User.js')
 
 const apiRoute = express.Router()
 
@@ -22,4 +23,4 @@ apiRoute.get('/profiles/:id/:username', async (request, response) => {
 	}})
 })
 
-export default apiRoute
+module.exports =apiRoute

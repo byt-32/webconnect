@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require('mongoose')
 
 const userPrivacySchema = new mongoose.Schema({
 	_id: String,
@@ -7,4 +7,4 @@ const userPrivacySchema = new mongoose.Schema({
 
 const UserPrivacy = mongoose.model('userPrivacy', userPrivacySchema)
 
-export default UserPrivacy
+module.exports = UserPrivacy
