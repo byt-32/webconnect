@@ -391,7 +391,7 @@ const Settings = ({className}) => {
 					        <ListItemText 
 					        	primary={
 					        		bio === '' ? <span style={{fontStyle: 'italic', color: '#818181'}}> Your bio is empty </span>
-					        		: {bio}
+					        		: bio
 					        	}
 					        /> 
 					      </ListItem>
