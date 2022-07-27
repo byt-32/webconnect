@@ -135,6 +135,7 @@ const useStyles = makeStyles((theme) => ({
 		// justifyContent: 'center',
 		alignItems: 'center',
 		display: 'flex',
+		flexDirection: 'column',
 		marginBottom: 12,
 		'& .MuiListItem-root': {
 			padding: '0 16px'
@@ -153,7 +154,7 @@ const useStyles = makeStyles((theme) => ({
 			alignSelf: 'flex-end'
 		},
 		'& .MuiSvgIcon-root': {
-			color: '#6a74bf',
+			color: '#b3ac9e',
 			marginRight: 10, 
 			fontSize: '1.2rem',
 		}
@@ -323,7 +324,7 @@ const Settings = ({className}) => {
 		<section className={[classes.settings, className].join(' ')}>
 			<Header>
 				<IconButton onClick={() => setComp({component: 'recentChats', value: true})}>
-					<KeyboardBackspaceIcon />
+					<KeyboardBackspaceIcon  />
 				</IconButton>
 				<Typography component='h6'> Profile </Typography>
 				<div className={classes.headerActions}>
@@ -365,7 +366,7 @@ const Settings = ({className}) => {
 
 					<div className={classes.profileInfo}>
 						<div className={classes.info}>
-							<ListItem>
+							<ListItem title='username'>
 				        <ListItemIcon>
 						 			<PermIdentityIcon />
 				        </ListItemIcon>
@@ -373,7 +374,7 @@ const Settings = ({className}) => {
 				      </ListItem>
 
 				      { displayName !== undefined && displayName !== '' &&
-					      <ListItem>
+					      <ListItem title='display name'>
 					        <ListItemIcon>
 							 			<AccountBoxIcon />
 					        </ListItemIcon>
