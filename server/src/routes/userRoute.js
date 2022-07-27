@@ -113,8 +113,7 @@ userRoute.put('/saveProfileInfo/:id', async (request, response) => {
 		bio: info.bio,
 		displayName: info.displayName
 	}, {upsert: true, new: true})
-console.log(update)
-// response.send()
+	response.send({bio, displayName})
 })
 
 userRoute.put('/editBio/:id', async (request, response) => {
