@@ -4,9 +4,9 @@ const bcrypt = require('bcrypt')
 const mongoose = require('mongoose')
 const path = require('path')
 
-const apiRoute = require('./routes/apiRoute.js')
-const userRoute = require('./routes/userRoute.js')
-const chatRoute = require('./routes/chatRoute.js')
+const apiRoute = require('./src/routes/apiRoute.js')
+const userRoute = require('./src/routes/userRoute.js')
+const chatRoute = require('./src/routes/chatRoute.js')
 let app = express()
 
 const {
@@ -14,9 +14,9 @@ const {
 	unreadUtil,
 	userUtil,
 	validateUtil,
-} = require('./utils/script.js')
+} = require('./src/utils/script.js')
 
-const Chat = require('./models/Chat.js')
+const Chat = require('./src/models/Chat.js')
 
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
