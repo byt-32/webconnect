@@ -12,7 +12,7 @@ const userSchema = new mongoose.Schema({
 	email: { type: String, lowercase: true, required: true, index: {unique: true}} ,
 	password: { type: String, required: true },
 	remember: {type: Boolean},
-	bio: {type: String},
+	bio: {type: String, default: ''},
 	updateNameTimestamp: {type: Date},
 	lastSeen: {type: Number},
 	socials: [socialsSchema],

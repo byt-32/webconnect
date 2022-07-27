@@ -108,10 +108,35 @@ userRoute.put('/saveProfileInfo/:id', async (request, response) => {
 	const info = request.body
 	const id = request.params.id
 	if (id === undefined || id === null) return 
-	
+
+	// async function setInfos(infos) {
+	// 	const {displayName, bio} = await User.findOneAndUpdate(id, {
+	// 		...infos
+	// 	}, {upsert: true})
+
+	// 	return {displayName, bio}
+	// }
+
+	// const getLastUpdate = await User.findById(id, {updateNameTimestamp: 1, _id: 0})
+
+	// if (getLastUpdate.updateNameTimestamp === undefined) {
+	// 	response.send({...setInfos({...info})})
+
+	// } else {
+
+	// 	const daysSinceLastUpdate = 
+	// 		shado.date.set(getLastUpdate.updateNameTimestamp, new Date()).getDays(true)
+
+	// 	if (daysSinceLastUpdate >= 60) {
+	// 		response.send({...setInfos({...info})})
+	// 		response.send({...setDisplayName})
+	// 	} else {
+	// 		response.send({type: 'isMax', response: `You can only update your name once in 60 days .You have ${60 - daysSinceLastUpdate} days left` })
+	// 	}
+	// }
+		
 	const {bio, displayName} = await User.findByIdAndUpdate(id, {
-		bio: info.bio,
-		displayName: info.displayName
+		...info
 	}, {upsert: true, new: true})
 	response.send({bio, displayName})
 })
@@ -125,37 +150,6 @@ userRoute.put('/editBio/:id', async (request, response) => {
 			response.send({bio: update.bio})
 		} catch (e) {
 			e && console.log('Err' + e)
-		}
-	}
-})
-
-userRoute.put('/updateName/:id', async (request, response) => {
-	const { id } = request.params
-	const {newName} = request.body
-	const date = new Date().toLocaleDateString()
-	const getLastUpdate = await User.findById(id, {updateNameTimestamp: 1, _id: 0})
-
-	async function queryAndUpdate() {
-		const checkName = await User.findOne({username: newName}, {_id: 0})
-		if (checkName === null) {//if name has not been taken
-			await User.findByIdAndUpdate(id, {updateNameTimestamp: date})
-			const updateName = await User.findByIdAndUpdate(id, {username: newName}, { new: true})
-			response.send({type: 'success', response: updateName.username})
-		} else {//name has been taken, leave!!!
-			response.send({type: 'error', response: 'This name is unavailable'})
-			response.end()
-		}
-	}
-
-	if (getLastUpdate.updateNameTimestamp === undefined) {//if the user has not updated his name before
-		queryAndUpdate()
-	} else {// You cant update at this time
-		const daysSinceLastUpdate = 
-			shado.date.set(getLastUpdate.updateNameTimestamp, new Date()).getDays(true)
-		if (daysSinceLastUpdate >= 60) {
-			queryAndUpdate()
-		} else {
-			response.send({type: 'isMax', response: `You can only update your name once in 2 months.\n Wait until ${60 - daysSinceLastUpdate} days` })
 		}
 	}
 })
@@ -243,7 +237,7 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 
 userRoute.get('/accountData/:id', async (request, response) => {
 	const {id} = request.params
-	const user = await User.findById(id, {_id: 0, socials: 1, bio: 1})
+	const user = await User.findById(id, {_id: 0, socials: 1, bio: 1, displayName: 1})
 	response.send(user)
 })
 
