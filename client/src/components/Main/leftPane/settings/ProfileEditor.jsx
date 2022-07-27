@@ -134,15 +134,15 @@ const ProfileEditor = ({open}) => {
 	}, [dialog])
 	
 	const changeDisplayName = (value) => {
-		if (value.length < 3) {
-			setError({...error, displayName: true})
-			setHelperText({...helperText, displayName: 'Name is too short'})
-			setDisabled(true)
-		} else {
-			setError({...error, displayName: false})
-			setHelperText({...helperText, displayName: ''})
-			setDisabled(false)
-		}
+		// if (value.length < 3) {
+		// 	setError({...error, displayName: true})
+		// 	setHelperText({...helperText, displayName: 'Name is too short'})
+		// 	value !== '' && setDisabled(true)
+		// } else {
+		// 	setError({...error, displayName: false})
+		// 	setHelperText({...helperText, displayName: ''})
+		// 	setDisabled(false)
+		// }
 		
 		setValue({...values, displayName: value})
 	}
@@ -170,6 +170,7 @@ const ProfileEditor = ({open}) => {
 			bio: values.bio
 		}, (res) => {
 			if (!res.error) {
+				console.log(res)
 				dispatch(profileUpdate(res))
 			}
 			setPreloader(false)
