@@ -170,7 +170,6 @@ const ProfileEditor = ({open}) => {
 			bio: values.bio
 		}, (res) => {
 			if (!res.error) {
-				console.log(res)
 				dispatch(profileUpdate(res))
 			}
 			setPreloader(false)
@@ -181,7 +180,9 @@ const ProfileEditor = ({open}) => {
 
 	return (
 	 <>
-			<IconButton className={classes.profileEdit} onClick={() => openProfileEditor()}> <AccountCircleIcon /> </IconButton>
+			<IconButton className={classes.profileEdit} onClick={() => openProfileEditor()}> 
+				<AccountCircleIcon style={{color: '#677187'}} /> 
+			</IconButton>
       <Dialog open={dialog} className={classes.dialog} onClose={handleClose} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">
        	 Edit Profile
