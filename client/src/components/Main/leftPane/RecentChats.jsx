@@ -36,7 +36,7 @@ import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 
 import { setSelectedUser, assertFetch, clearFromFetched } from '../../../Redux/features/otherSlice'
 import { fetchMessages, clearChats } from '../../../Redux/features/chatSlice'
-import { resetUnread, handleStarred, clearConversation, alertBeforeClear } from '../../../Redux/features/recentChatsSlice'
+import { resetUnread, handleStarred, clearConversation, alertBeforeClear, searchRecentChats } from '../../../Redux/features/recentChatsSlice'
 
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText'
@@ -377,6 +377,11 @@ const RecentChats = ({className}) => {
 		dispatch(clearConversation(chatToBeCleared.username))
 		dispatch(clearChats(chatToBeCleared.username))
 	}
+
+	const handleSearch = (value) => {
+		dispatch(searchRecentChats(value))
+	}
+
 	return (
 			<section className={[classes.recentChats, className].join(' ')}>
 				<Header>
@@ -413,6 +418,7 @@ const RecentChats = ({className}) => {
 						className={classes.searchbar}
 			      placeholder='@user'
 			      type="text"
+			      onChange={handleSearch}
 			    />
 
 				</Header>

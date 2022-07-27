@@ -42,6 +42,7 @@ function traverse(arr) {
 const initialState = {
 	recentChats: [],
 	chatToBeCleared: [],
+	temp: [],
 	// defaultActions: {
 	// 	online: false,
 	// 	unread: [],
@@ -161,8 +162,13 @@ const recentChatsSlice = createSlice({
 
 		alertBeforeClear: (state, action) => {
 			state.chatToBeCleared = action.payload
-		}
+		},
 
+		searchRecentChats: (state, action) => {
+			if (!temp.length) {
+				// state.recentChats.forEach()
+			}
+		}
 	},
 	extraReducers: builder => {
 		builder.addCase(fetchRecentChats.pending, (state, action) => {
@@ -194,6 +200,7 @@ export const {
 	clearConversation,
 	alertBeforeClear,
 	setUnread,
+	searchRecentChats,
 	syncRecentsWithDeleted,
 	updateRecentChats,
 	syncRecentsWithRead,
