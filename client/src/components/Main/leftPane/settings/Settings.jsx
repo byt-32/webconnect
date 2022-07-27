@@ -335,7 +335,7 @@ const Settings = ({className}) => {
 				}
 			</Header>
 				
-			<Dialog
+			{/*<Dialog
         open={openDialog}
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
@@ -347,6 +347,7 @@ const Settings = ({className}) => {
 	        </DialogContentText>
 	      </DialogContent>
       </Dialog>
+      */}
 			<div className={classes.profileBody}>
 				<div className={classes.banner}>
 					<div className={classes.profileImage} 
