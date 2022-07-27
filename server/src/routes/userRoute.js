@@ -223,6 +223,7 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 			{
 				_id: 0,
 				'chats.username': 1, 
+				'chats.displayName': 1,
 				'chats.lastSent': 1, 
 				'chats.unread': 1,
 				'chats.isStarred': 1,

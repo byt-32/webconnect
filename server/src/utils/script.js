@@ -78,7 +78,7 @@ const chatsUtil = {
 
 		await Chat.findOne({username: user1})
 		.exec(async (err, docs) => {
-			// console.log(docs)
+			console.log(docs)
 			if (docs !== null) {
 				const find = docs.chats.findIndex(i => i.username === user2)
 				if (find !== -1) {
