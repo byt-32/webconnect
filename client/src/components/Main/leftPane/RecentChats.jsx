@@ -359,9 +359,6 @@ const RecentChats = ({className}) => {
 		dispatch(setComponents(obj))
 	}
 	
-	const performSearch = (searchVal) => {
-		dispatch(handleSearch({input: searchVal, component: 'recentChats'}))
-	}
 	const closeDialog = ()=> {
 		dispatch(alertBeforeClear({}))
 	}
