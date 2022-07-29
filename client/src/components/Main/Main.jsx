@@ -57,10 +57,10 @@ const Main = () => {
 
 	}, [])
 
-	socket.on('connect', () => {
+	socket.off('connect').on('connect', () => {
 		dispatch(setOnline(true))
 	})
-	socket.on('disconnect', reason => {
+	socket.off('disconnect').on('disconnect', reason => {
 		dispatch(setOnline(false))
 	})
 
