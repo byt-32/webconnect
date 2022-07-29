@@ -4,12 +4,13 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon ./src/server.js",
+    "dev": "nodemon server.js",
     "client": "cd ../client && npm start",
     "start": "concurrently \"npm run dev\" \"npm run client \" "
   },
   "nodemonConfig": {
     "watch": [
+      "server.js",
       "./src/"
     ]
   },
