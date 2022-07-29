@@ -24,10 +24,8 @@ const unreadUtil = {
 			const find = docs.chats.findIndex(i => i.username === sender)
 			if (find !== -1) {
 				docs.chats[find].unread.push(chatId)
-			} else {
-
-			}
-			docs.save()
+				docs.save()
+			} 
 		})
 		
 	},
