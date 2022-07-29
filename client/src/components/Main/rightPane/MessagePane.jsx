@@ -127,6 +127,10 @@ const useStyles = makeStyles({
 				background: common.white,
 				margin: 0,
 				padding: '11px 10px',
+
+				'& textarea': {
+					height: '19px'
+				}
 				// borderRadius: '15px',
 				// boxShadow: '1px 2px 4px 0px #00000021'
 			},
@@ -137,7 +141,6 @@ const useStyles = makeStyles({
 		},
 
 		'& .MuiInputBase-inputMultiline': {
-			maxHeight: 70,
 			overflowY: 'scroll !important'
 		},
 
@@ -198,8 +201,9 @@ const useStyles = makeStyles({
 		position: 'absolute',
 		bottom: '1rem',
 		textAlign: 'center',
-		width: '95%',
-		color: '#4e4f62'
+		width: '80%',
+		textShadow: '1px 1px 1px #eee',
+		color: '#68431d'
 	},
 	bottomSnackbar: {
 		bottom: '15%',
@@ -247,7 +251,6 @@ const MessagesPane = ({friend}) => {
 
 	const dispatch = useDispatch()
 	const {username, id} = JSON.parse(localStorage.getItem('details'))
-	const friendInUsers = useSelector(state => state.activeUsers.activeUsers.find(i => i.username === friend.username))
 
 	const profile = useSelector(state => state.components.profile)
 	// console.log(online)
@@ -256,7 +259,7 @@ const MessagesPane = ({friend}) => {
 
 	const accountIsOnline = useSelector(state => state.account.account.online)
 
-	const friendInRecent = useSelector(state => state.recentChats.recentChats).find(i => i.username === friend.username)
+	const userOnline = useSelector(state => state.other.onlineUsers.find(i => i.username === friend.username))
 
 	const inputRef = React.createRef(null)
 	const [timerToDelete, setDeleteTimer] = React.useState(null)
@@ -277,16 +280,14 @@ const MessagesPane = ({friend}) => {
 	const [secondaryText, setText] = React.useState('')
 
 	React.useEffect(() => {
-		if (friendInUsers !== undefined && friendInUsers.online) {
-			setText('online')
-		} else {
-			if (typeof friendInUsers.lastSeen === 'number') {
-				setText('last seen ' + getLastSeen(friendInUsers.lastSeen))
+		if (assert(userOnline)) {
+			if (userOnline.online) {
+				setText('online') 
 			} else {
-				setText('offline')
+				setText('last seen ' + getLastSeen(userOnline.lastSeen))
 			}
-		}
-	}, [friendInUsers.online])
+		} 
+	}, [userOnline])
 
 	React.useEffect(() => {
 		/*** READ THIS 
@@ -322,18 +323,11 @@ const MessagesPane = ({friend}) => {
 		}
 	}, [reply])
 
-
 	const undoDelete = () => {
 		dispatch(undoPendingDelete({friendsName: friend.username}))
 		clearTimeout(timerToDelete)
 	}
 
-	let friendIsTyping = false
-
-	if (friendInRecent !== undefined) {
-		friendIsTyping = friendInRecent.typing
-	}
-	
 	const toggleMenu = (event) => {
 		setAnchorEl(event.target)
 	}
@@ -488,7 +482,7 @@ const MessagesPane = ({friend}) => {
 	       //  </>
         // }
         subheader={
-        	friendIsTyping ? <span style={{color: '#6495ed'}} > {'typing...'} </span>
+        	assert(userOnline) && userOnline.typing === true ? <span style={{color: '#6495ed'}} > {'typing...'} </span>
         	: secondaryText
         }
       />
@@ -567,12 +561,14 @@ const MessagesPane = ({friend}) => {
 			     	 }
 		      	</div>
 	      	</Slide>
-      	<InputBase 
+      	<InputBase
       		multiline
       		placeholder='Type your messages'
       		ref={inputRef}
       		className={classes.inputBase}
       		onChange={() => secondaryText === 'online' && handleTextInput()}
+      		maxRows={4}
+      		minRows={1}
       		endAdornment={
 						<InputAdornment position="end" style={{height: '100%'}}>
 							<IconButton onClick={sendMessage} >

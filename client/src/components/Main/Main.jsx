@@ -6,14 +6,14 @@ import { Outlet } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
 import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, 
-	handleUserTypingActivity, updateRecentChats, syncRecentsWithDeleted, syncRecentsWithRead} from '../../Redux/features/recentChatsSlice'
+	updateRecentChats, syncRecentsWithDeleted, syncRecentsWithRead} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
 
 import { storeReceivedChat, setChatRead, handleStarredChat, performChatDelete } from '../../Redux/features/chatSlice'
 
-import { setDisconnectedUsers, setOnlineUsers } from '../../Redux/features/otherSlice'
+import { setDisconnectedUsers, setOnlineUsers, handleUserTypingActivity } from '../../Redux/features/otherSlice'
 
 import { assert } from '../../lib/script'
 import LeftPane from './leftPane/LeftPane'
@@ -65,14 +65,12 @@ const Main = () => {
 	})
 
 	socket.off('onlineUsers').on('onlineUsers', users => {
-		dispatch(setRecentOnline(users.filter(user => user.username !== username)))
 		dispatch(setActiveOnline(users.filter(user => user.username !== username)))
-		// dispatch(setOnlineUsers(users.filter(user => user.username !== username)))
+		dispatch(setOnlineUsers(users.filter(user => user.username !== username)))
 	})
 	socket.off('userDisconnect').on('userDisconnect', user => {
 		dispatch(setActiveDisconnect(user))
-		dispatch(setRecentDisconnect(user))
-		// dispatch(setDisconnectedUsers(user))
+		dispatch(setDisconnectedUsers(user))
 	})
 
 	socket.off('starredChat').on('starredChat', (starredBy, starredChat) => {
@@ -105,7 +103,6 @@ const Main = () => {
 			})
 
 		}
-		
 
 		if (!assert(selectedUser) || selectedUser.username !== chat.sender) {
 			socket.emit('saveUnread', chat.sender, username, chat.message.chatId, () => {})

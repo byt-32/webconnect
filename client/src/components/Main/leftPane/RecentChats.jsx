@@ -9,7 +9,6 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField'
 import MenuItem from '@material-ui/core/MenuItem';
-import InputBase from '@material-ui/core/InputBase'
 import Badge from '@material-ui/core/Badge';
 import Popover from '@material-ui/core/Popover';
 import IconButton from '@material-ui/core/IconButton'
@@ -52,6 +51,7 @@ import { assert, getLastSeen, handleFetch } from '../../../lib/script'
 
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 import Header from '../Header'
+import SearchBar from '../SearchBar'
 import ChatActions from '../ChatActions'
 
 const useStyles = makeStyles({
@@ -77,13 +77,7 @@ const useStyles = makeStyles({
 			minWidth: 40
 		}
 	},
-	searchbar: {
-		width: '100%',
-		marginLeft: 20,
-		alignSelf: 'stretch',
-		'& .MuiInputBase-root': {height: '100%'}
-
-	},
+	
 	listItem: {
 		position: 'relative',
 		padding: 12,
@@ -170,6 +164,8 @@ const UserList = ({user, style, secondaryItems}) => {
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 	const fetchedUsers = useSelector(state => state.other.fetched)
+	const userOnline = useSelector(state => state.other.onlineUsers.find(i => i.username === user.username))
+
 	let dateValue, yearPos, year, fullDate, timestamp
 
 	if (assert(user.messages)) {
@@ -248,12 +244,13 @@ const UserList = ({user, style, secondaryItems}) => {
 			className={classes.listItem}
 			selected={user.username === selectedUser.username || showMenu}
 			onContextMenu={openContextMenu}
+			style={{display: user.hidden === true ? 'none' : 'flex'}}
   		onClick={handleClick}>
 
     		<ListItemIcon>
 		      <UserAvatar
 			      username={user.username} 
-			      badge={user.online ? true : false}
+			      badge={assert(userOnline) ? userOnline.online : false}
 			     />
 		    </ListItemIcon>
       	<ListItemText 
@@ -261,7 +258,7 @@ const UserList = ({user, style, secondaryItems}) => {
       			<Typography component='h6'> {user.username}</Typography>
       		} 
       		secondary={
-      			user.typing ?
+      			assert(userOnline) && userOnline.typing === true ?
       				<span className={classes.typingStatus}> {'typing...'} </span>
       			: 
       				<span className={classes.lastChat}> 
@@ -337,12 +334,13 @@ const RecentChats = ({className}) => {
 	const showRecentChats = useSelector(state => state.components.stack.recentChats)
 	const chatToBeCleared = useSelector(state => state.recentChats.chatToBeCleared)
 
-	const { useEffect } = React
+	const { useEffect, useState } = React
 	const classes = useStyles()
 	const dispatch = useDispatch()
-	const [anchorEl, setAnchorEl] = React.useState(null)
+	const [anchorEl, setAnchorEl] = useState(null)
 	const open = Boolean(anchorEl)
 	const input = useSelector(state => state.recentChats.input)
+
 	const toggleMenu = (event) => {
 		setAnchorEl(event.target)
 	}
@@ -412,15 +410,10 @@ const RecentChats = ({className}) => {
 						</MenuItem>
 							
 					</Menu>
-					<InputBase
-						className={classes.searchbar}
-			      placeholder='@user'
-			      type="text"
-			      value={input}
-			      onChange={({target}) => {
-			      	handleSearch(target.value)
-			      }}
-			    />
+					
+					<SearchBar input={input} onChange={(val) => {
+						handleSearch(val)
+					}} />
 
 				</Header>
 				<div className={classes.userslist}>

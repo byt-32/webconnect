@@ -12,6 +12,7 @@ import Preloader from '../../Preloader'
 import { setSelectedUser, assertFetch } from '../../../Redux/features/otherSlice'
 import { fetchMessages } from '../../../Redux/features/chatSlice'
 import { resetUnread } from '../../../Redux/features/recentChatsSlice'
+import { searchActiveUsers } from '../../../Redux/features/activeUsersSlice'
 
 import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
@@ -77,15 +78,6 @@ const UserList = ({user, style, secondaryItems}) => {
 		} else {
 			setText('last seen ' + getLastSeen(user.lastSeen))
 		}
-		return () => clearInterval(timer)
-	}, [])
-
-	React.useEffect(() => {
-		if (user.online) {
-			setText('')
-		} else {
-			setText('last seen ' + getLastSeen(user.lastSeen))
-		}
 	}, [user.online])
 
 	const handleClick = () => {
@@ -122,6 +114,7 @@ const UserList = ({user, style, secondaryItems}) => {
 		<ListItem	button 
 			className={classses.listItem}
 			selected={user.username === selectedUser.username}
+			style={{display: user.hidden === true ? 'none' : 'flex'}}
   		onClick={handleClick}>
     		<ListItemIcon>
 		      <UserAvatar
@@ -144,9 +137,14 @@ const ActiveUsers = ({className}) => {
 	const dispatch = useDispatch()
 	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
 	const showLoader = useSelector(state => state.activeUsers.showActiveUsersLoader)
+	const input = useSelector(state => state.activeUsers.input)
 
 	const setComponent = () => {
 		dispatch(setComponents({component: 'recentChats', value: true}))
+	}
+
+	const handleSearch = (value) => {
+		dispatch(searchActiveUsers(value))
 	}
 	return (
 			<section className={[classes.activeUsers, className].join(' ')}>
@@ -159,6 +157,10 @@ const ActiveUsers = ({className}) => {
 						className={classes.searchbar}
 			      placeholder='@user'
 			      type="text"
+			      value={input}
+			      onChange={({target}) => {
+			      	handleSearch(target.value)
+			      }}
 			    />
 
 				</Header>

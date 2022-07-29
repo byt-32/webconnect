@@ -56,9 +56,6 @@ const recentChatsSlice = createSlice({
 	name: 'recentChats',
 	initialState,
 	reducers: {
-		search: (state, action) => {
-
-		},
 		setRecentOnline: (state, action) => {
 			const users = action.payload
 			
@@ -96,13 +93,7 @@ const recentChatsSlice = createSlice({
 			}
 			
 		},
-		handleUserTypingActivity: (state, action) => {
-			const {user, typing} = action.payload
-			const find = state.recentChats.findIndex(i => i.username === user)
-			if (find !== -1) {
-				state.recentChats[find].typing = typing
-			}
-		},
+		
 		updateRecentChats: (state, action) => {
 			const {lastSent, username, messages} = action.payload
 			let index = state.recentChats.findIndex(i => i.username === username)
@@ -167,18 +158,15 @@ const recentChatsSlice = createSlice({
 
 		searchRecentChats: (state, action) => {
 			const input = action.payload
-			const temp = state.temp
 			state.input = input
 			
-			if (!temp.length) {
-				state.temp = state.recentChats
-			}
-			if (input === '') {
-				state.recentChats = state.temp
-				state.temp = []
-			}
-
-			state.recentChats = state.recentChats.filter(i => i.username.toLowerCase().includes(input.toLowerCase()) )
+			state.recentChats.forEach((a, b) => {
+				if (a.username.toLowerCase().includes(input.toLowerCase())) {
+					state.recentChats[b].hidden = false
+				} else {
+					state.recentChats[b].hidden = true
+				}
+			})
 		}
 	},
 	extraReducers: builder => {
@@ -215,7 +203,6 @@ export const {
 	syncRecentsWithDeleted,
 	updateRecentChats,
 	syncRecentsWithRead,
-	handleUserTypingActivity,
 	setRecentDisconnect
 } = recentChatsSlice.actions
 

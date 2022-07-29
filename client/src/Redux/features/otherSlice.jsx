@@ -26,6 +26,15 @@ const otherSlice = createSlice({
 				state.fetched.splice(find, 1)
 			}
 		},
+
+		handleUserTypingActivity: (state, action) => {
+			const {user, typing} = action.payload
+			const find = state.onlineUsers.findIndex(i => i.username === user)
+			if (find !== -1) {
+				state.onlineUsers[find].typing = typing
+			}
+		},
+
 		setOnlineUsers: (state, action) => {
 			const users = action.payload
 
@@ -56,6 +65,7 @@ export const {
 	assertFetch,
 	clearFromFetched,
 	setOnlineUsers,
+	handleUserTypingActivity,
 	setDisconnectedUsers
 } = otherSlice.actions
 

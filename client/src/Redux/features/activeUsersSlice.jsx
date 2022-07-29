@@ -13,7 +13,9 @@ export const fetchActiveUsers = createAsyncThunk(
 
 const initialState = {
 	activeUsers: [],
-	showActiveUsersLoader: false
+	showActiveUsersLoader: false,
+	input: '',
+	temp: []
 }
 
 const activeUsersSlice = createSlice({
@@ -43,6 +45,19 @@ const activeUsersSlice = createSlice({
 				state.activeUsers[index].online = false
 				state.activeUsers[index].lastSeen = Date.now()
 			}
+		},
+
+		searchActiveUsers: (state, action) => {
+			const input = action.payload
+			state.input = input
+
+			state.activeUsers.forEach((a, b) => {
+				if (a.username.toLowerCase().includes(input.toLowerCase())) {
+					state.activeUsers[b].hidden = false
+				} else {
+					state.activeUsers[b].hidden = true
+				}
+				})
 		}
 	},
 	extraReducers: builder => {
@@ -61,9 +76,9 @@ const activeUsersSlice = createSlice({
 })
 
 export const {
-	search,
 	setActiveOnline,
-	setActiveDisconnect
+	setActiveDisconnect,
+	searchActiveUsers
 } = activeUsersSlice.actions
 
 export default activeUsersSlice.reducer

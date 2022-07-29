@@ -1,5 +1,7 @@
 import React from 'react'
 
+const baseUrl = ''
+
 export const getWindowHeight = () => {
 	const [height, setHeight] = React.useState(`${window.innerHeight}`)
 	window.addEventListener('resize', () => {
@@ -38,7 +40,7 @@ export function getLastSeen(timestamp) {
 	let newDate = new Date()
 	let oldDate = new Date(timestamp)
 	let mins = oldDate.toLocaleTimeString('en-US', {hour12: false, hour: '2-digit', minute: '2-digit'})
-	console.log(oldDate)
+	// console.log(oldDate)
 	if (typeof timestamp === 'number') {
 		if (oldDate.toDateString() === newDate.toDateString()) {
 			return mins
