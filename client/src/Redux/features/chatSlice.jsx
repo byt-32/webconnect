@@ -14,8 +14,8 @@ export const fetchUserProfile = createAsyncThunk('fetchUserProfile',
 	async ({id, username}) => {
 		const response = await fetch(`/api/profiles/${id}/${username}`)
 		if (response.ok) {
-			const messages = await response.json()
-			return messages
+			const profile = await response.json()
+			return profile
 		}
 	}
 )
@@ -46,9 +46,9 @@ const chatSlice = createSlice({
 			} else {
 				state.privateChats.push({username: receiver, messages: [message]})
 			}
-			if (state.privateChats[find].messages.length > 15) {
-				state.privateChats[find].messages.splice(0, state.privateChats[find].messages.length -1 - 15)
-			}
+			// if (state.privateChats[find].messages.length > 15) {
+			// 	state.privateChats[find].messages.splice(0, state.privateChats[find].messages.length -1 - 15)
+			// }
 
 		},
 		storeReceivedChat: (state, action) => {
@@ -65,9 +65,9 @@ const chatSlice = createSlice({
 					actionValues
 				})
 			}
-			if (state.privateChats[find].messages.length > 15) {
-				state.privateChats[find].messages.splice(0, state.privateChats[find].messages.length -1 - 15)
-			}
+			// if (state.privateChats[find].messages.length > 15) {
+			// 	state.privateChats[find].messages.splice(0, state.privateChats[find].messages.length -1 - 15)
+			// }
 
 		},
 		setChatRead: (state, action) => {
