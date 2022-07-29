@@ -43,6 +43,7 @@ const initialState = {
 	recentChats: [],
 	chatToBeCleared: [],
 	temp: [],
+	input: '',
 	// defaultActions: {
 	// 	online: false,
 	// 	unread: [],
@@ -165,9 +166,19 @@ const recentChatsSlice = createSlice({
 		},
 
 		searchRecentChats: (state, action) => {
+			const input = action.payload
+			const temp = state.temp
+			state.input = input
+			
 			if (!temp.length) {
-				// state.recentChats.forEach()
+				state.temp = state.recentChats
 			}
+			if (input === '') {
+				state.recentChats = state.temp
+				state.temp = []
+			}
+
+			state.recentChats = state.recentChats.filter(i => i.username.toLowerCase().includes(input.toLowerCase()) )
 		}
 	},
 	extraReducers: builder => {

@@ -342,6 +342,7 @@ const RecentChats = ({className}) => {
 	const dispatch = useDispatch()
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	const open = Boolean(anchorEl)
+	const input = useSelector(state => state.recentChats.input)
 	const toggleMenu = (event) => {
 		setAnchorEl(event.target)
 	}
@@ -415,7 +416,10 @@ const RecentChats = ({className}) => {
 						className={classes.searchbar}
 			      placeholder='@user'
 			      type="text"
-			      onChange={handleSearch}
+			      value={input}
+			      onChange={({target}) => {
+			      	handleSearch(target.value)
+			      }}
 			    />
 
 				</Header>
