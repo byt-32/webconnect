@@ -25,7 +25,7 @@ const port = process.env.PORT || 3001;
 let connectedClients = [], onlineUsers = []
 
 const db = mongoose.connection
-mongoose.connect( process.env.LOCALURI , {
+mongoose.connect( process.env.URI , {
 	useNewUrlParser: true,
 	useUnifiedTopology: true
 })
