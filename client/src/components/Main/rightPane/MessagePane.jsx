@@ -60,6 +60,7 @@ import { getWindowHeight, assert, getLastSeen } from '../../../lib/script'
 
 import Profile from './Profile'
 import { socket } from '../Main'
+import HelperAlert from '../HelperAlert'
 
 
 const useStyles = makeStyles({
@@ -158,7 +159,7 @@ const useStyles = makeStyles({
 	contents: {
 		padding: '0 10%',
 		['@media (max-width: 900px)']: {
-			padding: '0 2%',
+			padding: '0 0 0 2%',
 		},
 		
 	},
@@ -166,6 +167,7 @@ const useStyles = makeStyles({
 		display: 'flex',
 		borderBottom: '1px solid #f1f1f1',
 		justifyContent: 'space-between',
+		maxHeight: '100px',
 		// boxShadow: 'inset -1px -3px 5px 0px #0000000d',
 		background: '#fdfdfd',
 		width: '100%',
@@ -181,6 +183,10 @@ const useStyles = makeStyles({
 		borderRadius: 'inherit',
 		'& span:first-child': {
 			marginBottom: 2
+		},
+		'& span:last-of-type': {
+			maxHeight: '200px',
+			overflowY: 'scroll',
 		}
 	},
 	starred: {
@@ -197,9 +203,10 @@ const useStyles = makeStyles({
 	snackbar: {
 		transform: 'none'
 	},
-	notChats: {
+	noChats: {
 		position: 'absolute',
 		bottom: '1rem',
+		left: '10%',
 		textAlign: 'center',
 		width: '80%',
 		textShadow: '1px 1px 1px #eee',
@@ -215,12 +222,21 @@ const useStyles = makeStyles({
 			alignItems: 'center',
 		}
 	},
+	codeEle: {
+		borderRadius: '4px',
+		display: 'inline-flex',
+		background: '#ffffff47',
+		alignItems: 'center',
+		justifyContent: 'center',
+		padding: '0 6px'
+	}
 })
-function retrieveDate(date) {
+function retrieveDate(_date) {
+	let date = _date.toDateString()
 	const index = (/[0-9](?=[0-9]{3})/).exec(date)['index']
 	const year = date.split('').splice(index).join('')
 	const day = date.split('').splice(0, index-1).join('')
-	const fullDate = date
+	const fullDate = _date.toString()
 
 	return {year: year, day: day, fullDate: fullDate}
 }
@@ -246,11 +262,15 @@ function ActionNotifier(props) {
   )
 }
 
+const LS = (str) => {
+	return JSON.parse(localStorage.getItem(str))
+}
+
 const MessagesPane = ({friend}) => {
 	const classes = useStyles()
 
 	const dispatch = useDispatch()
-	const {username, id} = JSON.parse(localStorage.getItem('details'))
+	const {username, id} = LS('details')
 
 	const profile = useSelector(state => state.components.profile)
 	// console.log(online)
@@ -265,6 +285,8 @@ const MessagesPane = ({friend}) => {
 	const [timerToDelete, setDeleteTimer] = React.useState(null)
 
 	const {pendingDelete, starredChat, reply, showProfile} = friend.actionValues
+	const [showHelper, setHelperAlert] = React.useState(false)
+	const [noOfDispay, setValue] = React.useState(LS('noOfDispay') || 0)
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	// const [input, setInput] = React.useState('')
 	const [showPicker, setPicker] = React.useState(false)
@@ -357,36 +379,45 @@ const MessagesPane = ({friend}) => {
 		}
 		setTimer(newTimer)
 	}
+
+	const listenForEnter = (e) => {
+		if (e.key === 'Enter') {
+			e.preventDefault()
+			sendMessage()
+		}
+	}
 	const hideNetworkError = () => {
 		setNetworkError(false)
 	}
 	const closeReplyHandle = () => {
 		dispatch(setReply({open: false, friendsName: friend.username}))
 	}
+	const closeHelper = () => setHelperAlert(false)
 
 	const sendMessage = async () => {
 		handleTypingStatus(false)
 		const textarea = inputRef.current.querySelector('textarea')
 		const input = textarea.value
-		const dateNow = () => Date.now()
 		const _date = new Date()
+		const dateNow = () => _date.getTime()
 		const thisDate = dateNow()
 			
 		const date =
-		{...retrieveDate(_date.toDateString()), 
+		{...retrieveDate(_date), 
 			time: _date.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'})
 		}
-
+		
 		if (input !== '') {
 			if (accountIsOnline) {
+				textarea.value = ''
 				setNetworkError(false)
 				const chatObj = {
 					receiver: friend.username,
 					sender: username,
-					lastSent: thisDate,
+					lastSent: thisDate ,
 					message: {
 						message: input,
-						chatId: thisDate, 
+						chatId: thisDate,
 						sender: username,
 						read: false,
 						receiver: friend.username,
@@ -406,7 +437,6 @@ const MessagesPane = ({friend}) => {
 				}))
 
 				dispatch(storeSentChat(chatObj))
-				textarea.value = ''
 				// setInput('')
 				reply.open && closeReplyHandle()
 			} else {
@@ -435,6 +465,15 @@ const MessagesPane = ({friend}) => {
 	}
 	const showMoreOptions = () => {
 
+	}
+	const handleInputClick = () => {
+		if (navigator.appVersion.indexOf('Win') && noOfDispay <= 2) {
+			if (friend.messages.length === 1) {
+				setHelperAlert(true)
+				localStorage.setItem({noOfDispay: noOfDispay + 1})
+			}
+		}
+		
 	}
 	const showProfilePage = () => {
 		if (!assert(friend.profile)) {
@@ -512,18 +551,17 @@ const MessagesPane = ({friend}) => {
 
         { friend.messages.length > 0 ?
         	<ChatMessages chats={friend.messages} />
-        	: <div className={classes.notChats}> {'Start the conversation by saying Hi'} </div>
+        	: <div className={classes.noChats}> {'Start the conversation by saying Hi'} </div>
         }
 
-        <Snackbar open={networkError}
-        	className={[classes.bottomSnackbar, classes.snackbar].join(' ')}
+				<HelperAlert
+					open={networkError}
+        	classNames={[classes.bottomSnackbar, classes.snackbar]}
 					autoHideDuration={6000} 
 					onClose={hideNetworkError}
-				>
-				  <MuiAlert variant='filled' elevation={6} onClose={hideNetworkError} severity="error">
-				    Your're currently offline
-				  </MuiAlert>
-				</Snackbar>
+					message={'Your\'re currently offline'}
+					severity="error"
+				/>
 
 				<Snackbar 
 					className={[classes.bottomSnackbar, classes.snackbar].join(' ')}
@@ -538,7 +576,19 @@ const MessagesPane = ({friend}) => {
 				}
 			/>
 
-
+    		<HelperAlert 
+    			open={showHelper}
+    			onClose={closeHelper}
+    			message={
+    				<span> 
+    					Press <code className={classes.codeEle} > win + Period (<strong> . </strong>) </code> to use emoji
+    				</span>
+    			}
+    			severity='info'
+    			direction='up'
+    			classNames={[classes.bottomSnackbar, classes.snackbar]}
+    		/>
+      		
       </CardContent>
       
       <CardActions className={classes.contents} >
@@ -567,8 +617,12 @@ const MessagesPane = ({friend}) => {
       		ref={inputRef}
       		className={classes.inputBase}
       		onChange={() => secondaryText === 'online' && handleTextInput()}
+      		onKeyDown={listenForEnter}
       		maxRows={4}
       		minRows={1}
+      		onClick={() => {
+      			friend.messages.length <= 1 && handleInputClick()
+      		}}
       		endAdornment={
 						<InputAdornment position="end" style={{height: '100%'}}>
 							<IconButton onClick={sendMessage} >

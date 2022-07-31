@@ -14,6 +14,7 @@ import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
 import { storeReceivedChat, setChatRead, handleStarredChat, performChatDelete } from '../../Redux/features/chatSlice'
 
 import { setDisconnectedUsers, setOnlineUsers, handleUserTypingActivity } from '../../Redux/features/otherSlice'
+import { setComponents} from '../../Redux/features/componentSlice'
 
 import { assert } from '../../lib/script'
 import LeftPane from './leftPane/LeftPane'
@@ -37,8 +38,18 @@ const Main = () => {
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
-	const {leftPane} = useSelector(state => state.components)
+	const {leftPane, rightPane} = useSelector(state => state.components)
 	const activeUsers = useSelector(state => state.activeUsers.activeUsers)
+
+	/** TODO: CLEAR THIS OR REFACTOR, 
+			REASON: IT TRIGGERS MULTIPLE DISPATCHES **/
+	window.addEventListener('resize', () => {
+		if (window.innerWidth <= 660) {
+			if (assert(selectedUser) && leftPane) dispatch(setComponents({component: 'leftPane', value: false}))
+		} else if (window.innerWidth > 660) {
+			!leftPane && dispatch(setComponents({component: 'leftPane', value: true}))
+		}
+	})
 
 	const { useEffect } = React
 

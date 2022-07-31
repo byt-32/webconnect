@@ -30,6 +30,7 @@ function traverse(arr) {
 	arr.sort((a,b) => {
 		if (a.lastSent > b.lastSent) return -1
 		else return 1
+
 	})
 	
 
@@ -100,7 +101,7 @@ const recentChatsSlice = createSlice({
 			let spliced
 
 			if (index !== -1) {
-				state.recentChats[index].lastSent = lastSent
+				state.recentChats[index].lastSent = new Date(messages.timestamp.fullDate).getTime()
 				state.recentChats[index].messages = messages
 
 			} else {
@@ -181,6 +182,7 @@ const recentChatsSlice = createSlice({
 					i.typing = false 
 					i.online = false
 					i.messages = i.messages[0]
+					i.lastSent = new Date(i.messages.timestamp.fullDate).getTime()
 				}	
 			})
 

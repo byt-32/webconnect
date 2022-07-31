@@ -24,6 +24,7 @@ import {CSSTransition } from 'react-transition-group'
 
 import Header from '../Header'
 import UserAvatar from '../UserAvatar'
+import SearchBar from '../SearchBar'
 import { socket } from '../Main'
 import { getLastSeen, assert } from '../../../lib/script'
 
@@ -153,15 +154,9 @@ const ActiveUsers = ({className}) => {
 						<KeyboardBackspaceIcon />
 					</IconButton>
 
-					<InputBase
-						className={classes.searchbar}
-			      placeholder='@user'
-			      type="text"
-			      value={input}
-			      onChange={({target}) => {
-			      	handleSearch(target.value)
-			      }}
-			    />
+					<SearchBar input={input} onChange={(val) => {
+						handleSearch(val)
+					}} />
 
 				</Header>
 				<div className={classes.userslist}>

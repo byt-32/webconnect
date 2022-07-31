@@ -83,6 +83,8 @@ const useStyles = makeStyles({
 		background: common.white
 	},
 	chatSingle: {
+		maxWidth: '80%',
+		whiteSpace: 'pre-wrap',
 		width: 'auto',
 		font: 'message-box',
 		borderRadius: '5px' ,
@@ -90,15 +92,20 @@ const useStyles = makeStyles({
 		position: 'relative',
 		'& > span': {
 			padding: '4px 8px',
-			display: 'flex',
-			alignItems: 'center',
-			justifyContent: 'space-between'
+			// display: 'flex',
+			// alignItems: 'flex-start',
+			// justifyContent: 'space-between'
 		}
 	},
 	
-	
 	isLast: {
 		marginBottom: 12
+	},
+	overflow: {
+		maxHeight: '200px',
+		overflowX: 'hidden',
+		whiteSpace: 'pre-wrap',
+		display: 'block'
 	},
 	reply: {
 		background: common.white,
@@ -122,9 +129,12 @@ const useStyles = makeStyles({
 	},
 	chatTime: {
 		fontSize: '.65rem',
-		marginLeft: 9,
+		marginLeft: 7,
 		opacity: .9,
-		alignSelf: 'flex-end'
+		position: 'sticky',
+		top: '100px',
+		float: 'right',
+		bottom: '0',
 	},
 	deleted: {
 		fontStyle: 'italic',
@@ -300,20 +310,22 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 					chat.reply.open ? 
 					<>
 						<div className={[className, classes.chatSingle, isFirst && bubbleClass(), 'reply'].join(' ')} >
+
 							<div 
 								className={classes.reply} 
 								onClick={() => { chat.reply.message !== '' && handleChatHighlight()}}
 							>
 								<span> {chat.reply.sender === username ? 'You' : chat.reply.sender} </span>
 								{ chat.reply.message !== '' ?
-										<span> {chat.reply.message} </span>
+										<span className={classes.overflow} > {chat.reply.message} </span>
 									: 
 										<div className={[className, classes.deleted].join(' ')}>
 											<span className={classes.deleted}> Deleted </span> 
 										</div> 
 								}
 							</div>
-							<span className={classes.chat} onClick={({target}) => {
+
+							<span className={[classes.chat, classes.overflow].join(' ')} onClick={({target}) => {
 								assert(chat.chatId) && handleChatActions(target)
 							}} > 
 								{chat.message}
@@ -329,7 +341,7 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 					:
 					<>
 						<div className={[className, classes.chatSingle, isFirst && bubbleClass()].join(' ')} >
-							<span className={classes.chat} onClick={({target}) => {
+							<span className={[classes.chat, classes.overflow].join(' ')} onClick={({target}) => {
 								assert(chat.chatId) && handleChatActions(target)
 							}} >
 								{chat.message}

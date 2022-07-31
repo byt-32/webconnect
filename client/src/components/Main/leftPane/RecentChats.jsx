@@ -18,9 +18,12 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
+import SpeedDial from '@material-ui/lab/SpeedDial';
+import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
+import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
 
 import GroupIcon from '@material-ui/icons/Group'
-import MenuIcon from '@material-ui/icons/Menu'
+// import MenuIcon from '@material-ui/icons/Menu'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
@@ -32,6 +35,7 @@ import DoneIcon from '@material-ui/icons/Done';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
 import StarIcon from '@material-ui/icons/Star';
 import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import { setSelectedUser, assertFetch, clearFromFetched } from '../../../Redux/features/otherSlice'
 import { fetchMessages, clearChats } from '../../../Redux/features/chatSlice'
@@ -155,6 +159,19 @@ const useStyles = makeStyles({
 	
 })
 
+function getTime(date) {
+	let year, day
+
+	let str = date.toDateString()
+	let match = str.match(/[0-9][0-9][0-9][0-9]/)
+
+	if (match !== null) {
+		year = match[0]
+		day = str.slice(0, match.index-1)
+	}
+	return {year, day}
+}
+
 const UserList = ({user, style, secondaryItems}) => {
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const {useState, useEffect} = React
@@ -169,22 +186,15 @@ const UserList = ({user, style, secondaryItems}) => {
 	let dateValue, yearPos, year, fullDate, timestamp
 
 	if (assert(user.messages)) {
-		timestamp = user.messages.timestamp
-		// Get the date of the last chat 
-		//example of a fulldate: fri July 21, 2022
-		if (timestamp.fullDate === new Date().toDateString()) {
-			dateValue = timestamp.time[0] === '0' ? timestamp.time.slice(1) : timestamp.time
-		} else {
-			fullDate = user.messages.timestamp.fullDate
-			yearPos = fullDate.match(/[0-9][0-9][0-9][0-9]/).index
-			year = parseInt(fullDate.slice(yearPos, fullDate.length).replaceAll(' ', ''))
+		const oldDate = getTime(new Date(user.messages.chatId))
+		const newDate = getTime(new Date())
 
-			if (year === new Date().getFullYear()) {
-				dateValue = fullDate.slice(0, yearPos)
-			} else {
-				dateValue = fullDate
-			}
+		if (oldDate.day === newDate.day) {
+			dateValue = user.messages.timestamp.time
+		} else {
+			dateValue = oldDate.day
 		}
+		
 	}
 
 	const handleClick = (e) => {
@@ -382,7 +392,7 @@ const RecentChats = ({className}) => {
 			<section className={[classes.recentChats, className].join(' ')}>
 				<Header>
 					<IconButton onClick={toggleMenu} style={{background: open && '#0000000a'}} >
-						<MenuIcon />
+						<MoreVertIcon />
 					</IconButton>
 					<Menu 
 						open={open} 
@@ -426,6 +436,7 @@ const RecentChats = ({className}) => {
 						})
 					}
 				</div>
+
 				{ assert(chatToBeCleared) &&
 					<Dialog
 		        open={assert(chatToBeCleared)}
@@ -440,14 +451,14 @@ const RecentChats = ({className}) => {
 		          </DialogContentText>
 		        </DialogContent>
 		        <DialogActions>
-		          <Button onClick={closeDialog} color="primary">
+		          <Button onClick={closeDialog} style={{color: 'red'}}>
 		            Cancel
 		          </Button>
-		          <Button color="secondary" autoFocus onClick={() => {
+		          <Button color="primary" autoFocus onClick={() => {
 		          	handleDelete()
 		          	closeDialog()
 		          }} >
-		            Yes
+		            Delete
 		          </Button>
 		        </DialogActions>
 		      </Dialog>

@@ -7,6 +7,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import MuiAlert from '@material-ui/lab/Alert';
+import Snackbar from '@material-ui/core/Snackbar'
 
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
@@ -105,11 +107,13 @@ const ProfileEditor = ({open}) => {
 	const {id} = JSON.parse(localStorage.getItem('details'))
 	const {useState, useEffect} = React
 	const dispatch = useDispatch()
+	const { displayName, bio} = useSelector(state => state.account.account)
 	const classes = useStyles()
 	const [dialog, setDialog] = useState(false)
-	const [noSave, setDisabled] = useState(true)
+	const [noSave, setDisabled] = useState(false)
 	const [preloader, setPreloader] = useState(false)
 	const [noInput, disableInput] = useState(false)
+	const [openAlert, setAlert] = useState({open: false, message: ''})
 
 	const [error, setError] = useState({
 		displayName: false, bio: false
@@ -120,17 +124,18 @@ const ProfileEditor = ({open}) => {
 	})
 	
 	const [values, setValue] = useState({
-		displayName: '', bio: ''
+		displayName: displayName, bio: bio
 	})
 
 	useEffect(() => {
-		if (!dialog) {
-			setDisabled(false)
-			setPreloader(false)
-			disableInput(false)
-			setValue({displayName: '', bio: ''})
-			setHelperText({displayName: '', bio: ''})
-		}
+		setValue({displayName, bio})
+		// if (!dialog) {
+		// 	setDisabled(false)
+		// 	setPreloader(false)
+		// 	disableInput(false)
+		// 	setValue({displayName: '', bio: ''})
+		// 	setHelperText({displayName: '', bio: ''})
+		// }
 	}, [dialog])
 	
 	const changeDisplayName = (value) => {
@@ -175,13 +180,19 @@ const ProfileEditor = ({open}) => {
 			setPreloader(false)
 			setDisabled(false)
 			disableInput(false)
+			handleClose()
+			setAlert({open: true, message: 'Profile updated successfully'})
 		})
+	}
+
+	const closeAlert = () => {
+		setAlert({open: false, message: ''})
 	}
 
 	return (
 	 <>
 			<IconButton className={classes.profileEdit} onClick={() => openProfileEditor()}> 
-				<AccountCircleIcon style={{color: '#677187'}} /> 
+				<AccountCircleIcon style={{color: '#6495ed'}} /> 
 			</IconButton>
       <Dialog open={dialog} className={classes.dialog} onClose={handleClose} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">
@@ -191,7 +202,7 @@ const ProfileEditor = ({open}) => {
         <DialogContent>
         	<form>
         		<fieldset>
-							<div className={classes.formField}>
+							{/*<div className={classes.formField}>
 								<label htmlFor='username' className={classes.disabled} > 
 									Username 
 								</label>
@@ -203,12 +214,8 @@ const ProfileEditor = ({open}) => {
 									variant='outlined'
 									disabled={true}
 									color='primary' 
-									// error={error.username} 
-									// helperText={helperText.username}
-									// value={values.username}
-									// onChange={handleUsernameValue} 
 								/>
-							</div>
+							</div>*/}
 							<div className={classes.formField}>
 								<label htmlFor='displayName' > Dispaly name </label>
 								<TextField
@@ -273,6 +280,25 @@ const ProfileEditor = ({open}) => {
           </Button>
         </DialogActions>
       </Dialog>
+				{/*<Snackbar 
+					// className={classes.bottomSnackbar}
+					anchorOrigin={{
+						vertical: 'bottom',
+						horizontal: 'center',
+					}}
+					transformAnchorOrigin={{
+						vertical: 'bottom',
+						horizontal: 'center',
+					}}
+					autoHideDuration={4000} 
+					message={openAlert.message}
+					open={true}
+					onClose={closeAlert}
+				>
+				<MuiAlert variant='filled' elevation={6} onClose={closeAlert} severity="success">
+			    {openAlert.message}
+			  </MuiAlert>
+			</Snackbar>*/}
     </>
 	)
 }

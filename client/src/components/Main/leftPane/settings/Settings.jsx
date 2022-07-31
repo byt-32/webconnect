@@ -15,7 +15,6 @@ import MenuItem from '@material-ui/core/MenuItem'
 
 import { Preloader, Oval } from 'react-preloader-icon'
 
-import MoreVertIcon from '@material-ui/icons/MoreVert';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto'
 import LocalPhoneIcon from '@material-ui/icons/LocalPhone'
@@ -90,10 +89,6 @@ const useStyles = makeStyles((theme) => ({
 		
 	},
 
-	profileEdit: {
-		'& svg': {
-		}
-	},	
 	banner: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -104,6 +99,7 @@ const useStyles = makeStyles((theme) => ({
 		padding: '1rem 0 .5rem 0',
 		width: '100%'
 	},
+	
 	profileImage: {
 		position: 'relative'
 	},
@@ -154,9 +150,23 @@ const useStyles = makeStyles((theme) => ({
 			alignSelf: 'flex-end'
 		},
 		'& .MuiSvgIcon-root': {
-			color: '#b3ac9e',
-			marginRight: 10, 
-			fontSize: '1.2rem',
+			marginLeft: 5, 
+			fontSize: '1rem',
+		}
+	},
+	infoHandle: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'flex-start',
+		marginBottom: '10px',
+		'& > span:first-child': {
+			fontSize: '.9rem',
+			color: '#707f91',
+			display: 'flex',
+			alignItems: 'center'
+		},
+		'& > span:last-of-type': {
+			marginLeft: '3px'
 		}
 	},
 	list: {
@@ -368,36 +378,38 @@ const Settings = ({className}) => {
 					<div className={classes.profileInfo}>
 						<div className={classes.info}>
 							<ListItem title='username'>
-				        <ListItemIcon>
-						 			<PermIdentityIcon />
-				        </ListItemIcon>
-				        <ListItemText primary={'@' +username} />
+				        <ListItemText primary={
+				        	<span className={classes.infoHandle}>
+			        			<span> User name </span>
+			        			<span> {'@' + username} </span>
+			        		</span>
+				        } />
 				      </ListItem>
 
 				      { displayName !== undefined && displayName !== '' &&
 					      <ListItem title='display name'>
-					        <ListItemIcon>
-							 			<AccountBoxIcon />
-					        </ListItemIcon>
-					        <ListItemText primary={displayName } />
+					        <ListItemText primary={
+					        	<span className={classes.infoHandle}>
+				        			<span> Display name </span>
+				        			<span> {displayName} </span>
+				        		</span>
+					        } />
 					      </ListItem>
 				      }
+			       <ListItem>
+				        <ListItemText 
+				        	primary={
+				        		bio === '' ? 
+				        		<span style={{fontStyle: 'italic', color: '#818181'}}> Your bio is empty </span>
+				        		: 
+				        		<span className={classes.infoHandle}>
+				        			<span> Bio <InfoOutlinedIcon /> </span>
+				        			<span> {bio} </span>
+				        		</span>
+				        	}
+				        /> 
+				      </ListItem>
 						</div>
-
-						 <div className={classes.info}>
-							 <ListItem>
-					        <ListItemIcon>
-							 			<InfoOutlinedIcon style={{marginRight: 10, fontSize: '1.2rem'}} />
-					        </ListItemIcon>
-
-					        <ListItemText 
-					        	primary={
-					        		bio === '' ? <span style={{fontStyle: 'italic', color: '#818181'}}> Your bio is empty </span>
-					        		: bio
-					        	}
-					        /> 
-					      </ListItem>
-							</div> 
 					</div>
 				</div>
 				<Divider />

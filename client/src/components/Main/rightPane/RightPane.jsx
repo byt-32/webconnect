@@ -20,6 +20,7 @@ const useStyles = makeStyles({
 	rightPane: {
 		flex: 9,
 		display: 'flex',
+		overflow: 'hidden',
 		['@media (max-width: 625px)']: {
 			width: '100%',
 			zIndex: 30,
