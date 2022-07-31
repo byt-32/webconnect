@@ -58,7 +58,7 @@ userRoute.post('/login', async (request, response) => {
 			try {
 				const compare = await bcrypt.compare(login.password, user.password)
 				if (compare) {
-					response.send({id: user.id, username: user.username, socials: 1})
+					response.send({id: user.id, username: user.username})
 
 				} else {
 					response.send({type: 'error'})
@@ -107,51 +107,30 @@ userRoute.put('/updateSettings/:id', async (request, response) => {
 userRoute.put('/saveProfileInfo/:id', async (request, response) => {
 	const info = request.body
 	const id = request.params.id
-	if (id === undefined || id === null) return 
-
-	// async function setInfos(infos) {
-	// 	const {displayName, bio} = await User.findOneAndUpdate(id, {
-	// 		...infos
-	// 	}, {upsert: true})
-
-	// 	return {displayName, bio}
-	// }
-
 	// const getLastUpdate = await User.findById(id, {updateNameTimestamp: 1, _id: 0})
 
-	// if (getLastUpdate.updateNameTimestamp === undefined) {
-	// 	response.send({...setInfos({...info})})
 
+	// if (getLastUpdate.updateNameTimestamp === undefined || getLastUpdate.updateNameTimestamp === null) {
+	// 	let {displayName} = await User.findOneAndUpdate(id, {
+	// 		displayName
+	// 	},{upsert: true, new: true})
+	// 	updated = {...updated, displayName}
 	// } else {
-
 	// 	const daysSinceLastUpdate = 
 	// 		shado.date.set(getLastUpdate.updateNameTimestamp, new Date()).getDays(true)
 
 	// 	if (daysSinceLastUpdate >= 60) {
-	// 		response.send({...setInfos({...info})})
-	// 		response.send({...setDisplayName})
-	// 	} else {
-	// 		response.send({type: 'isMax', response: `You can only update your name once in 60 days .You have ${60 - daysSinceLastUpdate} days left` })
+	// 		let {displayName} = await User.findByIdAndUpdate(id, {
+	// 			displayName
+	// 		}, {upsert: true, new: true})
+	// 		updated = {...updated, displayName}
 	// 	}
 	// }
-		
-	const {bio, displayName} = await User.findByIdAndUpdate(id, {
-		...info
-	}, {upsert: true, new: true})
-	response.send({bio, displayName})
-})
 
-userRoute.put('/editBio/:id', async (request, response) => {
-	const {bio} = request.body
-	const {id} = request.params
-	if (id !== '' && id) {
-		try {
-			const update = await User.findByIdAndUpdate(id, {bio: bio}, { new: true})
-			response.send({bio: update.bio})
-		} catch (e) {
-			e && console.log('Err' + e)
-		}
-	}
+	let {displayName, bio} = await User.findByIdAndUpdate(id, {
+		bio: info.bio, displayName: info.displayName
+	}, {upsert: true, new: true})
+	response.send({displayName, bio})
 })
 
 userRoute.put('/matchPassword/:id', async (request, response) => {
@@ -238,7 +217,7 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 
 userRoute.get('/accountData/:id', async (request, response) => {
 	const {id} = request.params
-	const user = await User.findById(id, {_id: 0, socials: 1, bio: 1, displayName: 1})
+	const user = await User.findById(id, {_id: 0, socials: 1, bio: 1, displayName: 1, updateNameTimestamp: 1})
 	response.send(user)
 })
 
