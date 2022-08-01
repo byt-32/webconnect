@@ -13,6 +13,7 @@ export const fetchRecentChats = createAsyncThunk(
 
 
 function traverse(arr) {
+	console.log(arr)
 	let starred = []
 	arr.forEach((chat, i) => {
 		if (chat.isStarred.value) {
@@ -39,6 +40,11 @@ function traverse(arr) {
 	return arr
 }
 
+const defaultValues = {
+	online: false,
+	typing: false,
+	visible: true
+}
 
 const initialState = {
 	recentChats: [],
@@ -105,6 +111,7 @@ const recentChatsSlice = createSlice({
 				state.recentChats[index].messages = messages
 
 			} else {
+				action.payload = {...action.payload, ...defaultValues}
 				state.recentChats.unshift(action.payload)
 			}
 			
@@ -156,16 +163,21 @@ const recentChatsSlice = createSlice({
 		alertBeforeClear: (state, action) => {
 			state.chatToBeCleared = action.payload
 		},
+		addGroup: (state, action) => {
+			const groupDetails = action.payload
+
+			// state.recentChats.push(groupDetails)
+		},
 
 		searchRecentChats: (state, action) => {
 			const input = action.payload
 			state.input = input
 			
-			state.recentChats.forEach((a, b) => {
+			state.recentChats.forEach((a, i) => {
 				if (a.username.toLowerCase().includes(input.toLowerCase())) {
-					state.recentChats[b].visible = true
+					state.recentChats[i].visible = true
 				} else {
-					state.recentChats[b].visible = false
+					state.recentChats[i].visible = false
 				}
 			})
 		}
@@ -175,19 +187,22 @@ const recentChatsSlice = createSlice({
 			state.showRecentUsersLoader = true
 		})
 		.addCase(fetchRecentChats.fulfilled, (state, action) => {
-			// console.log(action.payload)
 			const {recentChats} = action.payload
-			recentChats.forEach(i => {
-				if (i.messages.length > 0) {
-					i.typing = false 
-					i.online = false
-					i.messages = i.messages[0]
-					i.lastSent = new Date(i.messages.timestamp.fullDate).getTime()
-					i.visible = true
-				}	
+			const allChats = recentChats.chats.concat(recentChats.groups)
+			// console.log(recentChats)
+			allChats.forEach(i => {
+				if (i.chatType === undefined || i.chatType !== 'group') {
+					if (i.messages.length > 0) {
+						i.typing = false 
+						i.online = false
+						i.messages = i.messages[0]
+						i.lastSent = new Date(i.messages.timestamp.fullDate).getTime()
+						i.visible = true
+					}	
+				}
 			})
 
-			state.recentChats = traverse(recentChats)
+			state.recentChats = traverse(allChats)
 
 			state.showRecentUsersLoader = false
 		})
@@ -206,6 +221,7 @@ export const {
 	syncRecentsWithDeleted,
 	updateRecentChats,
 	syncRecentsWithRead,
+	addGroup,
 	setRecentDisconnect
 } = recentChatsSlice.actions
 

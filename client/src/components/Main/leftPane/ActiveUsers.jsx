@@ -115,7 +115,7 @@ const UserList = ({user, style, secondaryItems}) => {
 		<ListItem	button 
 			className={classses.listItem}
 			selected={user.username === selectedUser.username}
-			style={{display: user.hidden === true ? 'none' : 'flex'}}
+			style={{display: user.visible === true ? 'flex' : 'none'}}
   		onClick={handleClick}>
     		<ListItemIcon>
 		      <UserAvatar
@@ -159,6 +159,7 @@ const ActiveUsers = ({className}) => {
 					}} />
 
 				</Header>
+
 				<div className={classes.userslist}>
 					{
 						showLoader ? <Preloader /> : 

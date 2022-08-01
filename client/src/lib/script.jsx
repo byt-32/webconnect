@@ -54,6 +54,12 @@ export function getLastSeen(timestamp) {
 	}
 }
 
+export function assertChar(input) {
+	const match = input.match(/[a-z0-9]/)
+	if (match === null) return false
+	else true 
+}
+
 export function assert(obj) {
 	/** 
 		THIS FUNCTION BASICALLY CHECKS FOR

@@ -94,7 +94,11 @@ const useStyles = makeStyles({
 			padding: '0 16px',
 			position: 'relative',
 			'& .MuiCardHeader-title': {
-				fontWeight: 'bold'
+				fontWeight: 'bold',
+
+				'& .MuiCardHeader-avatar': {
+					marginRight: 10
+				}
 			},
 			['@media (max-width: 660px)']: {
 				// width: '100%'
@@ -286,7 +290,6 @@ const MessagesPane = ({friend}) => {
 
 	const {pendingDelete, starredChat, reply, showProfile} = friend.actionValues
 	const [showHelper, setHelperAlert] = React.useState(false)
-	const [noOfDispay, setValue] = React.useState(LS('noOfDispay') || 0)
 	const [anchorEl, setAnchorEl] = React.useState(null)
 	// const [input, setInput] = React.useState('')
 	const [showPicker, setPicker] = React.useState(false)
@@ -406,8 +409,8 @@ const MessagesPane = ({friend}) => {
 		{...retrieveDate(_date), 
 			time: _date.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'})
 		}
-		
-		if (input !== '') {
+		//input.match(/[a-z0-9!@#$%^&*)(:;'",<>./?}{][+=-\_]/) !== null
+		if (input !== '' && input[1] !== ' ') {
 			if (accountIsOnline) {
 				textarea.value = ''
 				setNetworkError(false)
@@ -467,10 +470,10 @@ const MessagesPane = ({friend}) => {
 
 	}
 	const handleInputClick = () => {
-		if (navigator.appVersion.indexOf('Win') && noOfDispay <= 2) {
+		if (navigator.appVersion.indexOf('Win') !== -1 && LS('noOfDisplay') <= 1) {
 			if (friend.messages.length === 1) {
 				setHelperAlert(true)
-				localStorage.setItem({noOfDispay: noOfDispay + 1})
+				localStorage.setItem('noOfDisplay', LS('noOfDisplay') + 1)
 			}
 		}
 		

@@ -10,6 +10,7 @@ const initialState = {
 		settings: false,
 		resetPassword: false,
 		contactInfo: false,
+		newGroup: false
 	}
 		
 }

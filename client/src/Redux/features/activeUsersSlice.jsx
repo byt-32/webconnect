@@ -15,7 +15,7 @@ const initialState = {
 	activeUsers: [],
 	showActiveUsersLoader: false,
 	input: '',
-	temp: []
+	showChips: false
 }
 
 const activeUsersSlice = createSlice({
@@ -51,13 +51,16 @@ const activeUsersSlice = createSlice({
 			const input = action.payload
 			state.input = input
 
-			state.activeUsers.forEach((a, b) => {
+			state.activeUsers.forEach((a, i) => {
 				if (a.username.toLowerCase().includes(input.toLowerCase())) {
-					state.activeUsers[b].hidden = false
+					state.activeUsers[i].visible = true
 				} else {
-					state.activeUsers[b].hidden = true
+					state.activeUsers[i].visible = false
 				}
-				})
+			})
+		},
+		handleChips: (state, action) => {
+			state.showChips = action.payload
 		}
 	},
 	extraReducers: builder => {
@@ -65,7 +68,10 @@ const activeUsersSlice = createSlice({
 			state.showActiveUsersLoader = true
 		})
 		.addCase(fetchActiveUsers.fulfilled, (state, action) => {
-			action.payload.users.forEach(i => i.online = false)
+			action.payload.users.forEach(i => {
+				i.online = false
+				i.visible = true
+			})
 			state.activeUsers = action.payload.users.sort((a, b) => {
 				if (a.username.toUpperCase() < b.username.toUpperCase()) return -1
 				if (a.username.toUpperCase() > b.username.toUpperCase()) return 1
@@ -78,6 +84,7 @@ const activeUsersSlice = createSlice({
 export const {
 	setActiveOnline,
 	setActiveDisconnect,
+	handleChips,
 	searchActiveUsers
 } = activeUsersSlice.actions
 

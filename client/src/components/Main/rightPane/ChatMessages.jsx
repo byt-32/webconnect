@@ -117,10 +117,11 @@ const useStyles = makeStyles({
 		borderBottomLeftRadius: '0',
 		borderBottomRightRadius: '0',
 		'& > span': {
-			padding: '0 10px',
+			padding: '0 5px',
 			display: 'block',
 		},
 		'& > span:first-child': {
+			paddingLeft: 3,
 			color: deepOrange[500],
 			paddingBottom: 3,
 			fontSize: '.8rem', 
@@ -234,7 +235,10 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 			friendsName: getFriendName()
 		}))
 	}
-	const closeActions = () => setOpen(false)
+	const closeActions = () => {
+		setAnchorEl(null)
+		setOpen(false)
+	}
 	// const handleReactions = (name) => {
 	// 	if (chat.reaction && name === chat.reaction.name) {
 	// 		dispatch(setReaction({
@@ -293,6 +297,12 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 
 	}, [])
 
+	const openContextMenu= (e) => {
+		e.preventDefault()
+		setAnchorEl(e.target)
+		setOpen(!open)
+	}
+
 	return (
 		<ClickAwayListener onClickAway={handleClickAway}>
 			<div 
@@ -325,9 +335,12 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 								}
 							</div>
 
-							<span className={[classes.chat, classes.overflow].join(' ')} onClick={({target}) => {
-								assert(chat.chatId) && handleChatActions(target)
-							}} > 
+							<span className={[classes.chat, classes.overflow].join(' ')} 
+								onClick={({target}) => {
+									assert(chat.chatId) && handleChatActions(target)
+								}} 
+								onContextMenu={openContextMenu}
+							> 
 								{chat.message}
 								<span className={classes.chatTime}> {chat.timestamp.time} </span>
 							</span>
@@ -341,9 +354,13 @@ const ChatSingle = ({chat, isFirst, isLast}) => {
 					:
 					<>
 						<div className={[className, classes.chatSingle, isFirst && bubbleClass()].join(' ')} >
-							<span className={[classes.chat, classes.overflow].join(' ')} onClick={({target}) => {
-								assert(chat.chatId) && handleChatActions(target)
-							}} >
+							<span className={[classes.chat, classes.overflow].join(' ')} 
+								onClick={({target}) => {
+									assert(chat.chatId) && handleChatActions(target)
+								}} 
+								onContextMenu={openContextMenu}
+
+							>
 								{chat.message}
 								<span className={classes.chatTime}> {chat.timestamp.time} </span>
 							</span>

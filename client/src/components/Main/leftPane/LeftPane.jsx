@@ -1,14 +1,17 @@
 import React from 'react'
-import ActiveUsers from './ActiveUsers'
-import RecentChats from './RecentChats'
-import Settings from './settings/Settings'
-import ResetPassword from './settings/ResetPassword'
-import ContactInfo from './settings/ContactInfo'
+
 import { CSSTransition } from 'react-transition-group'
 import { makeStyles } from '@material-ui/core/styles';
 import common from '@material-ui/core/colors/common';
 import Snackbar from '@material-ui/core/Snackbar'
 import MuiAlert from '@material-ui/lab/Alert';
+
+import ActiveUsers from './ActiveUsers'
+import RecentChats from './RecentChats'
+import NewGroup from './NewGroup'
+import Settings from './settings/Settings'
+import ResetPassword from './settings/ResetPassword'
+import ContactInfo from './settings/ContactInfo'
 
 import styles from '../../../stylesheet/transition.css'
 
@@ -24,7 +27,7 @@ const useStyles = makeStyles(() => ({
 		width: 330,
 		overflowY: 'scroll',
 		'& > section': {
-			width: '100%'
+			width: '100%',
 		},
 		['@media (max-width: 660px)']: {
 			width: '100%',
@@ -40,7 +43,8 @@ const LeftPane = () => {
 		recentChats,
 		contactInfo,
 		settings,
-		resetPassword
+		resetPassword,
+		newGroup
 	} = useSelector(state => state.components.stack)
 
 	const networkError = useSelector(state => state.chat.networkError)
@@ -66,6 +70,7 @@ const LeftPane = () => {
 
 			{activeUsers && <ActiveUsers className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
 			{recentChats && <RecentChats className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
+			{newGroup && <NewGroup className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
 			{settings && <Settings className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')} />}
 			{contactInfo && <ContactInfo className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}
 			{resetPassword && <ResetPassword className={[styles.animate__fadeInRight, styles.animate__animated].join(' ')}/>}

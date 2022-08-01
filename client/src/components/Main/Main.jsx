@@ -5,8 +5,12 @@ import { io } from 'socket.io-client'
 import { Outlet } from 'react-router-dom'
 import { makeStyles } from '@material-ui/core/styles';
 import grey from '@material-ui/core/colors/grey';
-import {fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, 
-	updateRecentChats, syncRecentsWithDeleted, syncRecentsWithRead} from '../../Redux/features/recentChatsSlice'
+import {
+	fetchRecentChats, setRecentOnline, setRecentDisconnect, setUnread, 
+	updateRecentChats, 
+	syncRecentsWithDeleted, 
+	addGroup,
+	syncRecentsWithRead} from '../../Redux/features/recentChatsSlice'
 import { fetchActiveUsers, setActiveOnline, setActiveDisconnect } from '../../Redux/features/activeUsersSlice'
 
 import { fetchAccountData, setOnline } from '../../Redux/features/accountSlice'
@@ -90,6 +94,10 @@ const Main = () => {
 	socket.off('deleteChat').on('deleteChat', obj => {
 		dispatch(performChatDelete(obj))
 		dispatch(syncRecentsWithDeleted(obj))
+	})
+
+	socket.off('addedGroup').on('addedGroup', groupDetails => {
+		dispatch(addGroup(groupDetails))
 	})
 
 	socket.off('chatFromUser').on('chatFromUser', chat => {

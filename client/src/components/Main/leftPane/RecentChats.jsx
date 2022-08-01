@@ -21,13 +21,14 @@ import Button from '@material-ui/core/Button';
 import SpeedDial from '@material-ui/lab/SpeedDial';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
+import Fade from '@material-ui/core/Fade';
 
+import PublicIcon from '@material-ui/icons/Public';
 import GroupIcon from '@material-ui/icons/Group'
-// import MenuIcon from '@material-ui/icons/Menu'
 import AddCircleIcon from '@material-ui/icons/AddCircle'
 import SettingsApplicationsIcon from '@material-ui/icons/SettingsApplications'
 import RecentActorsIcon from '@material-ui/icons/RecentActors';
-import PeopleAltRoundedIcon from '@material-ui/icons/PeopleAltRounded';
+import GroupAddIcon from '@material-ui/icons/GroupAdd';
 import AccountCircleRoundedIcon from '@material-ui/icons/AccountCircleRounded';
 import FiberManualRecordRoundedIcon from '@material-ui/icons/FiberManualRecordRounded';
 import DoneAllIcon from '@material-ui/icons/DoneAll'
@@ -46,14 +47,14 @@ import ListItemText from '@material-ui/core/ListItemText'
 import ListItem from '@material-ui/core/ListItem'
 import List from '@material-ui/core/List'
 
-import UserAvatar from '../UserAvatar'	
 import { Link } from 'react-router-dom'
-import Preloader from '../../Preloader'
 
 import { socket } from '../Main'
 import { assert, getLastSeen, handleFetch } from '../../../lib/script'
 
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
+import UserAvatar from '../UserAvatar'	
+import Preloader from '../../Preloader'
 import Header from '../Header'
 import SearchBar from '../SearchBar'
 import ChatActions from '../ChatActions'
@@ -156,6 +157,16 @@ const useStyles = makeStyles({
 			top: 2
 		}
 	},
+	speedDial: {
+		alignItems: 'flex-end',
+		position: 'sticky',
+		bottom: '1rem',
+		right: '1rem',
+		'& .MuiFab-primary': {
+			background: 'cornflowerblue',
+			color: '#fff'
+		}
+	},
 	
 })
 
@@ -247,14 +258,14 @@ const UserList = ({user, style, secondaryItems}) => {
 	const handleDelete = () => {
 		dispatch(alertBeforeClear(user))
 	}
+	
 	return (
 		<>
-
 		<ListItem	button 
 			className={classes.listItem}
 			selected={user.username === selectedUser.username || showMenu}
 			onContextMenu={openContextMenu}
-			style={{display: user.hidden === true ? 'none' : 'flex'}}
+			style={{display: user.visible ? 'flex' : 'none'}}
   		onClick={handleClick}>
 
     		<ListItemIcon>
@@ -363,6 +374,8 @@ const RecentChats = ({className}) => {
 	const showLoader = useSelector(state => state.recentChats.showRecentUsersLoader)
 	const fetchedUsers = useSelector(state => state.other.fetched)
 	const { username} = JSON.parse(localStorage.getItem('details'))
+	const [showDial, setDial] = useState(false)
+	const [visible, setDialVisibility] = useState(false)
 
 	const setComp = (obj) => {
 		dispatch(setComponents(obj))
@@ -388,8 +401,22 @@ const RecentChats = ({className}) => {
 		dispatch(searchRecentChats(value))
 	}
 
+	const handleDial = () => {
+		setDial(!showDial)
+	}
+
+	const createGroup = () => {
+		dispatch(setComponents({component: 'newGroup', value: true}))
+	}
+	const handleDialVisibility = () => {
+		setDialVisibility(!visible)
+	}
+
 	return (
-			<section className={[classes.recentChats, className].join(' ')}>
+			<section className={[classes.recentChats, className].join(' ')}
+				onMouseEnter={handleDialVisibility}
+				onMouseLeave={handleDialVisibility}
+			>
 				<Header>
 					<IconButton onClick={toggleMenu} style={{background: open && '#0000000a'}} >
 						<MoreVertIcon />
@@ -415,7 +442,7 @@ const RecentChats = ({className}) => {
 							handleClose()
 							setComp({component: 'activeUsers', value: true})
 						}} >
-							<PeopleAltRoundedIcon />
+							<PublicIcon />
 							<Typography variant='inherit'> Network </Typography>
 						</MenuItem>
 							
@@ -430,9 +457,11 @@ const RecentChats = ({className}) => {
 					{
 						showLoader ? <Preloader /> : 
 						recentChats.map((user, i) => {
-							return (
-								<UserList user={user} key={i} />
-							)
+							if (user.chatType === 'group' && user.chatType !== undefined) {
+								return <GroupList  />
+							} else {
+								return <UserList user={user} key={i} />
+							}
 						})
 					}
 				</div>
@@ -463,6 +492,25 @@ const RecentChats = ({className}) => {
 		        </DialogActions>
 		      </Dialog>
 				}
+				<Fade in={visible}>
+					<SpeedDial
+		        ariaLabel="SpeedDial openIcon"
+		        className={classes.speedDial}
+		        icon={<SpeedDialIcon openIcon={<GroupAddIcon />} />}
+		        onClose={handleDial}
+		        onOpen={handleDial}
+		        open={showDial}
+		      >
+	          <SpeedDialAction
+	            icon={<GroupAddIcon />}
+	            tooltipTitle={'Create new group'}
+	            onClick={() => {
+	            	handleDial()
+	            	createGroup()
+	            }}
+	          />
+		      </SpeedDial>
+		     </Fade>
 			</section>
 
 	)
