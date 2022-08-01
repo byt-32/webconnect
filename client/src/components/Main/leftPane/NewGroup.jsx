@@ -120,7 +120,7 @@ const useStyles = makeStyles({
 	},
 	dialog: {
 		'& .MuiDialog-paperScrollPaper': {
-			minWidth: '350px'
+			minWidth: '285px'
 		}
 	}
 
@@ -192,7 +192,7 @@ const NewGroup = ({className}) => {
 		setGroupName(name)
 	}
 	const createGroup = () => {
-		if (groupName !== '' && groupName[1] !== ' ') {
+		if (groupName.match(/[0-9a-z]/i) !== null) {
 			socket.emit('newGroup', {
 				chatType: 'group',
 				group: {
@@ -202,6 +202,8 @@ const NewGroup = ({className}) => {
 				},
 				createdBy: {username},
 				participants: selectedUsers,
+				isStarred: {value: false},
+				lastSent: new Date().getTime()
 			})
 			dispatch(setComponents({component: 'recentChats', value: true}))
 		} else {
