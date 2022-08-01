@@ -163,9 +163,9 @@ const recentChatsSlice = createSlice({
 			
 			state.recentChats.forEach((a, b) => {
 				if (a.username.toLowerCase().includes(input.toLowerCase())) {
-					state.recentChats[b].hidden = false
+					state.recentChats[b].visible = true
 				} else {
-					state.recentChats[b].hidden = true
+					state.recentChats[b].visible = false
 				}
 			})
 		}
@@ -183,6 +183,7 @@ const recentChatsSlice = createSlice({
 					i.online = false
 					i.messages = i.messages[0]
 					i.lastSent = new Date(i.messages.timestamp.fullDate).getTime()
+					i.visible = true
 				}	
 			})
 
