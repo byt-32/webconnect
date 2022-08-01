@@ -207,7 +207,7 @@ const NewGroup = ({className}) => {
 			})
 			dispatch(setComponents({component: 'recentChats', value: true}))
 		} else {
-			setInputProps({error: true, helperText: 'Please type a name'})
+			setInputProps({error: true, helperText: 'Please enter a group name'})
 		}
 			
 	}
