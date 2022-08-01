@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 const initialState = {
 	selectedUsers: [],
+	selectedGroup: {}
 }
 
 const groupSlice = createSlice({
@@ -15,6 +16,9 @@ const groupSlice = createSlice({
 			if (find === -1) {
 				state.selectedUsers.push({username})
 			}
+		},
+		setSelectedGroup: (state, action) => {
+			state.selectedGroup = action.payload
 		},
 		unselectUser: (state, action) => {
 			const {username} = action.payload
@@ -29,7 +33,8 @@ const groupSlice = createSlice({
 
 export const {
 	addGroupUser,
-	unselectUser
+	unselectUser,
+	setSelectedGroup
 } = groupSlice.actions
 
 export default groupSlice.reducer
