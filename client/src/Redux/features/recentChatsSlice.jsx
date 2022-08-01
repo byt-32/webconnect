@@ -13,7 +13,6 @@ export const fetchRecentChats = createAsyncThunk(
 
 
 function traverse(arr) {
-	console.log(arr)
 	let starred = []
 	arr.forEach((chat, i) => {
 		if (chat.isStarred.value) {
@@ -165,7 +164,9 @@ const recentChatsSlice = createSlice({
 		},
 		addGroup: (state, action) => {
 			const groupDetails = action.payload
+			state.recentChats.unshift(groupDetails)
 
+			state.recentChats = traverse(state.recentChats)
 			// state.recentChats.push(groupDetails)
 		},
 
@@ -174,10 +175,19 @@ const recentChatsSlice = createSlice({
 			state.input = input
 			
 			state.recentChats.forEach((a, i) => {
-				if (a.username.toLowerCase().includes(input.toLowerCase())) {
-					state.recentChats[i].visible = true
-				} else {
-					state.recentChats[i].visible = false
+				if (a.chatType === 'group') {
+					if (a.group.groupName.toLowerCase().includes(input.toLowerCase())) {
+						state.recentChats[i].visible = true
+					} else {
+						state.recentChats[i].visible = false
+					}
+				}
+				if (a.chatType === 'user') {
+					if (a.username.toLowerCase().includes(input.toLowerCase())) {
+						state.recentChats[i].visible = true
+					} else {
+						state.recentChats[i].visible = false
+					}
 				}
 			})
 		}
@@ -189,15 +199,22 @@ const recentChatsSlice = createSlice({
 		.addCase(fetchRecentChats.fulfilled, (state, action) => {
 			const {recentChats} = action.payload
 			const allChats = recentChats.chats.concat(recentChats.groups)
-			// console.log(recentChats)
+
 			allChats.forEach(i => {
-				if (i.chatType === undefined || i.chatType !== 'group') {
+				i.visible = true
+				if (i.chatType === 'group') {
+					if (i.messages.length === 0) {
+						i.lastSent = new Date(i.group.created).getTime()
+					} else {
+						i.lastSent = new Date(i.messages.timestamp.fullDate).getTime()
+					}
+				}
+				if (i.chatType === 'user') {
 					if (i.messages.length > 0) {
 						i.typing = false 
 						i.online = false
 						i.messages = i.messages[0]
 						i.lastSent = new Date(i.messages.timestamp.fullDate).getTime()
-						i.visible = true
 					}	
 				}
 			})
