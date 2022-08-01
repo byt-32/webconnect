@@ -1,6 +1,5 @@
 import React from 'react'
 
-import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
 import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
@@ -62,6 +61,8 @@ import Profile from './Profile'
 import { socket } from '../Main'
 import HelperAlert from '../HelperAlert'
 
+import ReplyHandle from './ReplyHandle'
+import BaseCard from './BaseCard'
 
 const useStyles = makeStyles({
 	emoji: {
@@ -74,82 +75,11 @@ const useStyles = makeStyles({
 		right: '10px',
 		bottom: '50px'
 	},
-	messagesPane: {
+	UserMessagesPane: {
 		width: '100%',
 		position: 'relative'
 	},
-	card: {
-		boxShadow: 'none',
-		display: 'flex',
-		flexDirection: 'column',
-		height: '100%',
-		width: '100%',
-		background: 'transparent',
-		flexDirection: 'column',
-		'& .MuiCardHeader-root': {
-			background: common.white,
-    	boxShadow: '-1px 1px 1px 0px #cbcbcb',
-			marginLeft: 5,
-			height: '3.7rem',
-			padding: '0 16px',
-			position: 'relative',
-			'& .MuiCardHeader-title': {
-				fontWeight: 'bold',
-
-				'& .MuiCardHeader-avatar': {
-					marginRight: 10
-				}
-			},
-			['@media (max-width: 660px)']: {
-				// width: '100%'
-				marginLeft: 0,
-				padding: '0 16px 0 39px'
-			},
-		},
-		'& .MuiCardHeader-action': {
-			alignSelf: 'center',
-			marginTop: 0,
-			['@media (max-width: 351px)']: {
-				marginLeft: 0,
-				display: 'none'
-			},
-		},
-		'& .MuiCardContent-root': {
-			flex: 1,
-			overflowY: 'scroll',
-			position: 'relative',
-			
-		},
-		'& .MuiCardActions-root': {
-			position: 'relative',
-			marginBottom: '1rem',
-			paddingTop: '.25rem',
-			flexDirection: 'column',
-			alignItems: 'stretch',
-			// boxShadow: '0px 0px 2px 1px #0000000d'
-			'& .MuiInputBase-root': {
-				flex: 1,
-				background: common.white,
-				margin: 0,
-				padding: '11px 10px',
-
-				'& textarea': {
-					height: '19px'
-				}
-				// borderRadius: '15px',
-				// boxShadow: '1px 2px 4px 0px #00000021'
-			},
-
-			['@media (max-width: 660px)']: {
-				marginBottom: '.2rem'
-			},
-		},
-
-		'& .MuiInputBase-inputMultiline': {
-			overflowY: 'scroll !important'
-		},
-
-	},
+	
 	backBtn: {
 		position: 'absolute',
 		top: '11px',
@@ -167,32 +97,7 @@ const useStyles = makeStyles({
 		},
 		
 	},
-	replyHandel: {
-		display: 'flex',
-		borderBottom: '1px solid #f1f1f1',
-		justifyContent: 'space-between',
-		maxHeight: '100px',
-		// boxShadow: 'inset -1px -3px 5px 0px #0000000d',
-		background: '#fdfdfd',
-		width: '100%',
-		zIndex: 40,
-		borderRadius: '10px 10px 0 0'
-	},
-	replyProps: {
-		display: 'flex',
-		flexDirection: 'column',
-		padding: 10,
-		width: 'inherit',
-		borderLeft: '2px solid #d1803e',
-		borderRadius: 'inherit',
-		'& span:first-child': {
-			marginBottom: 2
-		},
-		'& span:last-of-type': {
-			maxHeight: '200px',
-			overflowY: 'scroll',
-		}
-	},
+	
 	starred: {
 		position: 'sticky',
 		width: '98%',
@@ -270,7 +175,7 @@ const LS = (str) => {
 	return JSON.parse(localStorage.getItem(str))
 }
 
-const MessagesPane = ({friend}) => {
+const UserMessagesPane = ({friend}) => {
 	const classes = useStyles()
 
 	const dispatch = useDispatch()
@@ -489,14 +394,11 @@ const MessagesPane = ({friend}) => {
 	}
 
 	return (
-		<div className={classes.messagesPane} style={{
+		<div className={classes.UserMessagesPane} style={{
 			display: selectedUser.username === friend.username ? 'flex' : 'none'
 		}} >
 		
-		<Card className={classes.card} 
-      style={{
-      	height: `${getWindowHeight()}px`
-      }}>
+		<BaseCard>
 			<IconButton className={classes.backBtn} onClick={() => handleComponent()} >
 				<ArrowBackIcon style={{color: '#959494'}} />
 			</IconButton>
@@ -512,17 +414,6 @@ const MessagesPane = ({friend}) => {
 				   </div>
         }
         title={<span onClick={showProfilePage}> {friend.username} </span>}
-        // action={
-        // 	<>
-
-	       //    <IconButton aria-label="settings" onClick={showMoreOptions}>
-	       //      <PhoneIcon style={{color: '#676d78'}} />
-	       //    </IconButton>
-	       //    <IconButton aria-label="settings" onClick={showMoreOptions}>
-	       //      <VideoCallIcon style={{color: '#676d78'}} />
-	       //    </IconButton>
-	       //  </>
-        // }
         subheader={
         	assert(userOnline) && userOnline.typing === true ? <span style={{color: '#6495ed'}} > {'typing...'} </span>
         	: secondaryText
@@ -532,25 +423,6 @@ const MessagesPane = ({friend}) => {
       	ref={cardContentRef}
       	className={classes.contents} 
       >
-	    	{	assert(starredChat) &&
-	    		<Slide in={assert(starredChat)}>
-	    			<Card className={classes.starred} ref={starredChatRef}>
-	    				<CardHeader
-	    					avatar={
-	    						<StarsIcon style={{color: '#5f547a'}} />
-	    					}
-	    					action={
-	    						<IconButton onClick={handleUnstar}>
-	    							<HighlightOffIcon />
-	    						</IconButton>
-	    					}
-	    					title={starredChat.sender === username ? 'You' : starredChat.sender}
-	    					subheader={starredChat.message}
-	    				/>
-
-	    			</Card>
-	    		</Slide>
-	    	}
 
         { friend.messages.length > 0 ?
         	<ChatMessages chats={friend.messages} />
@@ -595,25 +467,10 @@ const MessagesPane = ({friend}) => {
       </CardContent>
       
       <CardActions className={classes.contents} >
-
-      		<Slide in={reply.open} direction='up'>
-		      	<div className={classes.replyHandel}
-		      	 >
-	      			{reply.open && 
-			      		<><div className={classes.replyProps}
-			      			onClick={handleChatHighlight}
-			      		>
-			      			<span style={{color: '#ad39ad', fontWeight: 'bold'}}>
-			      				{reply.sender === username ? 'You' : reply.sender} 
-			      			</span>
-			      			<span> {reply.message} </span>
-			      		</div>
-			      		<div >
-			      			<CloseIcon onClick={closeReplyHandle} style={{fontSize: '1.2rem', color: '#c55044', margin: 7,}} />
-			      		</div></>
-			     	 }
-		      	</div>
-	      	</Slide>
+      	<ReplyHandle {...reply} 
+      		closeReplyHandle={closeReplyHandle} 
+      		handleChatHighlight={handleChatHighlight}
+      	/>
       	<InputBase
       		multiline
       		placeholder='Type your messages'
@@ -638,10 +495,10 @@ const MessagesPane = ({friend}) => {
 	      	
     	</CardActions>
 
-		</Card>
+		</BaseCard>
 			{/*{showProfile && <Profile profile={friend.profile} />}*/}
 		</div>
 	)
 }
 
-export default MessagesPane
+export default UserMessagesPane

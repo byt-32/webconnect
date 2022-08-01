@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { setComponents } from '../../../Redux/features/componentSlice'
 import TextField from '@material-ui/core/TextField'
 import Menu from '@material-ui/core/Menu'
-import MessagePane from './MessagePane'
+import UserMessagesPane from './UserMessagesPane'
 import IconButton from '@material-ui/core/IconButton'
 import MenuItem from '@material-ui/core/MenuItem'
 import Typography from '@material-ui/core/Typography';
@@ -55,7 +55,7 @@ const RightPane = ({user}) => {
 				assert(privateChats) &&
 					privateChats.map( (friend, i) => {
 						return (
-							<MessagePane friend={friend} key={i} />
+							<UserMessagesPane friend={friend} key={i} />
 						)
 					})
 			}
