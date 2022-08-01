@@ -25,7 +25,7 @@ const port = process.env.PORT || 3001;
 let connectedClients = [], onlineUsers = []
 
 const db = mongoose.connection
-mongoose.connect( process.env.URI , {
+mongoose.connect( process.env.LOCALURI , {
 	useNewUrlParser: true,
 	useUnifiedTopology: true
 })
@@ -170,7 +170,17 @@ io.on('connection', socket => {
 		})
 	})
 
-
+	socket.on('newGroup', groupDetails => {
+		const {participants, createdBy} = groupDetails
+		participants.concat(createdBy).forEach(user => {
+			search(onlineUsers, 'username', user.username, ({result, index}) => {
+				if (result) {
+					io.to(result.socketId).emit('addedGroup', groupDetails)
+				}
+			})
+		})
+		chatsUtil.createGroup(groupDetails)
+	})
 
 	socket.on('sentChat', chat => {
 		const {receiver, sender,lastSent, message } = chat
