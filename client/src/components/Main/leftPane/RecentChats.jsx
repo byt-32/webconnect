@@ -22,6 +22,7 @@ import SpeedDial from '@material-ui/lab/SpeedDial';
 import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
 import Fade from '@material-ui/core/Fade';
+import Avatar from '@material-ui/core/Avatar'
 
 import PublicIcon from '@material-ui/icons/Public';
 import GroupIcon from '@material-ui/icons/Group'
@@ -38,10 +39,6 @@ import StarIcon from '@material-ui/icons/Star';
 import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
-import { setSelectedUser, assertFetch, clearFromFetched } from '../../../Redux/features/otherSlice'
-import { fetchMessages, clearChats } from '../../../Redux/features/chatSlice'
-import { resetUnread, handleStarred, clearConversation, alertBeforeClear, searchRecentChats } from '../../../Redux/features/recentChatsSlice'
-
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText'
 import ListItem from '@material-ui/core/ListItem'
@@ -52,7 +49,14 @@ import { Link } from 'react-router-dom'
 import { socket } from '../Main'
 import { assert, getLastSeen, handleFetch } from '../../../lib/script'
 
+
+import { setSelectedUser, assertFetch, clearFromFetched } from '../../../Redux/features/otherSlice'
+import { fetchMessages, clearChats } from '../../../Redux/features/chatSlice'
+import { resetUnread, handleStarred, clearConversation, alertBeforeClear, searchRecentChats } from '../../../Redux/features/recentChatsSlice'
+import { setSelectedGroup } from '../../../Redux/features/groupSlice'
+
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
+
 import UserAvatar from '../UserAvatar'	
 import Preloader from '../../Preloader'
 import Header from '../Header'
@@ -183,6 +187,100 @@ function getTime(date) {
 	return {year, day}
 }
 
+const GroupList = ({chatType, group, isStarred, messages, visible}) => {
+	const {useState, useEffect} = React
+	const classes = useStyles()
+	const dispatch = useDispatch()
+	const [showMenu, setMenu] = useState(false)
+	const [anchorEl, setAnchorEl] = React.useState(null)
+	const selectedUser = useSelector(state => state.other.currentSelectedUser)
+
+	const openContextMenu = (e) => {
+		e.preventDefault()
+
+		setMenu(true)
+		setAnchorEl(e.currentTarget)
+		return false
+	}
+	const closeContextMenu = (e) => {
+		setMenu(false)
+		setAnchorEl(null)
+	}
+
+	const starConversation = () => {
+		const isStarred = {value: !user.isStarred.value, date: Date.now()}
+
+		socket.emit('starConversation', username, user.username, 
+			isStarred, () => {})
+		dispatch(handleStarred({friendsName: user.username, isStarred }))
+	}
+	const handleDelete = () => {
+		dispatch(alertBeforeClear(user))
+	}
+
+	const handleClick = () => {
+		dispatch(setSelectedUser({}))
+		dispatch(setSelectedGroup(group))
+	}
+
+	return (
+		<><ListItem	
+			button
+			className={classes.listItem}
+			onClick={handleClick}
+			onContextMenu={openContextMenu}
+			style={{display: visible ? 'flex' : 'none'}}
+		>
+			<ListItemIcon>
+	      <Avatar>
+	      	<GroupIcon />
+	      </Avatar>
+	    </ListItemIcon>
+	    <ListItemText 
+    		primary={
+    			<Typography component='h6'> {group.groupName}</Typography>
+    		} 
+    	/>
+
+		</ListItem>
+		<ChatActions 
+   		open={showMenu} 
+   		anchorEl={anchorEl} 
+   		onClose={closeContextMenu}
+   		anchorOrigin={{
+		    vertical: 'center',
+		    horizontal: 'center',
+		  }}
+		  transformOrigin={{
+		    vertical: 'center',
+		    horizontal: 'center',
+		  }}
+   	>
+   		<div> 
+   			<IconButton onClick={() => {
+   				starConversation()
+   				closeContextMenu()
+   			}} >	
+   				{isStarred.value ? <StarIcon style={{color: '#6495ed'}} /> : 
+   					<StarBorderIcon style={{color: '#6495ed'}} />
+   				}
+					<Typography component='span'> {`${isStarred.value ? 'Unstar' : 'Star'} conversation` }</Typography>
+   			</IconButton>
+   			<IconButton onClick={() => {
+   				handleDelete()
+   				closeContextMenu()
+   			}} >	
+   				<DeleteSweepIcon style={{color: '#ff6a6a'}} />
+					<Typography component='span'> Leave group </Typography>
+   			</IconButton>
+   		</div>
+
+   	</ChatActions>
+		</>
+	)
+}
+
+
 const UserList = ({user, style, secondaryItems}) => {
 	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const {useState, useEffect} = React
@@ -233,9 +331,9 @@ const UserList = ({user, style, secondaryItems}) => {
 					setPane()
 				})
 			}
-			
 		}
 	}
+
 	const openContextMenu = (e) => {
 		e.preventDefault()
 
@@ -243,6 +341,7 @@ const UserList = ({user, style, secondaryItems}) => {
 		setAnchorEl(e.currentTarget)
 		return false
 	}
+
 	const closeContextMenu = (e) => {
 		setMenu(false)
 		setAnchorEl(null)
@@ -457,8 +556,8 @@ const RecentChats = ({className}) => {
 					{
 						showLoader ? <Preloader /> : 
 						recentChats.map((user, i) => {
-							if (user.chatType === 'group' && user.chatType !== undefined) {
-								return <GroupList  />
+							if (user.chatType === 'group') {
+								return <GroupList {...user} key={i} />
 							} else {
 								return <UserList user={user} key={i} />
 							}
