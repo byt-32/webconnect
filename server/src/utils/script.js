@@ -62,6 +62,20 @@ const chatsUtil = {
 			}
 		})
 	},
+	createGroup: async (groupDetails) => {
+		const {group, createdBy, participants} = groupDetails
+
+		participants.concat([createdBy]).forEach( async user => {
+			await Chat.findOneAndUpdate({username: user.username}, {
+				$push: {
+					groups: {
+						group, createdBy, participants
+					}
+				}
+			})
+		})
+		// console.log(newGroup)
+	},
 	save: async function (user1, user2, lastSent, message) {
 		const user1Id = await User.findOne({username: user1}, {_id: 1})
 		const user2Id = await User.findOne({username: user2}, {_id: 1})

@@ -201,6 +201,9 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 		await Chat.findOne({_id: id}, 
 			{
 				_id: 0,
+				'groups.group': 1,
+				'groups.chatType': 1,
+				'groups.messages': {$slice: -1},
 				'chats.username': 1, 
 				'chats.displayName': 1,
 				'chats.lastSent': 1, 
@@ -209,9 +212,9 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 				'chats.messages': {$slice: -1}, 
 			}) || []
 
-
+		// console.log(recentChats)
 	response.send({
-		recentChats: recentChats.chats || [],
+		recentChats: recentChats || [],
 	})
 })
 
