@@ -6,11 +6,11 @@ const chatSchema = new mongoose.Schema({
 	groups: [
 		{	
 			chatType: {type: String, default: 'group'},
+			isStarred: {
+				value: {type: Boolean, default: false},
+				date: {type: Number}
+			},
 			group: {
-				isStarred: {
-					value: {type: Boolean, default: false},
-					date: {type: Number}
-				},
 				groupName: {type: String},
 				groupId: {type: String, index: {unique: true}},
 				created: {type: Date}
@@ -18,6 +18,7 @@ const chatSchema = new mongoose.Schema({
 			createdBy: {
 				username: { type: String}
 			},
+			lastSent: {type: Number},
 			participants: [],
 			messages: []
 		}
@@ -30,6 +31,7 @@ const chatSchema = new mongoose.Schema({
 				value: {type: Boolean, default: false},
 				date: {type: Number}
 			},
+			chatType: {type: String, default: 'user'},
 			lastSent: Number,
 			unread: Array,
 			messages: Array
