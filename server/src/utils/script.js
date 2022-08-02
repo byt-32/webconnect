@@ -1,11 +1,11 @@
 const Chat = require('../models/Chat.js')
 const User = require('../models/User.js')
 
-const validateUtil = {
+const confirmUser = {
 	id: async function (id, callback) {
 		const userId = await User.findById(id, {_id: 1})
 
-		if (userId !== null) {
+		if (userId !== null && userId !== undefined) {
 			callback(userId.id)
 		} 
 	}
@@ -50,31 +50,43 @@ const unreadUtil = {
 }
 
 const chatsUtil = {
-	starConversation: async (user, friendsName, isStarred) => {
-		await Chat.findOneAndUpdate({username: user, 'chats.username': friendsName,}, {
+	starConversation: async (userId, friendsName, isStarred) => {
+		await Chat.findOneAndUpdate({_id: userId, 'chats.username': friendsName}, {
 			'chats.$.isStarred': isStarred
 		})
 	},
-	clearConversation: async (user, friendsName) => {
-		await Chat.findOneAndUpdate({username: user}, {
+	clearConversation: async (userId, friendsName) => {
+		await Chat.findByIdAndUpdate(userId, {
 			$pull: {
 				chats: {username: friendsName}
 			}
 		})
 	},
+	starGroup: async (userId, group, starredObj) => {
+		await Chat.findOneAndUpdate({_id: userId, 'groups.group.groupId': group.groupId}, {
+			'groups.$.isStarred': starredObj
+		})
+	},
 	createGroup: async (groupDetails) => {
-		const {group, createdBy, participants} = groupDetails
+		const {group, createdBy, participants, messages} = groupDetails
 
-		participants.concat([createdBy]).forEach( async user => {
+		participants.forEach( async user => {
 			await Chat.findOneAndUpdate({username: user.username}, {
 				$push: {
 					groups: {
-						group, createdBy, participants
+						group, createdBy, participants, messages
 					}
 				}
 			})
 		})
-		// console.log(newGroup)
+	},
+	exitGroup: async (group, userId) => {
+		const {groupId, groupName} = group
+		await Chat.findByIdAndUpdate(userId, {
+			$pull: {
+				groups: {'group.groupId': groupId}
+			}
+		})
 	},
 	save: async function (user1, user2, lastSent, message) {
 		const user1Id = await User.findOne({username: user1}, {_id: 1})
@@ -157,5 +169,5 @@ const chatsUtil = {
 
 
 module.exports = {
-	userUtil, chatsUtil, unreadUtil, validateUtil
+	userUtil, chatsUtil, unreadUtil, confirmUser
 }

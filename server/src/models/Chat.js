@@ -19,8 +19,9 @@ const chatSchema = new mongoose.Schema({
 				username: { type: String}
 			},
 			lastSent: {type: Number},
-			participants: [],
-			messages: []
+			participants: Array,
+			unread: Array,
+			messages: Array
 		}
 	],
 	chats: [

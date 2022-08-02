@@ -205,6 +205,8 @@ userRoute.get('/recentChats/:id', async (request, response) => {
 				'groups.chatType': 1,
 				'groups.messages': {$slice: -1},
 				'groups.isStarred': 1,
+				'groups.unread': 1,
+				
 				'chats.username': 1, 
 				'chats.chatType': 1, 
 				'chats.displayName': 1,
