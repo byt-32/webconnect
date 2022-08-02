@@ -129,6 +129,17 @@ const recentChatsSlice = createSlice({
 			state.recentChats = traverse(state.recentChats)
 		},
 
+		starGroup: (state, action) => {
+			const {group, starredObj} = action.payload
+			const find = state.recentChats.findIndex(i => i.chatType === 'group' && i.group.groupId === group.groupId)
+
+			if (find !== -1) {
+				state.recentChats[find].isStarred = starredObj
+			}
+			state.recentChats = traverse(state.recentChats)
+			
+		},
+
 		clearConversation: (state, action) => {
 			const friendsName = action.payload
 			const find = state.recentChats.findIndex(i => i.username === friendsName)
@@ -163,11 +174,19 @@ const recentChatsSlice = createSlice({
 			state.chatToBeCleared = action.payload
 		},
 		addGroup: (state, action) => {
-			const groupDetails = action.payload
-			state.recentChats.unshift(groupDetails)
+			action.payload.visible = true
+			state.recentChats.unshift(action.payload)
 
 			state.recentChats = traverse(state.recentChats)
 			// state.recentChats.push(groupDetails)
+		},
+
+		exitGroup: (state, action) => {
+			const {groupId} = action.payload
+			const find = state.recentChats.findIndex(i => i.chatType === 'group' && i.group.groupId === groupId)
+			if (find !== -1) {
+				state.recentChats.splice(find ,1)
+			}
 		},
 
 		searchRecentChats: (state, action) => {
@@ -239,6 +258,8 @@ export const {
 	updateRecentChats,
 	syncRecentsWithRead,
 	addGroup,
+	exitGroup,
+	starGroup,
 	setRecentDisconnect
 } = recentChatsSlice.actions
 
