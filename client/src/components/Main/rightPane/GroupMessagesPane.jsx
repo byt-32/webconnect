@@ -19,28 +19,49 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Button from '@material-ui/core/Button'
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { makeStyles } from '@material-ui/core/styles';
+import Avatar from '@material-ui/core/Avatar'
+
+import GroupIcon from '@material-ui/icons/Group'
 
 import { getWindowHeight, assert, getLastSeen } from '../../../lib/script'
 import { setComponents} from '../../../Redux/features/componentSlice'
 
-import { getWindowHeight } from '../../../lib/script'
-
 import { socket } from '../Main'
+import BaseCard from './BaseCard'
 import HelperAlert from '../HelperAlert'
+import UserAvatar from '../UserAvatar'	
 
 const useStyles = makeStyles({
 
 
 })
 
-const GroupMessagesPane = () => {
+const GroupMessagesPane = ({group, participants, createdBy, chats, isCurrentSelected}) => {
+	const classes = useStyles()
+	const {groupName} = group
 	return (
-		<Card className={classes.card} 
+		<div className={classes.groupMessagesPane}
+			style={{
+				display: isCurrentSelected ? 'block' : 'none'
+			}}
+		>
+		<BaseCard
 
 		>
-
-		</Card>
-
+			
+			<CardHeader
+        avatar={
+          <div onClick={() => {}}>
+				    <Avatar >
+				    	<GroupIcon />
+				    </Avatar>
+				   </div>
+        }
+        title={<span> {groupName} </span>}
+       
+      />
+		</BaseCard>
+		</div>
 	)
 }
 

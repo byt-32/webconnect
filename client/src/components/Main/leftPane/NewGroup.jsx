@@ -33,6 +33,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { setComponents} from '../../../Redux/features/componentSlice'
 import { addGroupUser, unselectUser} from '../../../Redux/features/groupSlice'
+import { addGroup } from '../../../Redux/features/recentChatsSlice'
 
 import { assertChar } from '../../../lib/script'
 import { socket } from '../Main'
@@ -158,7 +159,7 @@ const UserList = ({user, isSelected}) => {
 
 const NewGroup = ({className}) => {
 	// TODO: ADD group rules on dialog
-	const {username} = JSON.parse(localStorage.getItem('details'))
+	const {username, id} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const { useEffect, useState} = React
@@ -193,18 +194,23 @@ const NewGroup = ({className}) => {
 	}
 	const createGroup = () => {
 		if (groupName.match(/[0-9a-z]/i) !== null) {
-			socket.emit('newGroup', {
+			const groupInfo = {
+				userId: id,
 				chatType: 'group',
+				createdBy: {username},
+				participants: selectedUsers.concat({username}),
+				isStarred: {value: false},
+				messages: [],
 				group: {
 					groupName, 
 					groupId: uuid(),
 					created: new Date()
-				},
-				createdBy: {username},
-				participants: selectedUsers,
-				isStarred: {value: false},
-				lastSent: new Date().getTime()
+				}, 
+			}
+			socket.emit('newGroup', {
+				...groupInfo,
 			})
+			// dispatch(addGroup({...groupInfo, lastSent: new Date().getTime()}))
 			dispatch(setComponents({component: 'recentChats', value: true}))
 		} else {
 			setInputProps({error: true, helperText: 'Please enter a group name'})

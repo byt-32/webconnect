@@ -48,10 +48,8 @@ import {  storeSentChat,
 	setProfile
 } from '../../../Redux/features/chatSlice'
 
-import { setTypingStatus, setSelectedUser } from '../../../Redux/features/otherSlice'
+import { setTypingStatus } from '../../../Redux/features/otherSlice'
 import {updateRecentChats, syncRecentsWithDeleted} from '../../../Redux/features/recentChatsSlice'
-
-import { setComponents} from '../../../Redux/features/componentSlice'
 
 import ChatMessages from './ChatMessages'
 import UserAvatar from '../UserAvatar'
@@ -75,40 +73,7 @@ const useStyles = makeStyles({
 		right: '10px',
 		bottom: '50px'
 	},
-	UserMessagesPane: {
-		width: '100%',
-		position: 'relative'
-	},
 	
-	backBtn: {
-		position: 'absolute',
-		top: '11px',
-		padding: 5,
-		display: 'none',
-		zIndex: 100,
-		['@media (max-width: 660px)']: {
-			display: 'block'
-		},
-	},
-	contents: {
-		padding: '0 10%',
-		['@media (max-width: 900px)']: {
-			padding: '0 0 0 2%',
-		},
-		
-	},
-	
-	starred: {
-		position: 'sticky',
-		width: '98%',
-		top: 0,
-		margin: '0 auto',
-		zIndex: 25,
-		transition: '.7s ease all',
-		'& .MuiCardHeader-title': {
-			color: '#edb664'
-		}
-	},
 	snackbar: {
 		transform: 'none'
 	},
@@ -315,7 +280,7 @@ const UserMessagesPane = ({friend}) => {
 			time: _date.toLocaleTimeString('en-US', {hour12: true, hour: '2-digit', minute: '2-digit'})
 		}
 		//input.match(/[a-z0-9!@#$%^&*)(:;'",<>./?}{][+=-\_]/) !== null
-		if (input !== '' && input[1] !== ' ') {
+		if (input[0] !== ' ') {
 			if (accountIsOnline) {
 				textarea.value = ''
 				setNetworkError(false)
@@ -365,12 +330,6 @@ const UserMessagesPane = ({friend}) => {
 		setHighlightTimer(newTimer)
 	}
 
-	const handleComponent = (componentObj) => {
-		dispatch(setSelectedUser({}))
-		if (window.innerWidth < 660) {
-			dispatch(setComponents({component: 'leftPane', value: true}))
-		}
-	}
 	const showMoreOptions = () => {
 
 	}
@@ -399,9 +358,6 @@ const UserMessagesPane = ({friend}) => {
 		}} >
 		
 		<BaseCard>
-			<IconButton className={classes.backBtn} onClick={() => handleComponent()} >
-				<ArrowBackIcon style={{color: '#959494'}} />
-			</IconButton>
 			<CardHeader
         avatar={
           <div onClick={showProfilePage}>

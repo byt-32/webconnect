@@ -4,6 +4,13 @@ import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import { getWindowHeight } from '../../../lib/script'
 import common from '@material-ui/core/colors/common';
+import IconButton from '@material-ui/core/IconButton'
+
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+
+import { setComponents} from '../../../Redux/features/componentSlice'
+import { setSelectedUser } from '../../../Redux/features/otherSlice'
+import { useDispatch } from 'react-redux'
 
 const useStyles = makeStyles({
 	card: {
@@ -48,6 +55,13 @@ const useStyles = makeStyles({
 			position: 'relative',
 			
 		},
+		'& .MuiCardActions-root, .MuiCardContent-root': {
+				padding: '0 10%',
+				['@media (max-width: 900px)']: {
+					padding: '0 0 0 2%',
+				},
+		
+		},
 		'& .MuiCardActions-root': {
 			position: 'relative',
 			marginBottom: '1rem',
@@ -78,10 +92,39 @@ const useStyles = makeStyles({
 		},
 
 	},
+
+	starred: {
+		position: 'sticky',
+		width: '98%',
+		top: 0,
+		margin: '0 auto',
+		zIndex: 25,
+		transition: '.7s ease all',
+		'& .MuiCardHeader-title': {
+			color: '#edb664'
+		}
+	},
+	backBtn: {
+		position: 'absolute',
+		top: '11px',
+		padding: 5,
+		display: 'none',
+		zIndex: 100,
+		['@media (max-width: 660px)']: {
+			display: 'block'
+		},
+	},
 })
 
 const BaseCard = ({children}) => {
 	const classes = useStyles()
+	const dispatch = useDispatch()
+	const handleComponent = () => {
+		dispatch(setSelectedUser({}))
+		if (window.innerWidth < 660) {
+			dispatch(setComponents({component: 'leftPane', value: true}))
+		}
+	}
 	return (
 		<Card 
 			className={classes.card}
@@ -89,6 +132,9 @@ const BaseCard = ({children}) => {
       	height: `${getWindowHeight()}px`
       }}
 		>
+			<IconButton className={classes.backBtn} onClick={() => handleComponent()} >
+				<ArrowBackIcon style={{color: '#959494'}} />
+			</IconButton>
 			{children}
 		</Card>
 	)

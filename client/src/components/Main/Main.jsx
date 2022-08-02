@@ -47,13 +47,13 @@ const Main = () => {
 
 	/** TODO: CLEAR THIS OR REFACTOR, 
 			REASON: IT TRIGGERS MULTIPLE DISPATCHES **/
-	window.addEventListener('resize', () => {
-		if (window.innerWidth <= 660) {
-			if (assert(selectedUser) && leftPane) dispatch(setComponents({component: 'leftPane', value: false}))
-		} else if (window.innerWidth > 660) {
-			!leftPane && dispatch(setComponents({component: 'leftPane', value: true}))
-		}
-	})
+	// window.addEventListener('resize', () => {
+	// 	if (window.innerWidth <= 660) {
+	// 		if (assert(selectedUser) && leftPane) dispatch(setComponents({component: 'leftPane', value: false}))
+	// 	} else if (window.innerWidth > 660) {
+	// 		!leftPane && dispatch(setComponents({component: 'leftPane', value: true}))
+	// 	}
+	// })
 
 	const { useEffect } = React
 

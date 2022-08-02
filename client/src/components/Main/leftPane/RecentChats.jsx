@@ -47,13 +47,15 @@ import List from '@material-ui/core/List'
 import { Link } from 'react-router-dom'
 
 import { socket } from '../Main'
-import { assert, getLastSeen, handleFetch } from '../../../lib/script'
-
+import { assert, getLastSeen, handleFetch, find } from '../../../lib/script'
 
 import { setSelectedUser, assertFetch, clearFromFetched } from '../../../Redux/features/otherSlice'
 import { fetchMessages, clearChats } from '../../../Redux/features/chatSlice'
-import { resetUnread, handleStarred, clearConversation, alertBeforeClear, searchRecentChats } from '../../../Redux/features/recentChatsSlice'
-import { setSelectedGroup } from '../../../Redux/features/groupSlice'
+import { resetUnread, 
+		handleStarred, 
+	clearConversation, 
+	alertBeforeClear, searchRecentChats, exitGroup, starGroup } from '../../../Redux/features/recentChatsSlice'
+import { setSelectedGroup, fetchGroupChats, setFetched } from '../../../Redux/features/groupSlice'
 
 import { TransitionGroup, CSSTransition } from 'react-transition-group'
 
@@ -187,13 +189,13 @@ function getTime(date) {
 	return {year, day}
 }
 
-const GroupList = ({chatType, group, isStarred, messages, visible}) => {
+const GroupList = ({chatType, group, isStarred, messages, visible, unread, isCurrentSelected, isFetched}) => {
 	const {useState, useEffect} = React
+	const {id, username} = JSON.parse(localStorage.getItem('details'))
 	const classes = useStyles()
 	const dispatch = useDispatch()
 	const [showMenu, setMenu] = useState(false)
 	const [anchorEl, setAnchorEl] = React.useState(null)
-	const selectedUser = useSelector(state => state.other.currentSelectedUser)
 
 	const openContextMenu = (e) => {
 		e.preventDefault()
@@ -207,20 +209,46 @@ const GroupList = ({chatType, group, isStarred, messages, visible}) => {
 		setAnchorEl(null)
 	}
 
-	const starConversation = () => {
-		const isStarred = {value: !user.isStarred.value, date: Date.now()}
+	const handleStar = () => {
+		const starredObj = {value: !isStarred.value, date: Date.now()}
 
-		socket.emit('starConversation', username, user.username, 
-			isStarred, () => {})
-		dispatch(handleStarred({friendsName: user.username, isStarred }))
-	}
-	const handleDelete = () => {
-		dispatch(alertBeforeClear(user))
-	}
+		socket.emit('starGroup', id, group, starredObj, () => {})
 
+		dispatch(starGroup({group, starredObj }))
+	}
+	const handleGroupExit = () => {
+		dispatch(exitGroup(group))
+		socket.emit('exitGroup', group, id)
+		// dispatch(alertBeforeClear(user))
+	}
+	const setPane = () => {
+		if (window.innerWidth < 660) {
+			dispatch(setComponents({component: 'leftPane', value: false}))
+		}
+	}
 	const handleClick = () => {
-		dispatch(setSelectedUser({}))
-		dispatch(setSelectedGroup(group))
+		if (!isCurrentSelected) {
+			
+			if (assert(unread)) {
+				dispatch(resetUnread(group))
+				// socket.emit('chatIsRead', user.username, username)
+			}
+
+			if (isFetched) {
+				dispatch(setSelectedGroup(group))
+				dispatch(setSelectedUser({}))
+				setPane()
+			} else {
+				dispatch(
+					fetchGroupChats({token: id, groupId: group.groupId, groupName: group.groupName})
+				).then(() => {
+					dispatch(setFetched(group))
+					dispatch(setSelectedGroup(group))
+					dispatch(setSelectedUser({}))
+					setPane()
+				})
+			}
+		}
 	}
 
 	return (
@@ -241,6 +269,18 @@ const GroupList = ({chatType, group, isStarred, messages, visible}) => {
     			<Typography component='h6'> {group.groupName}</Typography>
     		} 
     	/>
+    	<div className={classes.chatMisc} > 
+   			<span className={classes.chatProps}> 
+   				{
+						isStarred.value &&
+							<StarIcon />
+					}
+   				{assert(unread) && 
+   					<span className={classes.unread}> {unread.length} </span>
+   				} 
+   				
+   			</span>
+     	</div>
 
 		</ListItem>
 		<ChatActions 
@@ -258,20 +298,20 @@ const GroupList = ({chatType, group, isStarred, messages, visible}) => {
    	>
    		<div> 
    			<IconButton onClick={() => {
-   				starConversation()
+   				handleStar()
    				closeContextMenu()
    			}} >	
    				{isStarred.value ? <StarIcon style={{color: '#6495ed'}} /> : 
    					<StarBorderIcon style={{color: '#6495ed'}} />
    				}
-					<Typography component='span'> {`${isStarred.value ? 'Unstar' : 'Star'} conversation` }</Typography>
+					<Typography component='span'> {`${isStarred.value ? 'Unstar' : 'Star'} group` }</Typography>
    			</IconButton>
    			<IconButton onClick={() => {
-   				handleDelete()
+   				handleGroupExit()
    				closeContextMenu()
    			}} >	
    				<DeleteSweepIcon style={{color: '#ff6a6a'}} />
-					<Typography component='span'> Leave group </Typography>
+					<Typography component='span'> Exit group </Typography>
    			</IconButton>
    		</div>
 
@@ -305,14 +345,15 @@ const UserList = ({user, style, secondaryItems}) => {
 		}
 		
 	}
+	const setPane = () => {
+		if (window.innerWidth < 660) {
+			dispatch(setComponents({component: 'leftPane', value: false}))
+		}
+	}
 
 	const handleClick = (e) => {
 		e.preventDefault()
-		const setPane = () => {
-			if (window.innerWidth < 660 ) {
-				dispatch(setComponents({component: 'leftPane', value: false}))
-			}
-		}
+		
 		if (selectedUser.username !== user.username) {
 			
 			if (assert(user.unread)) {
@@ -320,6 +361,7 @@ const UserList = ({user, style, secondaryItems}) => {
 				socket.emit('chatIsRead', user.username, username)
 			}
 			if (assert(fetchedUsers.find(i => i === user.username))) {
+				dispatch(setSelectedGroup({}))
 				dispatch(setSelectedUser({username: user.username}))
 				setPane()
 			} else {
@@ -327,6 +369,7 @@ const UserList = ({user, style, secondaryItems}) => {
 					fetchMessages({friendsName: user.username, token: id})
 				).then(() => {
 					dispatch(assertFetch(user.username))
+					dispatch(setSelectedGroup({}))
 					dispatch(setSelectedUser({username: user.username}))
 					setPane()
 				})
@@ -350,8 +393,7 @@ const UserList = ({user, style, secondaryItems}) => {
 	const starConversation = () => {
 		const isStarred = {value: !user.isStarred.value, date: Date.now()}
 
-		socket.emit('starConversation', username, user.username, 
-			isStarred, () => {})
+		socket.emit('starConversation', id, user.username, isStarred, () => {})
 		dispatch(handleStarred({friendsName: user.username, isStarred }))
 	}
 	const handleDelete = () => {
@@ -469,9 +511,12 @@ const RecentChats = ({className}) => {
 	}
 
 	const selectedUser = useSelector(state => state.other.currentSelectedUser)
+	const selectedGroup = useSelector(state => state.groups.selectedGroup)
 	const recentChats = useSelector(state => state.recentChats.recentChats)
 	const showLoader = useSelector(state => state.recentChats.showRecentUsersLoader)
 	const fetchedUsers = useSelector(state => state.other.fetched)
+	const fetchedGroups = useSelector(state => state.groups.fetched)
+
 	const { username} = JSON.parse(localStorage.getItem('details'))
 	const [showDial, setDial] = useState(false)
 	const [visible, setDialVisibility] = useState(false)
@@ -555,11 +600,33 @@ const RecentChats = ({className}) => {
 				<div className={classes.userslist}>
 					{
 						showLoader ? <Preloader /> : 
-						recentChats.map((user, i) => {
-							if (user.chatType === 'group') {
-								return <GroupList {...user} key={i} />
+
+						recentChats.map((chat, i) => {
+
+							if (chat.chatType === 'group') {
+								const isFetched = () => {
+									if (fetchedGroups.findIndex(i => i.groupId === chat.group.groupId) !== -1) {
+										return true
+									} else {
+										return false
+									}
+								}
+								const isCurrentSelected = () => {
+									if (selectedGroup.groupId === chat.group.groupId) return true
+									else return false
+								}
+								return (
+									<GroupList 
+										{...chat}
+										isCurrentSelected={isCurrentSelected()}
+										isFetched={isFetched()}
+										key={i} 
+									/>
+								)
 							} else {
-								return <UserList user={user} key={i} />
+								return (
+									<UserList user={chat} key={i} />
+								)
 							}
 						})
 					}

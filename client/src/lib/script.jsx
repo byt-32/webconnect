@@ -10,6 +10,13 @@ export const getWindowHeight = () => {
 	return height
 }
 
+export const find = (arr, str, match, cb) => {
+	const obj = arr.find(i => i[`${match}`] === str)
+	const index = arr.findIndex(i => i[`${match}`] === str)
+	if (cb === undefined) return {obj, index}
+	else cb({obj, index})
+}
+
 export async function handleFetch(url, method, body, callback) {
 	if (method.toLowerCase() === 'get') {
 
